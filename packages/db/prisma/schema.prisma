@@ -1,0 +1,107 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id BigInt @id @unique @default(autoincrement())
+
+  email         String @unique
+  password_hash String
+
+  username     String @unique // max 12 chars
+  display_name String // max 50 chars
+
+  occupation String? // max 32 chars
+  location   String? // max 32 chars
+  pronouns   String? // max 12 chars
+  website    String? // max 128 chars
+
+  avatar_url String?
+
+  email_verified Boolean @default(false)
+  email_token    String?
+
+  reset_password_token   String?
+  reset_password_expires DateTime?
+
+  internal_notes String?
+
+  super_admin Boolean @default(false)
+  suspended   Boolean @default(false)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  following Following[] @relation("following")
+  followers Following[] @relation("followers")
+  posts     Post[]      @relation("posts")
+
+  @@index([id])
+  @@index([username])
+  @@map("users")
+}
+
+model Following {
+  id String @id @unique @default(cuid())
+
+  user_id BigInt
+  user    User   @relation(fields: [user_id], references: [id], name: "following", onDelete: Cascade)
+
+  target_id BigInt
+  target    User   @relation(fields: [target_id], references: [id], name: "followers", onDelete: Cascade)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("following")
+}
+
+model Post {
+  id BigInt @id @unique @default(autoincrement())
+
+  author_id BigInt
+  author    User   @relation(fields: [author_id], references: [id], name: "posts", onDelete: Cascade)
+
+  body        String // max 300 chars
+  attachments Attachment[] @relation("attachments")
+
+  reply_to_id BigInt?
+  reply_to    Post?   @relation(fields: [reply_to_id], references: [id], name: "replies", onDelete: SetNull)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  replies Post[] @relation("replies")
+
+  @@index([author_id])
+  @@map("posts")
+}
+
+enum AttachmentType {
+  Image
+  Video
+}
+
+model Attachment {
+  id String @id @unique @default(uuid())
+
+  post_id BigInt
+  post    Post   @relation(fields: [post_id], references: [id], name: "attachments", onDelete: Cascade)
+
+  type AttachmentType
+
+  url String
+
+  width  Int
+  height Int
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("attachments")
+}

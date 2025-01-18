@@ -1,0 +1,31 @@
+{
+    "compilerOptions": {
+      "target": "es2023",
+      "module": "ESNext",
+      "rootDir": "./src",
+      "outDir": "./dist",
+      "moduleResolution": "Bundler",
+      "lib": ["ESNext"],
+      "baseUrl": "./",
+      "paths": {
+        "@/*": ["./src/*"]
+      },
+      "allowSyntheticDefaultImports": true,
+      "esModuleInterop": true,
+      "allowJs": true,
+      "forceConsistentCasingInFileNames": true,
+      "resolveJsonModule": true,
+      "moduleDetection": "force",
+      "strict": false,
+      "noImplicitAny": false,
+      "noUnusedLocals": false,
+      "noUnusedParameters": false,
+      "noImplicitReturns": false,
+      "noImplicitOverride": true,
+      "skipLibCheck": true
+    },
+  
+    "include": ["src/**/*.ts"],
+    "exclude": ["node_modules", "**/*.spec.ts"]
+  }
+  

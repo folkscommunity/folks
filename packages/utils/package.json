@@ -1,0 +1,16 @@
+{
+    "name": "@folks/utils",
+    "main": "./index.ts",
+    "types": "./index.ts",
+    "version": "1.0.0",
+    "private": true,
+    "devDependencies": {
+        "@types/node": "^20.14.10",
+        "tslib": "^2.6.3"
+    },
+    "dependencies": {
+        "fs": "0.0.1-security",
+        "path": "^0.12.7",
+        "zod": "^3.24.1"
+    }
+}
