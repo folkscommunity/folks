@@ -1,8 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 
-import { prisma } from "@folks/db";
-
 import { redis } from "./redis";
 
 export interface RequestWithUser extends Request {
