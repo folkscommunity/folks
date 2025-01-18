@@ -1,15 +1,22 @@
-# Folks
+<p align="left">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://cdn.rokita.me/folks/logo-white.svg">
+    <source media="(prefers-color-scheme: light)" srcset="https://cdn.rokita.me/folks/logo.svg">
+    <img alt="Folks" src="https://cdn.rokita.me/folks/logo.svg" width="250px">
+  </picture>
+</p>
+<p></p>
 
 Folks is a social media platform for product people.
-
-This codebase is primarly built in TypeScript, the web app is built with Next.js and the API is built on top of Express. We use PostgreSQL for the database and Redis for caching.
 
 > [!CAUTION]
 > A lot of the codebase is still not production ready, it's still in the early stages of development.
 
+This codebase is primarly built in TypeScript, the web app is built with Next.js and the API is built on top of Express. We use PostgreSQL for the database and Redis for caching.
+
 # Development
 
-B
+Here's a guide on how to get started with a local development environment for Folks.
 
 ## Prerequisites
 
