@@ -28,8 +28,11 @@ import { TimelinePhoto } from "@/components/timeline-photo";
 import { parsePostBody } from "@/lib/post-utils";
 import { cn, dateRelativeTiny } from "@/lib/utils";
 
+import { LikesModal } from "./likes-modal";
+
 export function SinglePost({ user, post }: { user: any; post: any }) {
   const [lPost, setLPost] = useState(post);
+  const [likesModalOpen, setLikesModalOpen] = useState(false);
 
   useEffect(() => {
     document.title = `Post by ${lPost.author.display_name} on Folks`;
@@ -195,8 +198,13 @@ export function SinglePost({ user, post }: { user: any; post: any }) {
         </div>
 
         <div className="text-black-500 pt-4 text-sm">
-          {lPost.count.likes > 0 &&
-            `${lPost.count.likes} ${lPost.count.likes > 1 ? "Likes" : "Like"}`}
+          <span
+            className="cursor-pointer hover:underline"
+            onClick={() => setLikesModalOpen(true)}
+          >
+            {lPost.count.likes > 0 &&
+              `${lPost.count.likes} ${lPost.count.likes > 1 ? "Likes" : "Like"}`}
+          </span>
           {lPost.count.replies && lPost.count.likes ? ", " : ""}
           {lPost.count.replies > 0 &&
             `${lPost.count.replies} ${lPost.count.replies > 1 ? "Replies" : "Reply"}`}
@@ -299,6 +307,12 @@ export function SinglePost({ user, post }: { user: any; post: any }) {
           <div>No replies yet.</div>
         )}
       </div>
+
+      <LikesModal
+        post={lPost}
+        open={likesModalOpen}
+        onClose={() => setLikesModalOpen(false)}
+      />
     </div>
   );
 }

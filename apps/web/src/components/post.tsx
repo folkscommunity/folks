@@ -206,12 +206,17 @@ export function Post({ post, user }: { post: any; user: any }) {
           </div>
         )}
 
-        <div
-          className="max-h-[400px]"
-          dangerouslySetInnerHTML={{
-            __html: parsePostBody(lPost.body)
-          }}
-        />
+        <a
+          href={`${lPost.author.username}/${lPost.id}`}
+          className="hover:no-underline"
+        >
+          <div
+            className="max-h-[400px]"
+            dangerouslySetInnerHTML={{
+              __html: parsePostBody(lPost.body)
+            }}
+          />
+        </a>
 
         {lPost.attachments && lPost.attachments.length > 0 && (
           <div className="pt-2">
@@ -228,9 +233,9 @@ export function Post({ post, user }: { post: any; user: any }) {
         )}
 
         <div className="flex h-[24px] items-center justify-start gap-6 pt-2">
-          <div className="flex w-10 items-center gap-2">
+          <div className="flex min-w-12 items-center gap-2">
             <MessageCircle
-              className="size-5 cursor-pointer text-slate-700 hover:fill-neutral-400 hover:text-neutral-400 dark:hover:fill-neutral-300 dark:hover:text-neutral-300"
+              className="size-5 min-h-5 min-w-5 cursor-pointer text-slate-700 hover:fill-neutral-400 hover:text-neutral-400 dark:hover:fill-neutral-300 dark:hover:text-neutral-300"
               strokeWidth={1.5}
               onClick={() =>
                 router.push(`/${lPost.author.username}/${lPost.id}`)
@@ -239,7 +244,7 @@ export function Post({ post, user }: { post: any; user: any }) {
             <span>{lPost.count.replies || " "}</span>
           </div>
 
-          <div className="flex w-10 items-center gap-2">
+          <div className="flex min-w-12 items-center gap-2">
             <Heart
               className={cn(
                 "size-5 cursor-pointer text-slate-700 hover:text-red-500",

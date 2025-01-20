@@ -358,6 +358,64 @@ router.get("/:id", async (req: RequestWithUser, res) => {
   }
 });
 
+router.get("/:id/likes", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const folks_sid = req.cookies.folks_sid;
+
+    let user_id = null;
+
+    if (folks_sid) {
+      const jwt_object: any = jwt.decode(folks_sid);
+
+      const session = await redis.get(`session:${jwt_object.id}:${folks_sid}`);
+
+      if (session) {
+        user_id = jwt_object.id;
+      }
+    }
+
+    const likes = await prisma.postLike.findMany({
+      where: {
+        post_id: BigInt(id)
+      },
+      select: {
+        id: true,
+        user_id: true,
+        post_id: true,
+        user: {
+          select: {
+            avatar_url: true,
+            username: true,
+            display_name: true
+          }
+        }
+      }
+    });
+
+    res.json({
+      ok: true,
+      likes: likes.map((like) => ({
+        ...like,
+        id: like.id.toString(),
+        user_id: like.user_id.toString(),
+        post_id: like.post_id.toString()
+      })),
+      count: {
+        likes: likes.length
+      }
+    });
+  } catch (e) {
+    console.error(e);
+
+    res.status(500).json({
+      error: "server_error",
+      message: "Something went wrong."
+    });
+  }
+});
+
 router.post("/like", authMiddleware, async (req: RequestWithUser, res) => {
   try {
     const { post_id } = req.body;

@@ -1,13 +1,14 @@
-import { version } from "os";
-import Link from "next/link";
-
 export const current_release = "0.1.5";
 
 const releases = [
   ,
   {
     version: "0.1.5",
-    changes: ["added single post page", "added replies"]
+    changes: [
+      "added single post page",
+      "added replies",
+      "addded likes modal on posts"
+    ]
   },
   {
     version: "0.1.4",
