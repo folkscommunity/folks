@@ -160,7 +160,7 @@ export function Post({ post, user }: { post: any; user: any }) {
                   Copy Post ID
                 </DropdownMenuItem>
 
-                {user.super_admin && (
+                {user && user.super_admin && (
                   <DropdownMenuItem
                     className="dark:hover:bg-black-600 cursor-pointer hover:bg-slate-100"
                     onClick={() => {
@@ -175,18 +175,19 @@ export function Post({ post, user }: { post: any; user: any }) {
                   </DropdownMenuItem>
                 )}
 
-                {(user.super_admin ||
-                  post.author.id.toString() === user.id.toString()) && (
-                  <>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      className="dark:hover:bg-black-600 cursor-pointer text-red-500 hover:bg-slate-100"
-                      onClick={() => deletePost()}
-                    >
-                      Delete Post
-                    </DropdownMenuItem>
-                  </>
-                )}
+                {user &&
+                  (user.super_admin ||
+                    post.author.id.toString() === user.id.toString()) && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        className="dark:hover:bg-black-600 cursor-pointer text-red-500 hover:bg-slate-100"
+                        onClick={() => deletePost()}
+                      >
+                        Delete Post
+                      </DropdownMenuItem>
+                    </>
+                  )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
