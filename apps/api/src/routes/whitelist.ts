@@ -3,6 +3,7 @@ import { Router } from "express";
 import { prisma } from "@folks/db";
 
 import { authMiddleware, RequestWithUser } from "@/lib/auth_middleware";
+import { sendDiscordNotification } from "@/lib/send_discord_notification";
 import { sendInviteEmail } from "@/lib/send_email";
 
 const router = Router();
@@ -10,8 +11,6 @@ const router = Router();
 router.post("/", async (req: RequestWithUser, res) => {
   try {
     const { email, name, posts_cv_url } = req.body;
-
-    console.log(req.body);
 
     if (!email || !name) {
       return res.status(400).json({
@@ -61,6 +60,10 @@ router.post("/", async (req: RequestWithUser, res) => {
         created_at: new Date()
       }
     });
+
+    await sendDiscordNotification(
+      `${email} (${name}) just requested to join Folks!`
+    );
 
     res.json({ ok: true });
   } catch (e) {

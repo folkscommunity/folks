@@ -7,6 +7,7 @@ import { schemas } from "@folks/utils";
 
 import { authMiddleware, RequestWithUser } from "@/lib/auth_middleware";
 import { redis } from "@/lib/redis";
+import { sendDiscordNotification } from "@/lib/send_discord_notification";
 import { sendVerifyEmail } from "@/lib/send_email";
 
 const router = Router();
@@ -158,6 +159,10 @@ router.post("/register", async (req, res) => {
     sendVerifyEmail(created_user.id.toString());
 
     await redis.del(`cache:ribbon`);
+
+    await sendDiscordNotification(
+      `${created_user.display_name} (@${created_user.username}) just registered their account!`
+    );
 
     res.json({ ok: true });
   } catch (err) {

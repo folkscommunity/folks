@@ -35,3 +35,4 @@ env:
     - AWS_BUCKET
     - AWS_REGION
     - CDN_URL
+    - DISCORD_WEBHOOK_URL
