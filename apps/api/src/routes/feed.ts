@@ -89,7 +89,7 @@ router.get("/everything", async (req, res) => {
           }
         },
         created_at: true,
-        likes: user_id ? { where: { user_id: BigInt(user_id) } } : undefined,
+        likes: user_id ? { where: { user_id: BigInt(user_id) } } : false,
         _count: {
           select: {
             replies: true,
@@ -116,11 +116,13 @@ router.get("/everything", async (req, res) => {
             id: reply.author.id.toString()
           }
         })),
-        likes: post.likes.map((like) => ({
-          id: like.id.toString(),
-          user_id: like.user_id.toString(),
-          post_id: like.post_id.toString()
-        })),
+        likes:
+          post.likes &&
+          post.likes.map((like) => ({
+            id: like.id.toString(),
+            user_id: like.user_id.toString(),
+            post_id: like.post_id.toString()
+          })),
         count: {
           replies: post._count.replies,
           likes: post._count.likes
@@ -223,7 +225,7 @@ router.get("/highlighted", async (req, res) => {
           }
         },
         created_at: true,
-        likes: user_id ? { where: { user_id: BigInt(user_id) } } : undefined,
+        likes: user_id ? { where: { user_id: BigInt(user_id) } } : false,
         _count: {
           select: {
             replies: true,
@@ -250,11 +252,13 @@ router.get("/highlighted", async (req, res) => {
             id: reply.author.id.toString()
           }
         })),
-        likes: post.likes.map((like) => ({
-          id: like.id.toString(),
-          user_id: like.user_id.toString(),
-          post_id: like.post_id.toString()
-        })),
+        likes:
+          post.likes &&
+          post.likes.map((like) => ({
+            id: like.id.toString(),
+            user_id: like.user_id.toString(),
+            post_id: like.post_id.toString()
+          })),
         count: {
           replies: post._count.replies,
           likes: post._count.likes
@@ -375,7 +379,7 @@ router.get("/following", authMiddleware, async (req: RequestWithUser, res) => {
           }
         },
         created_at: true,
-        likes: user.id ? { where: { user_id: BigInt(user.id) } } : undefined,
+        likes: user.id ? { where: { user_id: BigInt(user.id) } } : false,
         _count: {
           select: {
             replies: true,
@@ -402,11 +406,13 @@ router.get("/following", authMiddleware, async (req: RequestWithUser, res) => {
             id: reply.author.id.toString()
           }
         })),
-        likes: post.likes.map((like) => ({
-          id: like.id.toString(),
-          user_id: like.user_id.toString(),
-          post_id: like.post_id.toString()
-        })),
+        likes:
+          post.likes &&
+          post.likes.map((like) => ({
+            id: like.id.toString(),
+            user_id: like.user_id.toString(),
+            post_id: like.post_id.toString()
+          })),
         count: {
           replies: post._count.replies,
           likes: post._count.likes
@@ -509,7 +515,7 @@ router.get("/user/:author_id", async (req, res) => {
           }
         },
         created_at: true,
-        likes: user_id ? { where: { user_id: BigInt(user_id) } } : undefined,
+        likes: user_id ? { where: { user_id: BigInt(user_id) } } : false,
         _count: {
           select: {
             replies: true,
@@ -536,11 +542,13 @@ router.get("/user/:author_id", async (req, res) => {
             id: reply.author.id.toString()
           }
         })),
-        likes: post.likes.map((like) => ({
-          id: like.id.toString(),
-          user_id: like.user_id.toString(),
-          post_id: like.post_id.toString()
-        })),
+        likes:
+          post.likes &&
+          post.likes.map((like) => ({
+            id: like.id.toString(),
+            user_id: like.user_id.toString(),
+            post_id: like.post_id.toString()
+          })),
         count: {
           replies: post._count.replies,
           likes: post._count.likes

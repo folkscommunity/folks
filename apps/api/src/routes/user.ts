@@ -268,7 +268,8 @@ router.post("/avatar", authMiddleware, async (req: RequestWithUser, res) => {
           "Uploaded-By-User": req.user.id.toString()
         },
         ContentType: file_type,
-        ACL: "public-read"
+        ACL: "public-read",
+        CacheControl: "max-age=2592000" // 30 days
       })
     );
 

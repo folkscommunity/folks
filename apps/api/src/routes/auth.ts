@@ -171,6 +171,27 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ error: "invalid_request" });
     }
 
+    const ip_address =
+      req.headers["x-forwarded-for"] ||
+      req.headers["cf-connecting-ip"] ||
+      email;
+
+    const rate_limit = await redis.get(`rate_limit:login:${ip_address}`);
+
+    if (Number(rate_limit) > 10) {
+      return res.status(429).json({
+        error: "rate_limit_exceeded",
+        msg: "You have exceeded the rate limit. Please try again in a few minutes. If you continue to experience issues, please contact help@folkscommunity.com."
+      });
+    } else {
+      await redis.set(
+        `rate_limit:login:${ip_address}`,
+        Number(rate_limit) + 1,
+        "EX",
+        300
+      );
+    }
+
     const user = await prisma.user.findUnique({
       where: {
         email
@@ -221,6 +242,8 @@ router.post("/login", async (req, res) => {
           : ".localhost",
       secure: process.env.NODE_ENV === "production"
     });
+
+    await redis.del(`rate_limit:login:${ip_address}`);
 
     res.json({ ok: true });
   } catch (err) {

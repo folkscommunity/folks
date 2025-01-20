@@ -25,7 +25,7 @@ export function Separator() {
       className="text-black-400 flex h-[22px] w-full justify-between"
       ref={containerRef}
     >
-      {Array.from({ length: width / 30 }).map((_, i) => (
+      {Array.from({ length: width / 20 }).map((_, i) => (
         <span key={i}>·</span>
       ))}
     </div>

@@ -4,11 +4,22 @@ import { prisma } from "@folks/db";
 import { schemas } from "@folks/utils";
 
 import { authMiddleware, RequestWithUser } from "@/lib/auth_middleware";
+import { redis } from "@/lib/redis";
 
 const router = Router();
 
 router.get("/", async (req, res) => {
   try {
+    const ribbon_cache = await redis.get("cache:ribbon");
+
+    if (ribbon_cache) {
+      res.json({
+        ok: true,
+        ribbon: ribbon_cache
+      });
+      return;
+    }
+
     const ribbon_messages = await prisma.ribbon.findMany({
       include: {
         user: {
@@ -42,6 +53,8 @@ router.get("/", async (req, res) => {
         .join(" · ") || "";
 
     const ribbon_string = `${users.length} People · ${posts.length} Posts · ${ribbon_messages.length} Ribbon Messages  · ${ribbon_messages_string}`;
+
+    await redis.set("cache:ribbon", ribbon_string, "EX", 60 * 60 * 24 * 180);
 
     res.json({
       ok: true,
@@ -119,6 +132,8 @@ router.post("/", authMiddleware, async (req: RequestWithUser, res) => {
         }
       });
     }
+
+    await redis.del("cache:ribbon");
 
     res.json({ ok: true });
   } catch (e) {

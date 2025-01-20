@@ -2,13 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { useIsClient, useLocalStorage } from "@uidotdev/usehooks";
+import { useLocalStorage } from "@uidotdev/usehooks";
+// import { useIsClient, useLocalStorage } from "@uidotdev/usehooks";
 import dynamic from "next/dynamic";
 import { useInView } from "react-intersection-observer";
 
 import { cn } from "@/lib/utils";
 
 import { Composer } from "./composer";
+import { FeedSkeleton, PostSkeleton } from "./feed-skeleton";
 import { Post } from "./post";
 
 enum FeedType {
@@ -18,6 +20,48 @@ enum FeedType {
 }
 
 export function Feeds({ is_authed }: { is_authed: boolean }) {
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  return isClient ? (
+    <FeedsClient is_authed={is_authed} />
+  ) : (
+    <>
+      <div className="w-full max-w-3xl flex-1 justify-center">
+        <div className="flex justify-center pb-12">
+          <div className="text-black-400 flex flex-row space-x-2 text-sm font-bold">
+            <span
+              className={cn("hover:text-foreground cursor-pointer px-4 py-0.5")}
+            >
+              Highlights
+            </span>
+            <span
+              className={cn("hover:text-foreground cursor-pointer px-4 py-0.5")}
+            >
+              Everything
+            </span>
+            {is_authed && (
+              <span
+                className={cn(
+                  "hover:text-foreground cursor-pointer px-4 py-0.5"
+                )}
+              >
+                Following
+              </span>
+            )}
+          </div>
+        </div>
+
+        <FeedSkeleton />
+      </div>
+    </>
+  );
+}
+
+function FeedsClient({ is_authed }: { is_authed: boolean }) {
   const [feed, setFeed] = useLocalStorage(
     "selected_feed",
     FeedType.HIGHLIGHTED
@@ -141,7 +185,7 @@ function FeedEverything({ is_authed }: { is_authed: boolean }) {
       {is_authed && <Composer onPost={() => refetch()} />}
 
       {status === "pending" ? (
-        <p className="p-4"></p>
+        <FeedSkeleton />
       ) : status === "error" ? (
         <p className="p-4">Error: {error.message}</p>
       ) : (
@@ -249,7 +293,7 @@ function FeedHighlighted({ is_authed }: { is_authed: boolean }) {
       {is_authed && <Composer onPost={() => refetch()} />}
 
       {status === "pending" ? (
-        <p className="p-4"></p>
+        <FeedSkeleton />
       ) : status === "error" ? (
         <p className="p-4">Error: {error.message}</p>
       ) : (
@@ -357,7 +401,7 @@ function FeedFollowing({ is_authed }: { is_authed: boolean }) {
       {is_authed && <Composer onPost={() => refetch()} />}
 
       {status === "pending" ? (
-        <p className="p-4"></p>
+        <FeedSkeleton />
       ) : status === "error" ? (
         <p className="p-4">Error: {error.message}</p>
       ) : (

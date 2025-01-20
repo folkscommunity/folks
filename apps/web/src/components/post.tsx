@@ -130,11 +130,15 @@ export function Post({ post }: { post: any }) {
             <Heart
               className={cn(
                 "size-5 cursor-pointer text-slate-700 hover:text-red-500",
-                lPost.likes.length > 0 && "fill-red-500 text-red-500"
+                lPost.likes &&
+                  lPost.likes.length > 0 &&
+                  "fill-red-500 text-red-500"
               )}
               strokeWidth={1.5}
               onClick={() =>
-                lPost.likes.length > 0 ? unlikePost() : likePost()
+                lPost.likes && lPost.likes.length > 0
+                  ? unlikePost()
+                  : likePost()
               }
             />
             <span>

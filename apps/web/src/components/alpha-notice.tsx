@@ -1,10 +1,21 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useLocalStorage } from "@uidotdev/usehooks";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 export function AlphaNotice() {
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  return isClient ? <AlphaNoticeClient /> : null;
+}
+
+function AlphaNoticeClient() {
   const [show, setShow] = useLocalStorage("show_alpha_notice", true);
 
   const router = useRouter();

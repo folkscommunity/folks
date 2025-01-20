@@ -53,9 +53,7 @@ router.post("/", authMiddleware, async (req: RequestWithUser, res) => {
       });
     }
 
-    let file;
-
-    if (files) {
+    if (files && files.length > 0) {
       const file = files[0];
 
       const file_type = file.content.split(";")[0].replace("data:", "");
@@ -115,7 +113,8 @@ router.post("/", authMiddleware, async (req: RequestWithUser, res) => {
             "Uploaded-By-User": req.user.id.toString()
           },
           ContentType: file_type,
-          ACL: "public-read"
+          ACL: "public-read",
+          CacheControl: "max-age=2592000" // 30 days
         })
       );
 

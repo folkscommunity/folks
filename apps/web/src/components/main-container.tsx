@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { current_release } from "@/app/release-notes/release-notes";
 import { ServerSession } from "@/lib/server-session";
 
 import { AccountDropdown } from "./account-dropdown";
@@ -60,29 +61,30 @@ export async function MainContainer({
 
         {children}
 
-        <footer className="mx-auto flex w-full max-w-3xl flex-col gap-8 py-8">
-          <div className="flex gap-2">
+        <footer className="mx-auto flex w-full max-w-3xl flex-col gap-8 py-8 max-md:gap-2">
+          <Separator />
+          <div className="flex gap-2 max-md:flex-col max-md:items-center max-md:gap-1">
             <Link
               href="/about"
               className="underline opacity-70 hover:opacity-100"
             >
               About
             </Link>
-            <span>·</span>
+            <span className="max-md:hidden">·</span>
             <Link
               href="/privacy-policy"
               className="underline opacity-70 hover:opacity-100"
             >
               Privacy Policy
             </Link>
-            <span>·</span>
+            <span className="max-md:hidden">·</span>
             <Link
               href="/guidelines"
               className="underline opacity-70 hover:opacity-100"
             >
               Community Guidelines
             </Link>
-            <span>·</span>
+            <span className="max-md:hidden">·</span>
             <Link
               href="/discord"
               className="underline opacity-70 hover:opacity-100"
@@ -91,16 +93,22 @@ export async function MainContainer({
             </Link>
           </div>
           <Separator />
-          <div>
-            Folks is open source,{" "}
-            <Link
-              href="https://github.com/folkscommunity/folks"
-              target="_blank"
-              className="underline opacity-70 hover:opacity-100"
-            >
-              click here
-            </Link>{" "}
-            for the repository.
+          <div className="flex flex-row gap-2 max-md:flex-col max-md:items-center">
+            <Link href="/release-notes" className="underline">
+              Release v{current_release}
+            </Link>
+            <span className="max-md:hidden">·</span>
+            <div className="max-md:text-center">
+              Folks is open source,{" "}
+              <Link
+                href="https://github.com/folkscommunity/folks"
+                target="_blank"
+                className="underline opacity-70 hover:opacity-100"
+              >
+                click here
+              </Link>{" "}
+              for the repository.
+            </div>
           </div>
         </footer>
       </div>
