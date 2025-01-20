@@ -7,13 +7,13 @@ export const emailSchema = z
 
 export const usernameSchema = z
   .string()
-  .max(12, "Username must be less than 12 characters.")
-  .min(4, "Username must be more than 4 characters.");
+  .max(18, "Username must be at most 18 characters.")
+  .min(3, "Username must at least 3 characters.");
 
 export const displayNameSchema = z
   .string()
-  .max(50, "Display name must be less than 50 characters.")
-  .min(4, "Display name must be more than 4 characters.");
+  .max(24, "Display name must be less than 24 characters.")
+  .min(2, "Display name must at least 2 characters.");
 
 export const occupationSchema = z
   .string()

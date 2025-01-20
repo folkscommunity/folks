@@ -1,8 +1,12 @@
 import Link from "next/link";
 
-export const current_release = "0.1.3";
+export const current_release = "0.1.4";
 
 const releases = [
+  {
+    version: "0.1.4",
+    changes: ["added error reporting", "changed max lengths for some fields"]
+  },
   {
     version: "0.1.3",
     changes: [
