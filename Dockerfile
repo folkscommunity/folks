@@ -7,18 +7,15 @@ COPY . /app
 WORKDIR /app
 
 FROM base AS build
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install
 RUN pnpm run build
 
-FROM base
+FROM base AS release
 
 ENV NODE_ENV=production
 
-COPY --from=build /app/node_modules /app/node_modules
-COPY --from=build /app/apps/web/.next /app/apps/web/.next
+COPY --from=build /app /app
 
 EXPOSE 3000
-
-HEALTHCHECK --interval=5s --timeout=3s --start-period=10s CMD curl -f http://localhost:3000/ || exit 1
 
 CMD [ "pnpm", "start" ]

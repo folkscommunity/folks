@@ -18,7 +18,33 @@ const mono = IBM_Plex_Mono({
 
 export const metadata: Metadata = {
   title: "Folks",
-  description: "A place for product people."
+  description: "A place for product people.",
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://folkscommunity.com",
+    images: [
+      {
+        url: "https://folkscommunity.com/images/og.jpg",
+        width: 1200,
+        height: 675,
+        alt: "Folks"
+      }
+    ]
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Folks",
+    description: "A place for product people.",
+    images: [
+      {
+        url: "https://folkscommunity.com/images/og.jpg",
+        width: 1200,
+        height: 675,
+        alt: "Folks"
+      }
+    ]
+  }
 };
 
 export default function RootLayout({
@@ -28,6 +54,39 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link
+          rel="apple-touch-icon"
+          sizes="180x180"
+          href="/apple-touch-icon.png"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="32x32"
+          href="/favicon-32x32.png"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="16x16"
+          href="/favicon-16x16.png"
+        />
+        <link rel="manifest" href="/site.webmanifest" />
+        <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#000000" />
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
+        />
+        <meta name="theme-color" content="#00050c" />
+
+        <script
+          defer
+          data-domain="folkscommunity.com"
+          data-api="https://p.lum.is/api/event"
+          src="/js/s.js"
+        ></script>
+      </head>
       <body className={`${geistSans.variable} ${mono.variable} antialiased`}>
         <ContextProviders>{children}</ContextProviders>
       </body>

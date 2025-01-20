@@ -1,0 +1,36 @@
+service: folks
+
+image: folks/folks
+
+servers:
+  web:
+    - folks-web1-nyc
+
+proxy:
+  ssl: true
+  host: folkscommunity.com
+  app_port: 3000
+  healthcheck:
+    interval: 3
+    path: /api
+    timeout: 3
+
+registry:
+  server: <%= %x(echo $KAMAL_REGISTRY_SERVER).strip %>
+  username: <%= %x(echo $KAMAL_REGISTRY_USERNAME).strip %>
+  password:
+    - KAMAL_REGISTRY_PASSWORD
+
+builder:
+  arch: amd64
+
+env:
+  secret:
+    - DATABASE_URL
+    - REDIS_URL
+    - JWT_SECRET
+    - AWS_ACCESS_KEY_ID
+    - AWS_SECRET_ACCESS_KEY
+    - AWS_BUCKET
+    - AWS_REGION
+    - CDN_URL
