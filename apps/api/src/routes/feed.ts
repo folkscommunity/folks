@@ -28,7 +28,8 @@ router.get("/everything", async (req, res) => {
 
     const feed = await prisma.post.findMany({
       where: {
-        deleted_at: null
+        deleted_at: null,
+        reply_to_id: null
       },
       cursor: cursor
         ? {
@@ -109,6 +110,16 @@ router.get("/everything", async (req, res) => {
           ...post.author,
           id: post.author.id.toString()
         },
+        reply_to: post.reply_to
+          ? {
+              ...post.reply_to,
+              id: post.reply_to.id.toString(),
+              author: {
+                ...post.reply_to.author,
+                id: post.reply_to.author.id.toString()
+              }
+            }
+          : {},
         replies: post.replies.map((reply) => ({
           ...reply,
           id: reply.id.toString(),
@@ -247,6 +258,16 @@ router.get("/highlighted", async (req, res) => {
           ...post.author,
           id: post.author.id.toString()
         },
+        reply_to: post.reply_to
+          ? {
+              ...post.reply_to,
+              id: post.reply_to.id.toString(),
+              author: {
+                ...post.reply_to.author,
+                id: post.reply_to.author.id.toString()
+              }
+            }
+          : {},
         replies: post.replies.map((reply) => ({
           ...reply,
           id: reply.id.toString(),
@@ -403,6 +424,16 @@ router.get("/following", authMiddleware, async (req: RequestWithUser, res) => {
           ...post.author,
           id: post.author.id.toString()
         },
+        reply_to: post.reply_to
+          ? {
+              ...post.reply_to,
+              id: post.reply_to.id.toString(),
+              author: {
+                ...post.reply_to.author,
+                id: post.reply_to.author.id.toString()
+              }
+            }
+          : {},
         replies: post.replies.map((reply) => ({
           ...reply,
           id: reply.id.toString(),
@@ -460,7 +491,8 @@ router.get("/user/:author_id", async (req, res) => {
     const feed = await prisma.post.findMany({
       where: {
         author_id: BigInt(req.params.author_id),
-        deleted_at: null
+        deleted_at: null,
+        reply_to_id: null
       },
       cursor: cursor
         ? {
@@ -541,6 +573,16 @@ router.get("/user/:author_id", async (req, res) => {
           ...post.author,
           id: post.author.id.toString()
         },
+        reply_to: post.reply_to
+          ? {
+              ...post.reply_to,
+              id: post.reply_to.id.toString(),
+              author: {
+                ...post.reply_to.author,
+                id: post.reply_to.author.id.toString()
+              }
+            }
+          : {},
         replies: post.replies.map((reply) => ({
           ...reply,
           id: reply.id.toString(),

@@ -16,7 +16,7 @@ const router = Router();
 
 router.post("/", authMiddleware, async (req: RequestWithUser, res) => {
   try {
-    const { body, files } = req.body;
+    const { body, files, replying_to } = req.body;
 
     const user = await prisma.user.findUnique({
       where: {
@@ -35,6 +35,21 @@ router.post("/", authMiddleware, async (req: RequestWithUser, res) => {
         error: "suspended",
         msg: "Your account is suspended."
       });
+    }
+
+    if (replying_to) {
+      const replying_to_post = await prisma.post.findUnique({
+        where: {
+          id: BigInt(replying_to)
+        }
+      });
+
+      if (!replying_to_post) {
+        return res.status(400).json({
+          error: "invalid_request",
+          message: "Replying to post not found."
+        });
+      }
     }
 
     try {
@@ -131,6 +146,7 @@ router.post("/", authMiddleware, async (req: RequestWithUser, res) => {
         data: {
           body,
           author_id: BigInt(req.user.id),
+          reply_to_id: replying_to ? BigInt(replying_to) : undefined,
           attachments: {
             create: {
               type: "Image",
@@ -147,7 +163,8 @@ router.post("/", authMiddleware, async (req: RequestWithUser, res) => {
       const post = await prisma.post.create({
         data: {
           body,
-          author_id: BigInt(req.user.id)
+          author_id: BigInt(req.user.id),
+          reply_to_id: replying_to ? BigInt(replying_to) : undefined
         }
       });
     }
@@ -183,7 +200,8 @@ router.get("/:id", async (req: RequestWithUser, res) => {
 
     const post = await prisma.post.findUnique({
       where: {
-        id: BigInt(id)
+        id: BigInt(id),
+        deleted_at: null
       },
       select: {
         id: true,
@@ -203,16 +221,48 @@ router.get("/:id", async (req: RequestWithUser, res) => {
           }
         },
         replies: {
+          orderBy: {
+            created_at: "asc"
+          },
           select: {
             id: true,
             created_at: true,
             body: true,
+            reply_to: {
+              select: {
+                id: true,
+                author: {
+                  select: {
+                    username: true,
+                    display_name: true
+                  }
+                }
+              }
+            },
+            attachments: {
+              select: {
+                id: true,
+                url: true,
+                type: true,
+                height: true,
+                width: true
+              }
+            },
+            likes: user_id
+              ? { where: { user_id: BigInt(user_id) } }
+              : undefined,
             author: {
               select: {
                 id: true,
                 avatar_url: true,
                 display_name: true,
                 username: true
+              }
+            },
+            _count: {
+              select: {
+                replies: true,
+                likes: true
               }
             }
           }
@@ -261,12 +311,30 @@ router.get("/:id", async (req: RequestWithUser, res) => {
           ...post.author,
           id: post.author.id.toString()
         },
+        reply_to: post.reply_to
+          ? {
+              ...post.reply_to,
+              id: post.reply_to.id.toString(),
+              author: {
+                ...post.reply_to.author,
+                id: post.reply_to.author.id.toString()
+              }
+            }
+          : {},
         replies: post.replies.map((reply) => ({
           ...reply,
           id: reply.id.toString(),
           author: {
             ...reply.author,
             id: reply.author.id.toString()
+          },
+          reply_to: {
+            ...reply.reply_to,
+            id: reply.reply_to?.id.toString()
+          },
+          count: {
+            replies: reply._count.replies,
+            likes: reply._count.likes
           }
         })),
         likes: post.likes.map((like) => ({

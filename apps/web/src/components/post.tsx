@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { EllipsisIcon, Heart, MessageCircle, XIcon } from "lucide-react";
+import { EllipsisVerticalIcon, Heart, MessageCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { parsePostBody } from "@/lib/post-utils";
@@ -14,7 +15,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "./dropdown-menu";
@@ -22,6 +22,7 @@ import { TimelinePhoto } from "./timeline-photo";
 
 export function Post({ post, user }: { post: any; user: any }) {
   const [lPost, setLPost] = useState(post);
+  const router = useRouter();
 
   function fetchPost() {
     fetch(`/api/post/${post.id}`, {
@@ -117,7 +118,7 @@ export function Post({ post, user }: { post: any; user: any }) {
   }
 
   return (
-    <div className="group mx-auto mb-4 flex max-w-3xl gap-4 pb-4">
+    <div className="group mx-auto mb-4 flex w-full max-w-3xl gap-4 pb-4">
       <div>
         <Link href={`/${lPost.author.username}`} className="hover:no-underline">
           <Avatar>
@@ -147,8 +148,8 @@ export function Post({ post, user }: { post: any; user: any }) {
           </div>
           <div>
             <DropdownMenu>
-              <DropdownMenuTrigger>
-                <EllipsisIcon className="size-5 opacity-50 hover:opacity-100" />
+              <DropdownMenuTrigger className="h-[20px] outline-none">
+                <EllipsisVerticalIcon className="size-5 opacity-10 hover:!opacity-100 focus:block group-hover:opacity-50" />
               </DropdownMenuTrigger>
               <DropdownMenuContent className="dark:bg-black-800 !z-[99999] bg-white dark:border-slate-900">
                 <DropdownMenuItem
@@ -193,6 +194,18 @@ export function Post({ post, user }: { post: any; user: any }) {
           </div>
         </div>
 
+        {lPost.reply_to && lPost.reply_to.id && (
+          <div className="pb-1 text-sm opacity-50">
+            Replying to{" "}
+            <Link
+              href={`/${lPost.reply_to.author.username}/${lPost.reply_to.id}`}
+              className="font-bold hover:underline"
+            >
+              @{lPost.reply_to.author.username}
+            </Link>
+          </div>
+        )}
+
         <div
           className="max-h-[400px]"
           dangerouslySetInnerHTML={{
@@ -215,16 +228,18 @@ export function Post({ post, user }: { post: any; user: any }) {
         )}
 
         <div className="flex h-[24px] items-center justify-start gap-6 pt-2">
-          <div className="flex items-center gap-2">
+          <div className="flex w-10 items-center gap-2">
             <MessageCircle
               className="size-5 cursor-pointer text-slate-700 hover:fill-neutral-400 hover:text-neutral-400 dark:hover:fill-neutral-300 dark:hover:text-neutral-300"
               strokeWidth={1.5}
-              onClick={() => toast.info("Replies will be added soon.")}
+              onClick={() =>
+                router.push(`/${lPost.author.username}/${lPost.id}`)
+              }
             />
-            {/* <span>0</span> */}
+            <span>{lPost.count.replies || " "}</span>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex w-10 items-center gap-2">
             <Heart
               className={cn(
                 "size-5 cursor-pointer text-slate-700 hover:text-red-500",

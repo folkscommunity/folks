@@ -27,11 +27,14 @@ export function Feeds({ is_authed, user }: { is_authed: boolean; user: any }) {
   }, []);
 
   return isClient ? (
-    <FeedsClient is_authed={is_authed} user={user} />
+    <>
+      {is_authed && <Composer />}
+      <FeedsClient is_authed={is_authed} user={user} />
+    </>
   ) : (
     <>
       <div className="w-full max-w-3xl flex-1 justify-center">
-        <div className="flex justify-center pb-12">
+        <div className="flex justify-center pb-6">
           <div className="text-black-400 flex flex-row space-x-2 text-sm font-bold">
             <span
               className={cn("hover:text-foreground cursor-pointer px-4 py-0.5")}
@@ -79,7 +82,7 @@ function FeedsClient({ is_authed, user }: { is_authed: boolean; user: any }) {
 
   return (
     <div className="w-full max-w-3xl flex-1 justify-center">
-      <div className="flex justify-center pb-4">
+      <div className="flex justify-center pb-6">
         <div className="text-black-400 flex flex-row space-x-2 text-sm font-bold">
           <span
             className={cn(
@@ -190,10 +193,16 @@ function FeedEverything({
     timesAutoLoaded
   ]);
 
+  useEffect(() => {
+    window.addEventListener("refresh_feeds", () => refetch());
+
+    return () => {
+      window.removeEventListener("refresh_feeds", () => refetch());
+    };
+  }, [refetch]);
+
   return (
     <div className="text-md mx-auto max-w-3xl">
-      {is_authed && <Composer onPost={() => refetch()} />}
-
       {status === "pending" ? (
         <FeedSkeleton />
       ) : status === "error" ? (
@@ -304,10 +313,16 @@ function FeedHighlighted({
     timesAutoLoaded
   ]);
 
+  useEffect(() => {
+    window.addEventListener("refresh_feeds", () => refetch());
+
+    return () => {
+      window.removeEventListener("refresh_feeds", () => refetch());
+    };
+  }, [refetch]);
+
   return (
     <div className="text-md mx-auto max-w-3xl">
-      {is_authed && <Composer onPost={() => refetch()} />}
-
       {status === "pending" ? (
         <FeedSkeleton />
       ) : status === "error" ? (
@@ -412,10 +427,16 @@ function FeedFollowing({ is_authed, user }: { is_authed: boolean; user: any }) {
     timesAutoLoaded
   ]);
 
+  useEffect(() => {
+    window.addEventListener("refresh_feeds", () => refetch());
+
+    return () => {
+      window.removeEventListener("refresh_feeds", () => refetch());
+    };
+  }, [refetch]);
+
   return (
     <div className="text-md mx-auto max-w-3xl">
-      {is_authed && <Composer onPost={() => refetch()} />}
-
       {status === "pending" ? (
         <FeedSkeleton />
       ) : status === "error" ? (

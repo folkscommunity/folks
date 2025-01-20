@@ -14,7 +14,7 @@ function Marquee(props: {
   const { windowIsActive } = useContext(WindowContext);
   const marqueeRef = useRef<HTMLDivElement>(null);
 
-  const duration = props.content.length * 0.1 * (props.content.length / 40);
+  const duration = props.content.length * 0.1;
 
   return (
     <div

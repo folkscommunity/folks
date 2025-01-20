@@ -35,7 +35,7 @@ export default function Profile({
   isUser: boolean;
 }) {
   useEffect(() => {
-    document.title = `${profile.display_name} @ Folks`;
+    document.title = `${profile.display_name} on Folks`;
   }, [profile]);
 
   return (

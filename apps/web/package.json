@@ -20,6 +20,7 @@
     "@uidotdev/usehooks": "^2.4.1",
     "autolinker": "^4.1.0",
     "clsx": "^2.1.1",
+    "dayjs": "^1.11.13",
     "ioredis": "^5.4.1",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.473.0",
