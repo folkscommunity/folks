@@ -180,7 +180,7 @@ export function SinglePost({ user, post }: { user: any; post: any }) {
         />
 
         {lPost.attachments && lPost.attachments.length > 0 && (
-          <div className="pt-2">
+          <div className="pt-4">
             {lPost.attachments.map((attachment: any, i: number) => (
               <TimelinePhoto
                 key={i}
@@ -277,20 +277,22 @@ export function SinglePost({ user, post }: { user: any; post: any }) {
         <Separator className="h-[12px]" />
       </div>
 
-      <div className="flex w-full gap-2 pt-4">
-        <Avatar className="size-[40px]">
-          <AvatarImage src={user.avatar_url} />
-          <AvatarFallback>{user.username[0].toUpperCase()}</AvatarFallback>
-        </Avatar>
+      {user && (
+        <div className="flex w-full gap-2 pt-4">
+          <Avatar className="size-[40px]">
+            <AvatarImage src={user.avatar_url} />
+            <AvatarFallback>{user.username[0].toUpperCase()}</AvatarFallback>
+          </Avatar>
 
-        <ReplyCompose
-          post={lPost}
-          user={user}
-          onPost={() => {
-            fetchPost();
-          }}
-        />
-      </div>
+          <ReplyCompose
+            post={lPost}
+            user={user}
+            onPost={() => {
+              fetchPost();
+            }}
+          />
+        </div>
+      )}
 
       <div className="pt-4">
         {lPost.replies && lPost.replies.length > 0 ? (
