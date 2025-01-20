@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/avatar";
 import { FeedUser } from "@/components/feeds";
 import { Separator } from "@/components/separator";
 
+import { ChangeAvatar } from "../settings/change-avatar";
 import { FollowButton } from "./follow-button";
 
 export interface Profile {
@@ -41,12 +42,16 @@ export default function Profile({
     <div className="mx-auto w-full max-w-3xl">
       <div className="flex flex-col gap-2 py-2">
         <div className="pb-2">
-          <Avatar className="size-[80px]">
-            <AvatarImage src={profile.avatar_url} />
-            <AvatarFallback className="text-3xl">
-              {profile.username[0].toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
+          {isUser ? (
+            <ChangeAvatar user={user} />
+          ) : (
+            <Avatar className="size-[80px]">
+              <AvatarImage src={profile.avatar_url} />
+              <AvatarFallback className="text-3xl">
+                {profile.username[0].toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+          )}
         </div>
 
         <div className="flex flex-row justify-between gap-4">

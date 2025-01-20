@@ -83,7 +83,7 @@ export function ChangeAvatar({ user }: { user: any }) {
   return (
     <div
       onClick={() => openFilePicker()}
-      className="cursor-pointer py-4"
+      className="group my-4 size-[80px] cursor-pointer rounded-full"
       title="Click to change your avatar."
     >
       <Avatar className="size-[80px]">
@@ -92,6 +92,11 @@ export function ChangeAvatar({ user }: { user: any }) {
           {user.username[0].toUpperCase()}
         </AvatarFallback>
       </Avatar>
+      <div className="bg-black-900/70 absolute mt-[-80px] flex size-[80px] items-center justify-center rounded-full opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+        <span className="text-center font-bold leading-[16px] text-white">
+          Change Avatar
+        </span>
+      </div>
     </div>
   );
 }

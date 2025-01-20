@@ -55,6 +55,7 @@ export function Settings({ user }: { user: any }) {
       <div className="max-w-[83ch]">
         <h2 className="pb-4">Settings</h2>
         <div className="pb-4">
+          <div className="font-bold">Avatar: </div>
           <ChangeAvatar user={user} />
         </div>
         <div className="flex flex-col gap-3">
