@@ -28,7 +28,7 @@ export function Composer({ onPost }: { onPost: () => void }) {
       validators: [
         new FileAmountLimitValidator({ max: 1 }),
         new FileTypeValidator(["jpg", "jpeg", "png", "webp"]),
-        new FileSizeValidator({ maxFileSize: 15 * 1024 * 1024 /* 15 MB */ }),
+        new FileSizeValidator({ maxFileSize: 50 * 1024 * 1024 /* 50 MB */ }),
         new ImageDimensionsValidator({
           maxWidth: 8000,
           maxHeight: 8000

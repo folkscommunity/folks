@@ -75,7 +75,7 @@ router.post("/", authMiddleware, async (req: RequestWithUser, res) => {
         "base64"
       );
 
-      if (buffer.length > 15 * 1024 * 1024) {
+      if (buffer.length > 50 * 1024 * 1024) {
         return res.status(400).json({
           error: "invalid_request",
           message: "File size exceeds limit."
