@@ -157,6 +157,8 @@ router.post("/register", async (req, res) => {
 
     sendVerifyEmail(created_user.id.toString());
 
+    await redis.del(`cache:ribbon`);
+
     res.json({ ok: true });
   } catch (err) {
     console.error(err);
