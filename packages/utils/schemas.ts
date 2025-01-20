@@ -32,6 +32,7 @@ export const pronounsSchema = z
 
 export const websiteSchema = z
   .string()
+  .url("Invalid URL.")
   .max(128, "Website must be less than 128 characters.")
   .optional();
 
@@ -44,3 +45,8 @@ export const postBodySchema = z
   .string()
   .min(1, "A post must be more than 1 characters.")
   .max(300, "A post must be less than 300 characters.");
+
+export const ribbonBodySchema = z
+  .string()
+  .min(1, "A ribbon message must be more than 1 characters.")
+  .max(30, "A ribbon message must be less than 30 characters.");

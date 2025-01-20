@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect } from "react";
+import { ExternalLinkIcon } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/avatar";
 import { FeedUser } from "@/components/feeds";
+import { Separator } from "@/components/separator";
 
 import { FollowButton } from "./follow-button";
 
@@ -34,9 +36,9 @@ export default function Profile({
   }, [profile]);
 
   return (
-    <div>
-      <div className="border-b border-neutral-200 px-4 py-4 dark:border-neutral-800">
-        <div className="pb-4">
+    <div className="mx-auto w-full max-w-3xl">
+      <div className="flex flex-col gap-2 py-2">
+        <div className="pb-2">
           <Avatar className="size-[80px]">
             <AvatarImage src={profile.avatar_url} />
             <AvatarFallback className="text-3xl">
@@ -44,19 +46,39 @@ export default function Profile({
             </AvatarFallback>
           </Avatar>
         </div>
+
         <div className="flex flex-row justify-between gap-4">
           <h1 className="font-black">{profile.display_name}</h1>
 
           {!isUser && <FollowButton target_id={profile.id.toString()} />}
         </div>
+
         <p>
           @{profile.username} (#{profile.id})
         </p>
-        <p>
+
+        <p className="mb-0">
           {profile.occupation && `${profile.occupation}`}
           {profile.location && `, ${profile.location}`}
           {profile.pronouns && `, ${profile.pronouns}`}
         </p>
+
+        {profile.website && (
+          <a
+            href={profile.website}
+            target="_blank"
+            className="inline cursor-pointer text-sky-600 hover:underline"
+          >
+            <div className="flex items-center gap-2">
+              {profile.website.replace("https://", "")}
+              <ExternalLinkIcon className="size-3" />
+            </div>
+          </a>
+        )}
+      </div>
+
+      <div className="pb-8">
+        <Separator />
       </div>
 
       <FeedUser author_id={profile.id.toString()} />

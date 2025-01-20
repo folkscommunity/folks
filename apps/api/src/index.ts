@@ -9,6 +9,9 @@ import auth_router from "./routes/auth";
 import feed_router from "./routes/feed";
 import follow_router from "./routes/follow";
 import post_router from "./routes/post";
+import ribbon_router from "./routes/ribbon";
+import user_router from "./routes/user";
+import whitelist_router from "./routes/whitelist";
 
 dotenv.config({ path: "../../.env" });
 
@@ -32,7 +35,12 @@ async function mainThread() {
   console.log("Main thread started.");
   app.disable("x-powered-by");
 
-  app.use(express.json());
+  app.use(
+    express.json({
+      limit: "50mb"
+    })
+  );
+
   app.use(cookieParser());
 
   app.get("/api", async (req, res) => {
@@ -43,6 +51,9 @@ async function mainThread() {
   app.use("/api/follow", follow_router);
   app.use("/api/feed", feed_router);
   app.use("/api/post", post_router);
+  app.use("/api/whitelist", whitelist_router);
+  app.use("/api/user", user_router);
+  app.use("/api/ribbon", ribbon_router);
 
   httpServer.listen(process.env.PORT || 3002, () => {
     console.log("API started!");

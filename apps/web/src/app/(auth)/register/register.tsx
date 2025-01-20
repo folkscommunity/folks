@@ -57,45 +57,49 @@ export function Register() {
   };
 
   return (
-    <div className="flex flex-col gap-4 p-4 max-sm:items-center">
+    <div className="mx-auto flex max-w-3xl flex-1 flex-col gap-4">
       <p>
         Use the form below to create a new account, for the time being all new
         accounts have to get approved by an admin as we are still in beta.
       </p>
 
       <form
-        className="mx-auto flex w-full max-w-md flex-col gap-4"
+        className="mx-auto flex w-full max-w-2xl flex-col gap-4"
         onSubmit={handleSubmit(onSubmit)}
       >
-        <div className="flex flex-col gap-2">
-          <label htmlFor="username" className="font-bold">
-            Username
-          </label>
-          <input
-            type="text"
-            id="username"
-            {...register("username")}
-            placeholder="Username"
-            className="w-full rounded-none border border-neutral-400 bg-transparent px-2 py-1.5 placeholder:text-neutral-400 focus:border-blue-500 focus:outline-none dark:border-neutral-600 dark:placeholder:text-neutral-600"
-          />
-          {errors.username && (
-            <span className="text-red-500">{errors.username.message}</span>
-          )}
-        </div>
-        <div className="flex flex-col gap-2">
-          <label htmlFor="display_name" className="font-bold">
-            Display Name
-          </label>
-          <input
-            type="text"
-            id="display_name"
-            {...register("display_name")}
-            placeholder="Display Name"
-            className="rounded-none border border-neutral-400 bg-transparent px-2 py-1.5 placeholder:text-neutral-400 focus:border-blue-500 focus:outline-none dark:border-neutral-600 dark:placeholder:text-neutral-600"
-          />
-          {errors.display_name && (
-            <span className="text-red-500">{errors.display_name.message}</span>
-          )}
+        <div className="flex flex-row gap-2 max-md:flex-col">
+          <div className="flex flex-1 flex-col gap-2">
+            <label htmlFor="username" className="font-bold">
+              Username
+            </label>
+            <input
+              type="text"
+              id="username"
+              {...register("username")}
+              placeholder="Username"
+              className="w-full rounded-none border border-neutral-400 bg-transparent px-2 py-1.5 placeholder:text-neutral-400 focus:border-blue-500 focus:outline-none dark:border-neutral-600 dark:placeholder:text-neutral-600"
+            />
+            {errors.username && (
+              <span className="text-red-500">{errors.username.message}</span>
+            )}
+          </div>
+          <div className="flex flex-1 flex-col gap-2">
+            <label htmlFor="display_name" className="font-bold">
+              Display Name
+            </label>
+            <input
+              type="text"
+              id="display_name"
+              {...register("display_name")}
+              placeholder="Display Name"
+              className="rounded-none border border-neutral-400 bg-transparent px-2 py-1.5 placeholder:text-neutral-400 focus:border-blue-500 focus:outline-none dark:border-neutral-600 dark:placeholder:text-neutral-600"
+            />
+            {errors.display_name && (
+              <span className="text-red-500">
+                {errors.display_name.message}
+              </span>
+            )}
+          </div>
         </div>
         <div className="flex flex-col gap-2">
           <label htmlFor="email" className="font-bold">

@@ -37,9 +37,11 @@ model User {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  following Following[] @relation("following")
-  followers Following[] @relation("followers")
-  posts     Post[]      @relation("posts")
+  following   Following[] @relation("following")
+  followers   Following[] @relation("followers")
+  posts       Post[]      @relation("posts")
+  liked_posts PostLike[]  @relation("likes")
+  ribbons     Ribbon[]    @relation("ribbons")
 
   @@index([id])
   @@index([username])
@@ -67,8 +69,12 @@ model Post {
   author_id BigInt
   author    User   @relation(fields: [author_id], references: [id], name: "posts", onDelete: Cascade)
 
-  body        String // max 300 chars
+  body        String
   attachments Attachment[] @relation("attachments")
+
+  highlighted Boolean @default(false)
+
+  deleted_at DateTime?
 
   reply_to_id BigInt?
   reply_to    Post?   @relation(fields: [reply_to_id], references: [id], name: "replies", onDelete: SetNull)
@@ -76,10 +82,25 @@ model Post {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  replies Post[] @relation("replies")
+  replies Post[]     @relation("replies")
+  likes   PostLike[] @relation("likes")
 
   @@index([author_id])
   @@map("posts")
+}
+
+model PostLike {
+  id String @id @unique @default(cuid())
+
+  user_id BigInt
+  user    User   @relation(fields: [user_id], references: [id], name: "likes", onDelete: Cascade)
+
+  post_id BigInt
+  post    Post   @relation(fields: [post_id], references: [id], name: "likes", onDelete: Cascade)
+
+  created_at DateTime @default(now())
+
+  @@map("post_likes")
 }
 
 enum AttachmentType {
@@ -104,4 +125,33 @@ model Attachment {
   updated_at DateTime @updatedAt
 
   @@map("attachments")
+}
+
+model Ribbon {
+  id BigInt @id @unique @default(autoincrement())
+
+  body String
+
+  user_id BigInt
+  user    User   @relation(fields: [user_id], references: [id], name: "ribbons", onDelete: Cascade)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("ribbons")
+}
+
+model WhitelistRequest {
+  id BigInt @id @unique @default(autoincrement())
+
+  email       String    @unique
+  name        String
+  accepted_at DateTime?
+
+  posts_cv_url String?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("whitelist")
 }

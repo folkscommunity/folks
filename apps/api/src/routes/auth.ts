@@ -70,6 +70,22 @@ router.post("/register", async (req, res) => {
       });
     }
 
+    const whitelist = await prisma.whitelistRequest.findUnique({
+      where: {
+        email: email,
+        accepted_at: {
+          not: null
+        }
+      }
+    });
+
+    if (!whitelist) {
+      return res.status(400).json({
+        error: "not_whitelisted",
+        msg: "Your email has not been invited yet, we are slowly onboarding new users."
+      });
+    }
+
     const existing_username = await prisma.user.findUnique({
       where: {
         username

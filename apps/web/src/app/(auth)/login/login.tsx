@@ -54,11 +54,11 @@ export function Login() {
   };
 
   return (
-    <div className="flex flex-col gap-4 p-4 max-sm:items-center">
+    <div className="mx-auto flex max-w-3xl flex-1 flex-col gap-4">
       <p>Use the form below to login to your account.</p>
 
       <form
-        className="mx-auto flex w-full max-w-md flex-col gap-4"
+        className="mx-auto flex w-full max-w-2xl flex-col gap-4"
         onSubmit={handleSubmit(onSubmit)}
       >
         <div className="flex flex-col gap-2">

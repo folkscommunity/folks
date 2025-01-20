@@ -24,12 +24,13 @@ Here's a guide on how to get started with a local development environment for Fo
 - pnpm 9.15+
 - PostgreSQL 17 (if you're using mac i recommend using [DBNgin](https://dbngin.com/))
 - Redis 7 (same as above, use [DBNgin](https://dbngin.com/))
+- AWS S3 bucket for static assets.
 
 ## Setup
 
 1. Once you have cloned the repo and have the database setup, run `pnpm install` to install all the dependencies.
 
-2. Copy the `.env.example` file to `.env` and fill in the values (you don't need to fill in the AWS values for the time being).
+2. Copy the `.env.example` file to `.env` and fill in the values (you need to fill in the AWS values you can find the Policy [here](https://github.com/folkscommunity/folks/blob/main/docs/infrastructure.md)).
 
 3. Run `pnpm run dev` to start the development server.
 

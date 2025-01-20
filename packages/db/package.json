@@ -11,7 +11,7 @@
     "dev": "pnpm run db:generate",
     "build": "pnpm run db:generate",
     "db:generate": "prisma generate --no-hints",
-    "db:push": "prisma db push --skip-generate --accept-data-loss"
+    "db:push": "prisma db push --skip-generate"
   },
   "devDependencies": {
     "@types/node": "^20.14.10",
