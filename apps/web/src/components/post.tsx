@@ -164,7 +164,11 @@ export function Post({ post, user }: { post: any; user: any }) {
                   <DropdownMenuItem
                     className="dark:hover:bg-black-600 cursor-pointer hover:bg-slate-100"
                     onClick={() => {
-                      post.highlighted ? unhighlightPost() : highlightPost();
+                      if (post.highlighted) {
+                        unhighlightPost();
+                      } else {
+                        highlightPost();
+                      }
                     }}
                   >
                     {lPost.highlighted ? "Remove Highlight" : "Highlight"}
