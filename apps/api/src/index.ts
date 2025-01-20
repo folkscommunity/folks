@@ -15,12 +15,12 @@ import whitelist_router from "./routes/whitelist";
 
 dotenv.config({ path: "../../.env" });
 
-// Sentry.init({
-//   dsn: "",
-//   enabled: process.env.NODE_ENV === "production",
-//   environment:
-//     process.env.NODE_ENV === "production" ? "production" : "development",
-// });
+Sentry.init({
+  dsn: "https://6cb146e612974367b3154993eef50af1@sentry.folkscommunity.com/2",
+  enabled: process.env.NODE_ENV === "production",
+  environment:
+    process.env.NODE_ENV === "production" ? "production" : "development"
+});
 
 const app = express();
 const httpServer = createServer(app);
