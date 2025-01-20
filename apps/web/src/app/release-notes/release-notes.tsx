@@ -1,7 +1,6 @@
 export const current_release = "0.1.5";
 
 const releases = [
-  ,
   {
     version: "0.1.5",
     changes: [
