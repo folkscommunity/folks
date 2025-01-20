@@ -29,6 +29,7 @@
     "@aws-sdk/client-ses": "^3.687.0",
     "@folks/db": "workspace:^",
     "@folks/utils": "workspace:^",
+    "@folks/email": "workspace:^",
     "@sentry/node": "^8.47.0",
     "argon2": "^0.40.3",
     "aws-sdk": "^2.1692.0",

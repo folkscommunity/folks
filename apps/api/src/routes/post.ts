@@ -454,13 +454,14 @@ router.delete("/:id", authMiddleware, async (req: RequestWithUser, res) => {
       });
     }
 
-    if (post.author_id !== user.id) {
+    if (post.author_id !== user.id && !user.super_admin) {
       return res.status(401).json({
         error: "unauthorized"
       });
     }
 
-    // We're going to keep the post for 24 hours, and then delete it along with the likes, and the attachments. TODO: Add the cron job to delete the post after 24 hours.
+    // We're going to keep the post for 24 hours, and then delete it along with the likes, and the attachments.
+    // TODO: Add the cron job to delete the post after 24 hours.
     await prisma.post.updateMany({
       where: {
         id: BigInt(id)
@@ -480,5 +481,115 @@ router.delete("/:id", authMiddleware, async (req: RequestWithUser, res) => {
     });
   }
 });
+
+// admin only
+router.post(
+  "/highlight/:id",
+  authMiddleware,
+  async (req: RequestWithUser, res) => {
+    try {
+      const { id } = req.params;
+
+      const user = await prisma.user.findUnique({
+        where: {
+          id: BigInt(req.user.id),
+          super_admin: true
+        }
+      });
+
+      if (!user) {
+        return res.status(401).json({
+          error: "unauthorized"
+        });
+      }
+
+      let post = await prisma.post.findUnique({
+        where: {
+          id: BigInt(id)
+        }
+      });
+
+      if (!post) {
+        return res.status(400).json({
+          error: "invalid_request",
+          message: "Post not found."
+        });
+      }
+
+      post = await prisma.post.update({
+        where: {
+          id: BigInt(id)
+        },
+        data: {
+          highlighted: true
+        }
+      });
+
+      res.json({ ok: true });
+    } catch (e) {
+      console.error(e);
+
+      res.status(500).json({
+        error: "server_error",
+        message: "Something went wrong."
+      });
+    }
+  }
+);
+
+// admin only
+router.delete(
+  "/highlight/:id",
+  authMiddleware,
+  async (req: RequestWithUser, res) => {
+    try {
+      const { id } = req.params;
+
+      const user = await prisma.user.findUnique({
+        where: {
+          id: BigInt(req.user.id),
+          super_admin: true
+        }
+      });
+
+      if (!user) {
+        return res.status(401).json({
+          error: "unauthorized"
+        });
+      }
+
+      const post = await prisma.post.findUnique({
+        where: {
+          id: BigInt(id)
+        }
+      });
+
+      if (!post) {
+        return res.status(400).json({
+          error: "invalid_request",
+          message: "Post not found."
+        });
+      }
+
+      await prisma.post.update({
+        where: {
+          id: BigInt(id)
+        },
+        data: {
+          highlighted: false
+        }
+      });
+
+      res.json({ ok: true });
+    } catch (e) {
+      console.error(e);
+
+      res.status(500).json({
+        error: "server_error",
+        message: "Something went wrong."
+      });
+    }
+  }
+);
 
 export default router;

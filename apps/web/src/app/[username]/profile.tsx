@@ -26,9 +26,11 @@ export interface Profile {
 
 export default function Profile({
   profile,
+  user,
   isUser
 }: {
   profile: Profile;
+  user: any;
   isUser: boolean;
 }) {
   useEffect(() => {
@@ -81,7 +83,7 @@ export default function Profile({
         <Separator />
       </div>
 
-      <FeedUser author_id={profile.id.toString()} />
+      <FeedUser author_id={profile.id.toString()} user={user} />
     </div>
   );
 }

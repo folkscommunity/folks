@@ -1,15 +1,19 @@
-import { Suspense } from "react";
-
-import { Feeds } from "@/components/feeds";
+import NotFound from "@/app/not-found";
 import { MainContainer } from "@/components/main-container";
 import { ServerSession } from "@/lib/server-session";
 
-export default async function Home() {
+import { Whitelist } from "./whitelist";
+
+export default async function Page() {
   const user = await ServerSession();
+
+  if (!user || !user.super_admin) {
+    return <NotFound />;
+  }
 
   return (
     <MainContainer>
-      <Feeds is_authed={Boolean(user)} user={user} />
+      <Whitelist />
     </MainContainer>
   );
 }

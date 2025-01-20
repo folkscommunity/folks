@@ -7,6 +7,7 @@ import { schemas } from "@folks/utils";
 
 import { authMiddleware, RequestWithUser } from "@/lib/auth_middleware";
 import { redis } from "@/lib/redis";
+import { sendVerifyEmail } from "@/lib/send_email";
 
 const router = Router();
 
@@ -154,6 +155,8 @@ router.post("/register", async (req, res) => {
       secure: process.env.NODE_ENV === "production"
     });
 
+    sendVerifyEmail(created_user.id.toString());
+
     res.json({ ok: true });
   } catch (err) {
     console.error(err);
@@ -268,6 +271,38 @@ router.get("/logout", async (req, res) => {
     await redis.del(`session:${jwt_object.id}:${token}`);
 
     res.clearCookie("folks_sid");
+
+    res.redirect("/");
+  } catch (err) {
+    console.error(err);
+
+    res.status(500).json({ error: "server_error" });
+  }
+});
+
+router.get("/verify/:token", async (req, res) => {
+  try {
+    const { token } = req.params;
+
+    const user = await prisma.user.findFirst({
+      where: {
+        email_token: token
+      }
+    });
+
+    if (!user) {
+      return res.status(400).json({ error: "invalid_request" });
+    }
+
+    await prisma.user.update({
+      where: {
+        id: user.id
+      },
+      data: {
+        email_token: null,
+        email_verified: true
+      }
+    });
 
     res.redirect("/");
   } catch (err) {

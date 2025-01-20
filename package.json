@@ -2,10 +2,10 @@
   "name": "x",
   "private": true,
   "scripts": {
-    "build": "pnpm run db:generate; dotenv -- pnpm run -F './apps/**' --parallel -r build",
+    "build": "pnpm run db:generate; dotenv -- pnpm run -F './apps/**' -F './packages/email --parallel -r build",
     "lint": "dotenv -- pnpm run --filter './apps/**' --parallel -r lint",
     "start": "pnpm run db:push; pnpm run db:generate; dotenv -- pnpm run -F './apps/**' --parallel -r start",
-    "dev": "pnpm run db:generate; pnpm run db:push; dotenv -- pnpm run -F './apps/**' --parallel -r dev",
+    "dev": "pnpm run db:generate; pnpm run db:push; dotenv -- pnpm run -F './apps/**' -F './packages/email' --parallel -r dev",
     "db:push": "dotenv -- pnpm run -F @folks/db db:push",
     "db:generate": "dotenv -- pnpm run -F @folks/db db:generate",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""

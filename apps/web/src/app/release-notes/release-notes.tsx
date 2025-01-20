@@ -1,8 +1,16 @@
 import Link from "next/link";
 
-export const current_release = "0.1.2";
+export const current_release = "0.1.3";
 
 const releases = [
+  {
+    version: "0.1.3",
+    changes: [
+      "added admin tools",
+      "added email verification",
+      "added post deletion"
+    ]
+  },
   {
     version: "0.1.2",
     changes: [

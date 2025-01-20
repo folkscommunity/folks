@@ -62,6 +62,7 @@ export default async function Page({
           created_at: selectedUser.created_at,
           updated_at: selectedUser.updated_at
         }}
+        user={user}
         isUser={isUser}
       />
     </MainContainer>

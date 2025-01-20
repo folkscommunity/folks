@@ -12,7 +12,7 @@ if (
 }
 
 export const ses = new SES({
-  region: process.env.AWS_REGION,
+  region: "eu-central-1",
   credentials: {
     accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!

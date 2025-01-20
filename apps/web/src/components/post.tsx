@@ -1,17 +1,26 @@
 "use client";
 
 import { useState } from "react";
-import { Heart, MessageCircle, XIcon } from "lucide-react";
+import { EllipsisIcon, Heart, MessageCircle, XIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { toast } from "sonner";
 
 import { parsePostBody } from "@/lib/post-utils";
 import { cn, dateRelativeTiny } from "@/lib/utils";
 
 import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from "./dropdown-menu";
 import { TimelinePhoto } from "./timeline-photo";
 
-export function Post({ post }: { post: any }) {
+export function Post({ post, user }: { post: any; user: any }) {
   const [lPost, setLPost] = useState(post);
 
   function fetchPost() {
@@ -65,8 +74,50 @@ export function Post({ post }: { post: any }) {
       .catch((err) => {});
   }
 
+  function highlightPost() {
+    fetch(`/api/post/highlight/${post.id}`, {
+      method: "POST"
+    })
+      .then((res) => res.json())
+      .then((res) => {
+        if (res.ok) {
+          fetchPost();
+          toast.success("Post has been added to highlights.");
+        }
+      })
+      .catch((err) => {});
+  }
+
+  function unhighlightPost() {
+    fetch(`/api/post/highlight/${post.id}`, {
+      method: "DELETE"
+    })
+      .then((res) => res.json())
+      .then((res) => {
+        if (res.ok) {
+          fetchPost();
+          toast.success("Post has been removed from highlights.");
+        }
+      })
+      .catch((err) => {});
+  }
+
+  function deletePost() {
+    fetch(`/api/post/${post.id}`, {
+      method: "DELETE"
+    })
+      .then((res) => res.json())
+      .then((res) => {
+        if (res.ok) {
+          toast.success("Post has been deleted.");
+          window.location.reload();
+        }
+      })
+      .catch((err) => {});
+  }
+
   return (
-    <div className="mx-auto mb-4 flex max-w-3xl gap-4 pb-4">
+    <div className="group mx-auto mb-4 flex max-w-3xl gap-4 pb-4">
       <div>
         <Link href={`/${lPost.author.username}`} className="hover:no-underline">
           <Avatar>
@@ -93,6 +144,47 @@ export function Post({ post }: { post: any }) {
             >
               {dateRelativeTiny(new Date(lPost.created_at))}
             </span>
+          </div>
+          <div>
+            <DropdownMenu>
+              <DropdownMenuTrigger>
+                <EllipsisIcon className="size-5 opacity-50 hover:opacity-100" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="dark:bg-black-800 !z-[99999] bg-white dark:border-slate-900">
+                <DropdownMenuItem
+                  className="dark:hover:bg-black-600 cursor-pointer hover:bg-slate-100"
+                  onClick={() =>
+                    navigator.clipboard.writeText(post.id.toString())
+                  }
+                >
+                  Copy Post ID
+                </DropdownMenuItem>
+
+                {user.super_admin && (
+                  <DropdownMenuItem
+                    className="dark:hover:bg-black-600 cursor-pointer hover:bg-slate-100"
+                    onClick={() => {
+                      post.highlighted ? unhighlightPost() : highlightPost();
+                    }}
+                  >
+                    {lPost.highlighted ? "Remove Highlight" : "Highlight"}
+                  </DropdownMenuItem>
+                )}
+
+                {(user.super_admin ||
+                  post.author.id.toString() === user.id.toString()) && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      className="dark:hover:bg-black-600 cursor-pointer text-red-500 hover:bg-slate-100"
+                      onClick={() => deletePost()}
+                    >
+                      Delete Post
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 
@@ -122,6 +214,7 @@ export function Post({ post }: { post: any }) {
             <MessageCircle
               className="size-5 cursor-pointer text-slate-700 hover:fill-neutral-400 hover:text-neutral-400 dark:hover:fill-neutral-300 dark:hover:text-neutral-300"
               strokeWidth={1.5}
+              onClick={() => toast.info("Replies will be added soon.")}
             />
             {/* <span>0</span> */}
           </div>

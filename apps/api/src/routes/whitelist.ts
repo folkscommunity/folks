@@ -2,7 +2,8 @@ import { Router } from "express";
 
 import { prisma } from "@folks/db";
 
-import { RequestWithUser } from "@/lib/auth_middleware";
+import { authMiddleware, RequestWithUser } from "@/lib/auth_middleware";
+import { sendInviteEmail } from "@/lib/send_email";
 
 const router = Router();
 
@@ -62,6 +63,91 @@ router.post("/", async (req: RequestWithUser, res) => {
     });
 
     res.json({ ok: true });
+  } catch (e) {
+    console.error(e);
+
+    res.status(500).json({
+      error: "server_error",
+      message: "Something went wrong."
+    });
+  }
+});
+
+// admin only
+router.get("/", authMiddleware, async (req: RequestWithUser, res) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        id: BigInt(req.user.id),
+        super_admin: true
+      }
+    });
+
+    if (!user) {
+      return res.status(403).json({
+        error: "invalid_request",
+        msg: "Denied. You're not an admin."
+      });
+    }
+
+    const whitelist = await prisma.whitelistRequest.findMany({});
+
+    res.json({
+      ok: true,
+      data: {
+        count: whitelist.length,
+        whitelist: whitelist
+          ? whitelist.map((wl) => {
+              return {
+                id: wl.id.toString(),
+                email: wl.email,
+                name: wl.name,
+                posts_cv_url: wl.posts_cv_url,
+                accepted_at: wl.accepted_at?.toISOString(),
+                created_at: wl.created_at.toISOString(),
+                updated_at: wl.updated_at.toISOString()
+              };
+            })
+          : []
+      }
+    });
+  } catch (e) {
+    console.error(e);
+
+    res.status(500).json({
+      error: "server_error",
+      message: "Something went wrong."
+    });
+  }
+});
+
+// admin only
+router.post("/accept", authMiddleware, async (req: RequestWithUser, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        error: "invalid_request",
+        msg: "Invalid request. Missing email."
+      });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: {
+        id: BigInt(req.user.id),
+        super_admin: true
+      }
+    });
+
+    if (!user) {
+      return res.status(403).json({
+        error: "invalid_request",
+        msg: "Denied. You're not an admin."
+      });
+    }
+
+    sendInviteEmail(email);
   } catch (e) {
     console.error(e);
 

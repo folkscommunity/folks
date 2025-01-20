@@ -28,7 +28,7 @@ router.get("/everything", async (req, res) => {
 
     const feed = await prisma.post.findMany({
       where: {
-        deleted_at: undefined
+        deleted_at: null
       },
       cursor: cursor
         ? {
@@ -88,6 +88,7 @@ router.get("/everything", async (req, res) => {
             username: true
           }
         },
+        highlighted: true,
         created_at: true,
         likes: user_id ? { where: { user_id: BigInt(user_id) } } : false,
         _count: {
@@ -123,6 +124,7 @@ router.get("/everything", async (req, res) => {
             user_id: like.user_id.toString(),
             post_id: like.post_id.toString()
           })),
+        highlighted: post.highlighted,
         count: {
           replies: post._count.replies,
           likes: post._count.likes
@@ -163,7 +165,7 @@ router.get("/highlighted", async (req, res) => {
 
     const feed = await prisma.post.findMany({
       where: {
-        deleted_at: undefined,
+        deleted_at: null,
         highlighted: true
       },
       cursor: cursor
@@ -224,6 +226,7 @@ router.get("/highlighted", async (req, res) => {
             username: true
           }
         },
+        highlighted: true,
         created_at: true,
         likes: user_id ? { where: { user_id: BigInt(user_id) } } : false,
         _count: {
@@ -259,6 +262,7 @@ router.get("/highlighted", async (req, res) => {
             user_id: like.user_id.toString(),
             post_id: like.post_id.toString()
           })),
+        highlighted: post.highlighted,
         count: {
           replies: post._count.replies,
           likes: post._count.likes
@@ -318,7 +322,7 @@ router.get("/following", authMiddleware, async (req: RequestWithUser, res) => {
         author_id: {
           in: following.map((following) => following.target_id)
         },
-        deleted_at: undefined
+        deleted_at: null
       },
       cursor: cursor
         ? {
@@ -378,6 +382,7 @@ router.get("/following", authMiddleware, async (req: RequestWithUser, res) => {
             username: true
           }
         },
+        highlighted: true,
         created_at: true,
         likes: user.id ? { where: { user_id: BigInt(user.id) } } : false,
         _count: {
@@ -406,6 +411,7 @@ router.get("/following", authMiddleware, async (req: RequestWithUser, res) => {
             id: reply.author.id.toString()
           }
         })),
+        highlighted: post.highlighted,
         likes:
           post.likes &&
           post.likes.map((like) => ({
@@ -454,7 +460,7 @@ router.get("/user/:author_id", async (req, res) => {
     const feed = await prisma.post.findMany({
       where: {
         author_id: BigInt(req.params.author_id),
-        deleted_at: undefined
+        deleted_at: null
       },
       cursor: cursor
         ? {
@@ -514,6 +520,7 @@ router.get("/user/:author_id", async (req, res) => {
             username: true
           }
         },
+        highlighted: true,
         created_at: true,
         likes: user_id ? { where: { user_id: BigInt(user_id) } } : false,
         _count: {
@@ -549,6 +556,7 @@ router.get("/user/:author_id", async (req, res) => {
             user_id: like.user_id.toString(),
             post_id: like.post_id.toString()
           })),
+        highlighted: post.highlighted,
         count: {
           replies: post._count.replies,
           likes: post._count.likes

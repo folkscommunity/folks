@@ -19,7 +19,7 @@ enum FeedType {
   EVERYTHING = "EVERYTHING"
 }
 
-export function Feeds({ is_authed }: { is_authed: boolean }) {
+export function Feeds({ is_authed, user }: { is_authed: boolean; user: any }) {
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -27,7 +27,7 @@ export function Feeds({ is_authed }: { is_authed: boolean }) {
   }, []);
 
   return isClient ? (
-    <FeedsClient is_authed={is_authed} />
+    <FeedsClient is_authed={is_authed} user={user} />
   ) : (
     <>
       <div className="w-full max-w-3xl flex-1 justify-center">
@@ -61,7 +61,7 @@ export function Feeds({ is_authed }: { is_authed: boolean }) {
   );
 }
 
-function FeedsClient({ is_authed }: { is_authed: boolean }) {
+function FeedsClient({ is_authed, user }: { is_authed: boolean; user: any }) {
   const [feed, setFeed] = useLocalStorage(
     "selected_feed",
     FeedType.HIGHLIGHTED
@@ -117,15 +117,25 @@ function FeedsClient({ is_authed }: { is_authed: boolean }) {
       </div>
 
       {feed === FeedType.HIGHLIGHTED && (
-        <FeedHighlighted is_authed={is_authed} />
+        <FeedHighlighted is_authed={is_authed} user={user} />
       )}
-      {feed === FeedType.EVERYTHING && <FeedEverything is_authed={is_authed} />}
-      {feed === FeedType.FOLLOWING && <FeedFollowing is_authed={is_authed} />}
+      {feed === FeedType.EVERYTHING && (
+        <FeedEverything is_authed={is_authed} user={user} />
+      )}
+      {feed === FeedType.FOLLOWING && (
+        <FeedFollowing is_authed={is_authed} user={user} />
+      )}
     </div>
   );
 }
 
-function FeedEverything({ is_authed }: { is_authed: boolean }) {
+function FeedEverything({
+  is_authed,
+  user
+}: {
+  is_authed: boolean;
+  user: any;
+}) {
   const { ref, inView } = useInView();
   const [timesAutoLoaded, setTimesAutoLoaded] = useState(0);
 
@@ -194,7 +204,7 @@ function FeedEverything({ is_authed }: { is_authed: boolean }) {
             (page, i) =>
               page.feed &&
               page.feed.map((post: any, i: any) => {
-                return <Post post={post} key={post.id} />;
+                return <Post user={user} post={post} key={post.id} />;
               })
           )}
 
@@ -233,7 +243,13 @@ function FeedEverything({ is_authed }: { is_authed: boolean }) {
   );
 }
 
-function FeedHighlighted({ is_authed }: { is_authed: boolean }) {
+function FeedHighlighted({
+  is_authed,
+  user
+}: {
+  is_authed: boolean;
+  user: any;
+}) {
   const { ref, inView } = useInView();
   const [timesAutoLoaded, setTimesAutoLoaded] = useState(0);
 
@@ -302,7 +318,7 @@ function FeedHighlighted({ is_authed }: { is_authed: boolean }) {
             (page, i) =>
               page.feed &&
               page.feed.map((post: any, i: any) => {
-                return <Post post={post} key={post.id} />;
+                return <Post user={user} post={post} key={post.id} />;
               })
           )}
 
@@ -341,7 +357,7 @@ function FeedHighlighted({ is_authed }: { is_authed: boolean }) {
   );
 }
 
-function FeedFollowing({ is_authed }: { is_authed: boolean }) {
+function FeedFollowing({ is_authed, user }: { is_authed: boolean; user: any }) {
   const { ref, inView } = useInView();
   const [timesAutoLoaded, setTimesAutoLoaded] = useState(0);
 
@@ -410,7 +426,7 @@ function FeedFollowing({ is_authed }: { is_authed: boolean }) {
             (page, i) =>
               page.feed &&
               page.feed.map((post: any, i: any) => {
-                return <Post post={post} key={post.id} />;
+                return <Post user={user} post={post} key={post.id} />;
               })
           )}
 
@@ -447,7 +463,13 @@ function FeedFollowing({ is_authed }: { is_authed: boolean }) {
   );
 }
 
-export function FeedUser({ author_id }: { author_id: string }) {
+export function FeedUser({
+  author_id,
+  user
+}: {
+  author_id: string;
+  user: any;
+}) {
   const { ref, inView } = useInView();
 
   const fetchProjects = async ({
@@ -499,7 +521,7 @@ export function FeedUser({ author_id }: { author_id: string }) {
         <div>
           {data.pages.map((page, i) =>
             page.feed.map((post: any, i: any) => {
-              return <Post post={post} key={post.id} />;
+              return <Post user={user} post={post} key={post.id} />;
             })
           )}
 
