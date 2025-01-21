@@ -6,7 +6,7 @@ import { dateRelativeTiny } from "@/lib/utils";
 
 export function Whitelist() {
   const [wlItems, setWlItems] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   function fetchWhitelist() {
     fetch("/api/whitelist")
@@ -78,6 +78,7 @@ export function Whitelist() {
           <button
             className="bg-black-900 dark:bg-black-800 text-black-100 rounded-full border border-neutral-300/0 p-2 px-4 dark:border-slate-800 dark:text-slate-400"
             type="submit"
+            disabled={loading}
           >
             Send Invite
           </button>
