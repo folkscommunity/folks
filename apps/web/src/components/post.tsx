@@ -207,7 +207,7 @@ export function Post({ post, user }: { post: any; user: any }) {
         )}
 
         <a
-          href={`${lPost.author.username}/${lPost.id}`}
+          href={`/${lPost.author.username}/${lPost.id}`}
           className="hover:no-underline"
         >
           <div
