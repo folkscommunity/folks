@@ -19,10 +19,10 @@ export async function MainContainer({
 
   return (
     <div className="mx-auto flex flex-col pt-10">
-      <HorizonalRibbon fixed={true} />
+      <HorizonalRibbon fixed={true} top={true} />
       <AlphaNotice />
       <CreateRibbonModal />
-      <div className="dark:bg-black-900 dark:border-black-700 flex min-h-[calc(100dvh-80px)] w-full flex-col items-center border-t border-white bg-white px-20 pt-8 transition-all max-sm:px-4">
+      <div className="dark:bg-black-900 flex min-h-[calc(100dvh-80px)] w-full flex-col items-center bg-white px-20 pt-8 transition-all max-sm:px-4">
         <header className="mx-auto flex w-full max-w-3xl flex-col items-start gap-4 py-4">
           <div className="flex w-full flex-row items-center justify-between gap-4 max-sm:flex-col">
             <Link href="/">

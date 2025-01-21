@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ExternalLinkIcon } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/avatar";
@@ -9,6 +9,7 @@ import { Separator } from "@/components/separator";
 
 import { ChangeAvatar } from "../settings/change-avatar";
 import { FollowButton } from "./follow-button";
+import { FollowersModal, FollowingModal } from "./profile-modals";
 
 export interface Profile {
   id: bigint;
@@ -23,6 +24,10 @@ export interface Profile {
   suspended?: boolean;
   created_at: Date;
   updated_at: Date;
+  count: {
+    following?: number;
+    followers?: number;
+  };
 }
 
 export default function Profile({
@@ -34,6 +39,9 @@ export default function Profile({
   user: any;
   isUser: boolean;
 }) {
+  const [followingModal, setFollowingModal] = useState(false);
+  const [followersModal, setFollowersModal] = useState(false);
+
   useEffect(() => {
     document.title = `${profile.display_name} on Folks`;
   }, [profile]);
@@ -82,6 +90,24 @@ export default function Profile({
             </div>
           </a>
         )}
+
+        {isUser && (
+          <div className="flex gap-4 pt-2 text-sm">
+            <button
+              onClick={() => setFollowingModal(true)}
+              className="dark:border-black-300 dark:text-black-300 border-black-700 text-black-700 rounded-2xl border px-5 py-1"
+            >
+              {profile.count.following} following
+            </button>
+
+            <button
+              onClick={() => setFollowersModal(true)}
+              className="dark:border-black-300 dark:text-black-300 border-black-700 text-black-700 rounded-2xl border px-5 py-1"
+            >
+              {profile.count.followers} followers
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="pb-8">
@@ -89,6 +115,21 @@ export default function Profile({
       </div>
 
       <FeedUser author_id={profile.id.toString()} user={user} />
+
+      <FollowersModal
+        open={followersModal}
+        onClose={() => {
+          setFollowersModal(false);
+          setFollowingModal(false);
+        }}
+      />
+      <FollowingModal
+        open={followingModal}
+        onClose={() => {
+          setFollowersModal(false);
+          setFollowingModal(false);
+        }}
+      />
     </div>
   );
 }

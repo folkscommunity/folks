@@ -31,7 +31,13 @@ export default async function Page({
       super_admin: true,
       suspended: true,
       created_at: true,
-      updated_at: true
+      updated_at: true,
+      _count: {
+        select: {
+          following: true,
+          followers: true
+        }
+      }
     }
   });
 
@@ -60,7 +66,11 @@ export default async function Page({
           super_admin: selectedUser.super_admin,
           suspended: selectedUser.suspended,
           created_at: selectedUser.created_at,
-          updated_at: selectedUser.updated_at
+          updated_at: selectedUser.updated_at,
+          count: {
+            following: selectedUser._count.following || undefined,
+            followers: selectedUser._count.followers || undefined
+          }
         }}
         user={user}
         isUser={isUser}

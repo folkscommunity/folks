@@ -121,6 +121,110 @@ router.delete("/", authMiddleware, async (req: RequestWithUser, res) => {
   }
 });
 
+router.get("/following", authMiddleware, async (req: RequestWithUser, res) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        id: BigInt(req.user.id)
+      }
+    });
+
+    if (!user) {
+      return res.status(400).json({ error: "invalid_request" });
+    }
+
+    const following = await prisma.following.findMany({
+      where: {
+        user_id: user.id
+      },
+      include: {
+        target: {
+          select: {
+            id: true,
+            username: true,
+            display_name: true,
+            avatar_url: true
+          }
+        }
+      }
+    });
+
+    res.json({
+      ok: true,
+      data: {
+        count: following.length,
+        following:
+          following && following.length > 0
+            ? following.map((f) => {
+                return {
+                  id: f.id.toString(),
+                  username: f.target.username,
+                  display_name: f.target.display_name,
+                  avatar_url: f.target.avatar_url
+                };
+              })
+            : []
+      }
+    });
+  } catch (err) {
+    console.error(err);
+
+    res.status(500).json({ error: "server_error" });
+  }
+});
+
+router.get("/followers", authMiddleware, async (req: RequestWithUser, res) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        id: BigInt(req.user.id)
+      }
+    });
+
+    if (!user) {
+      return res.status(400).json({ error: "invalid_request" });
+    }
+
+    const followers = await prisma.following.findMany({
+      where: {
+        target_id: user.id
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+            display_name: true,
+            avatar_url: true
+          }
+        }
+      }
+    });
+
+    res.json({
+      ok: true,
+      data: {
+        count: followers.length,
+        followers:
+          followers && followers.length > 0
+            ? followers.map((f) => {
+                return {
+                  id: f.id.toString(),
+                  username: f.user.username,
+                  display_name: f.user.display_name,
+                  avatar_url: f.user.avatar_url
+                };
+              })
+            : []
+      }
+    });
+  } catch (err) {
+    console.error(err);
+
+    res.status(500).json({ error: "server_error" });
+  }
+});
+
 router.get("/:target_id", authMiddleware, async (req: RequestWithUser, res) => {
   try {
     const { target_id } = req.params;
@@ -165,90 +269,6 @@ router.get("/:target_id", authMiddleware, async (req: RequestWithUser, res) => {
       ok: true,
       data: {
         following: true
-      }
-    });
-  } catch (err) {
-    console.error(err);
-
-    res.status(500).json({ error: "server_error" });
-  }
-});
-
-router.get("/following", authMiddleware, async (req: RequestWithUser, res) => {
-  try {
-    const user = await prisma.user.findUnique({
-      where: {
-        id: BigInt(req.user.id)
-      }
-    });
-
-    if (!user) {
-      return res.status(400).json({ error: "invalid_request" });
-    }
-
-    const following = await prisma.following.findMany({
-      where: {
-        user_id: user.id
-      },
-      include: {
-        user: {
-          select: {
-            id: true,
-            username: true,
-            display_name: true,
-            avatar_url: true
-          }
-        }
-      }
-    });
-
-    res.json({
-      ok: true,
-      data: {
-        count: following.length,
-        following: following || []
-      }
-    });
-  } catch (err) {
-    console.error(err);
-
-    res.status(500).json({ error: "server_error" });
-  }
-});
-
-router.get("/followers", authMiddleware, async (req: RequestWithUser, res) => {
-  try {
-    const user = await prisma.user.findUnique({
-      where: {
-        id: BigInt(req.user.id)
-      }
-    });
-
-    if (!user) {
-      return res.status(400).json({ error: "invalid_request" });
-    }
-
-    const followers = await prisma.following.findMany({
-      where: {
-        target_id: user.id
-      },
-      include: {
-        target: {
-          select: {
-            id: true,
-            username: true,
-            display_name: true,
-            avatar_url: true
-          }
-        }
-      }
-    });
-
-    res.json({
-      ok: true,
-      data: {
-        count: followers.length,
-        followers: followers || []
       }
     });
   } catch (err) {

@@ -58,7 +58,13 @@ function Marquee(props: {
   );
 }
 
-export function HorizonalRibbon({ fixed }: { fixed?: boolean }) {
+export function HorizonalRibbon({
+  fixed,
+  top
+}: {
+  fixed?: boolean;
+  top?: boolean;
+}) {
   const [ribbonString, setRibbonString] = useState("");
 
   function updateRibbon() {
@@ -84,8 +90,9 @@ export function HorizonalRibbon({ fixed }: { fixed?: boolean }) {
   return (
     <div
       className={cn(
-        "left-0 top-0 z-[999] flex h-10 w-full cursor-default items-center justify-center bg-black text-[14px] font-medium text-slate-300",
-        fixed && "fixed"
+        "dark:border-black-700 left-0 top-0 z-[99] flex h-10 w-full cursor-default items-center justify-center border-white bg-black text-[14px] font-medium text-slate-300",
+        fixed && "fixed",
+        top ? "border-b" : "border-t"
       )}
     >
       <Marquee content={ribbonString} />
