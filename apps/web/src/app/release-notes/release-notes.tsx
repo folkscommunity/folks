@@ -1,8 +1,17 @@
 import dayjs from "dayjs";
 
-export const current_release = "0.1.6";
+import { parsePostBody } from "@/lib/post-utils";
+
+export const current_release = "0.1.7";
 
 const releases = [
+  {
+    version: "0.1.7",
+    date: "2025-01-21",
+    changes: [
+      "Fixed a bug which allowed the ribbon to parse HTML. Thanks to @nickisnoble for finding it."
+    ]
+  },
   {
     version: "0.1.6",
     date: "2025-01-21",
@@ -72,7 +81,15 @@ export function ReleaseNotes() {
               </span>
               <ul className="pl-4">
                 {release.changes.map((change, i) => (
-                  <li key={i}>– {change}</li>
+                  <li key={i}>
+                    –{" "}
+                    <div
+                      className="inline"
+                      dangerouslySetInnerHTML={{
+                        __html: parsePostBody(change)
+                      }}
+                    ></div>
+                  </li>
                 ))}
               </ul>
             </div>
