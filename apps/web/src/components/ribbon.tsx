@@ -30,7 +30,7 @@ function Marquee(props: {
       }
     >
       <div
-        className="marquee"
+        className="marquee pr-[1ch]"
         style={
           {
             "--play": !windowIsActive ? "paused" : "playing",
@@ -41,10 +41,10 @@ function Marquee(props: {
           } as any
         }
       >
-        {props.content + " " + " "}
+        {props.content}
       </div>
       <div
-        className="marquee"
+        className="marquee pr-[1ch]"
         style={
           {
             "--play": !windowIsActive ? "paused" : "playing",
@@ -55,7 +55,7 @@ function Marquee(props: {
           } as any
         }
       >
-        {props.content + " " + " "}
+        {props.content}
       </div>
     </div>
   );
