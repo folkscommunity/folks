@@ -33,7 +33,7 @@ export function NotificationMessage({
         >
           post
         </Link>
-        . [{dateRelativeTiny(new Date(notification.created_at))} ago]
+        . [{dateRelativeTiny(new Date(notification.created_at), true)}]
       </span>
     );
   } else if (notification.type === NotificationType.Follow) {
@@ -45,8 +45,8 @@ export function NotificationMessage({
         >
           {notification.display_name}
         </Link>{" "}
-        followed you. [{dateRelativeTiny(new Date(notification.created_at))}{" "}
-        ago]
+        followed you. [
+        {dateRelativeTiny(new Date(notification.created_at), true)}]
       </span>
     );
   } else if (notification.type === NotificationType.Like) {
@@ -65,7 +65,7 @@ export function NotificationMessage({
         >
           post
         </Link>
-        . [{dateRelativeTiny(new Date(notification.created_at))} ago]
+        . [{dateRelativeTiny(new Date(notification.created_at), true)}]
       </span>
     );
   } else if (notification.type === NotificationType.Reply) {
@@ -84,7 +84,7 @@ export function NotificationMessage({
         >
           post
         </Link>
-        . [{dateRelativeTiny(new Date(notification.created_at))} ago]
+        . [{dateRelativeTiny(new Date(notification.created_at), true)}]
       </span>
     );
   } else {

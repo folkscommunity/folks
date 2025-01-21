@@ -42,7 +42,7 @@ export function Whitelist() {
         if (res.ok) {
           setTimeout(() => {
             fetchWhitelist();
-          }, 1000);
+          }, 2000);
         }
       })
       .catch((err) => {
