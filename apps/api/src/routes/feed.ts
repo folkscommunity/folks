@@ -36,7 +36,7 @@ router.get("/everything", async (req, res) => {
             id: BigInt(cursor as any) - 1n
           }
         : undefined,
-      take: limit ? Number(limit) : 25,
+      take: limit ? Number(limit) : 20,
       orderBy: {
         created_at: "desc"
       },
@@ -184,7 +184,7 @@ router.get("/highlighted", async (req, res) => {
             id: BigInt(cursor as any) - 1n
           }
         : undefined,
-      take: limit ? Number(limit) : 25,
+      take: limit ? Number(limit) : 20,
       orderBy: {
         created_at: "desc"
       },
@@ -335,7 +335,7 @@ router.get("/following", authMiddleware, async (req: RequestWithUser, res) => {
           }
         }
       },
-      take: limit ? Number(limit) : 25
+      take: limit ? Number(limit) : 20
     });
 
     const feed = await prisma.post.findMany({
@@ -350,7 +350,7 @@ router.get("/following", authMiddleware, async (req: RequestWithUser, res) => {
             id: BigInt(cursor as any) - 1n
           }
         : undefined,
-      take: limit ? Number(limit) : 25,
+      take: limit ? Number(limit) : 20,
       orderBy: {
         created_at: "desc"
       },
@@ -499,7 +499,7 @@ router.get("/user/:author_id", async (req, res) => {
             id: BigInt(cursor as any) - 1n
           }
         : undefined,
-      take: limit ? Number(limit) : 50,
+      take: limit ? Number(limit) : 20,
       orderBy: {
         created_at: "desc"
       },
