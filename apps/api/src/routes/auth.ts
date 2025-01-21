@@ -40,7 +40,9 @@ router.get("/", authMiddleware, async (req: RequestWithUser, res) => {
         location: user.location,
         pronouns: user.pronouns,
         website: user.website,
-        created_at: user.created_at
+        created_at: user.created_at,
+        email_verified: user.email_verified,
+        notifications_last_read_at: user.notifications_last_read_at
       }
     });
   } catch (err) {

@@ -8,6 +8,7 @@ import { Server, Socket } from "socket.io";
 import auth_router from "./routes/auth";
 import feed_router from "./routes/feed";
 import follow_router from "./routes/follow";
+import notifications_router from "./routes/notifications";
 import post_router from "./routes/post";
 import ribbon_router from "./routes/ribbon";
 import user_router from "./routes/user";
@@ -54,6 +55,7 @@ async function mainThread() {
   app.use("/api/whitelist", whitelist_router);
   app.use("/api/user", user_router);
   app.use("/api/ribbon", ribbon_router);
+  app.use("/api/notifications", notifications_router);
 
   httpServer.listen(process.env.PORT || 3002, () => {
     console.log("API started!");

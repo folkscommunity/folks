@@ -27,7 +27,7 @@ export function Composer() {
       multiple: true,
       validators: [
         new FileAmountLimitValidator({ max: 1 }),
-        new FileTypeValidator(["jpg", "jpeg", "png", "webp"]),
+        new FileTypeValidator(["jpg", "jpeg", "png", "webp", "gif"]),
         new FileSizeValidator({ maxFileSize: 50 * 1024 * 1024 /* 50 MB */ }),
         new ImageDimensionsValidator({
           maxWidth: 8000,
@@ -56,6 +56,7 @@ export function Composer() {
 
   function onPost() {
     window.dispatchEvent(new Event("refresh_feeds"));
+    window.dispatchEvent(new Event("go_to_everything"));
   }
 
   function createPost(body: string, files: any[]) {
@@ -76,6 +77,7 @@ export function Composer() {
         if (res.ok) {
           setText("");
           setError("");
+          clear();
 
           setOpen(false);
           onPost();
@@ -124,6 +126,7 @@ export function Composer() {
                 onChange={(e) => {
                   setText(e.target.value);
                 }}
+                autoFocus
               />
 
               {posting && (
@@ -207,7 +210,7 @@ export function ReplyCompose({
       multiple: true,
       validators: [
         new FileAmountLimitValidator({ max: 1 }),
-        new FileTypeValidator(["jpg", "jpeg", "png", "webp"]),
+        new FileTypeValidator(["jpg", "jpeg", "png", "webp", "gif"]),
         new FileSizeValidator({ maxFileSize: 50 * 1024 * 1024 /* 50 MB */ }),
         new ImageDimensionsValidator({
           maxWidth: 8000,
@@ -253,6 +256,7 @@ export function ReplyCompose({
         if (res.ok) {
           setText("");
           setError("");
+          clear();
 
           setOpen(false);
           onPost();

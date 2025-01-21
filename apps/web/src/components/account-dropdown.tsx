@@ -36,7 +36,11 @@ export function AccountDropdown({ user }: { user: any }) {
           setShowDropdown(!showDropdown);
         }}
       >
-        <span className="group-hover:underline">Account</span>{" "}
+        <span
+          className={cn("group-hover:underline", showDropdown && "underline")}
+        >
+          Account
+        </span>{" "}
         <span className="text-[10px]">▼</span>
       </div>
       <div
@@ -80,7 +84,7 @@ export function AccountDropdown({ user }: { user: any }) {
 
           <span
             onClick={() => {
-              window.location.href = "/logout";
+              window.location.href = "/api/auth/logout";
             }}
             className="font-base text-foreground cursor-pointer px-4 py-1 hover:text-slate-500 hover:underline"
           >

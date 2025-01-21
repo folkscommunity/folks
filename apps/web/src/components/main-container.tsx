@@ -7,6 +7,7 @@ import { ServerSession } from "@/lib/server-session";
 import { AccountDropdown } from "./account-dropdown";
 import { AlphaNotice } from "./alpha-notice";
 import { CreateRibbonModal } from "./create-ribbon-modal";
+import { Notifications } from "./notifications";
 import { HorizonalRibbon } from "./ribbon";
 import { Separator } from "./separator";
 import { StickersComing } from "./stickers-coming";
@@ -22,9 +23,15 @@ export async function MainContainer({
     <div className="mx-auto flex flex-col pt-10">
       <HorizonalRibbon fixed={true} top={true} />
 
-      <div className="dark:bg-black-900 flex min-h-[calc(100dvh-80px)] w-full flex-col items-center bg-white px-20 pt-8 transition-all max-sm:px-4">
+      <div className="dark:bg-black-900 flex min-h-[calc(100dvh-80px)] w-full flex-col items-center bg-white px-20 pt-4 transition-all max-sm:px-4">
         <header className="mx-auto flex w-full max-w-3xl flex-col items-start gap-4 py-4">
           <div className="flex w-full flex-row items-center justify-between gap-4 max-sm:flex-col">
+            {user && (
+              <div className="text-md flex flex-1 flex-row gap-2 pt-2">
+                <Notifications user={user} />
+              </div>
+            )}
+
             <Link href="/">
               <Image
                 src="/images/logo.svg"
@@ -35,7 +42,7 @@ export async function MainContainer({
               />
             </Link>
 
-            <div className="text-md flex flex-row gap-2">
+            <div className="text-md flex flex-1 flex-row justify-end gap-2 pt-2">
               {user && (
                 <>
                   <Link href="/">Posts</Link>

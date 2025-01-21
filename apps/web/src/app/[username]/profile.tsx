@@ -82,11 +82,11 @@ export default function Profile({
           <a
             href={profile.website}
             target="_blank"
-            className="inline cursor-pointer text-sky-600 hover:underline"
+            className="inline w-fit cursor-pointer text-sky-600 hover:underline"
           >
-            <div className="flex items-center gap-2">
-              {profile.website.replace("https://", "")}
-              <ExternalLinkIcon className="size-3" />
+            <div className="inline">
+              {profile.website.replace("https://", "")}{" "}
+              <ExternalLinkIcon className="mt-[-2px] inline size-3" />
             </div>
           </a>
         )}

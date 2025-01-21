@@ -37,6 +37,8 @@ model User {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
+  notifications_last_read_at DateTime?
+
   following   Following[] @relation("following")
   followers   Following[] @relation("followers")
   posts       Post[]      @relation("posts")

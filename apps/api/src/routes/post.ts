@@ -77,7 +77,8 @@ router.post("/", authMiddleware, async (req: RequestWithUser, res) => {
         file_type !== "image/png" &&
         file_type !== "image/jpeg" &&
         file_type !== "image/jpg" &&
-        file_type !== "image/webp"
+        file_type !== "image/webp" &&
+        file_type !== "image/gif"
       ) {
         return res.status(400).json({
           error: "invalid_request",
@@ -98,12 +99,15 @@ router.post("/", authMiddleware, async (req: RequestWithUser, res) => {
       }
 
       let img = await sharp(buffer, {
-        animated: false
+        animated: true
       });
 
       const img_metadata = await img.metadata();
 
-      if (img_metadata.width > 8000 || img_metadata.height > 8000) {
+      if (
+        (img_metadata.width > 8000 || img_metadata.height > 8000) &&
+        file_type !== "image/gif"
+      ) {
         return res.status(400).json({
           error: "invalid_request",
           message: "Image dimensions exceeds limit. (8000x8000 max)"

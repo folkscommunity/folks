@@ -80,6 +80,18 @@ function FeedsClient({ is_authed, user }: { is_authed: boolean; user: any }) {
     }
   }, [feed, setFeed]);
 
+  useEffect(() => {
+    window.addEventListener("go_to_everything", () =>
+      setFeed(FeedType.EVERYTHING)
+    );
+
+    return () => {
+      window.removeEventListener("go_to_everything", () =>
+        setFeed(FeedType.EVERYTHING)
+      );
+    };
+  }, []);
+
   return (
     <div className="w-full max-w-3xl flex-1 justify-center">
       <div className="flex justify-center pb-6">

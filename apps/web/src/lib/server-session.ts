@@ -25,6 +25,7 @@ export interface UserWithoutSession {
   super_admin?: boolean;
   email_verified: boolean;
   suspended?: boolean;
+  notifications_last_read_at?: Date;
   created_at: Date;
   updated_at: Date;
 }
@@ -77,6 +78,7 @@ export async function ServerSession(): Promise<User | false> {
     created_at: user.created_at,
     updated_at: user.updated_at,
     super_admin: user.super_admin || undefined,
+    notifications_last_read_at: user.notifications_last_read_at || undefined,
     session: JSON.parse(session)
   };
 }
