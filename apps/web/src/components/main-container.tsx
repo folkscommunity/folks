@@ -6,6 +6,7 @@ import { ServerSession } from "@/lib/server-session";
 
 import { AccountDropdown } from "./account-dropdown";
 import { CreateRibbonModal } from "./create-ribbon-modal";
+import { FolksAboutTop } from "./folks-about-top";
 import { Notifications } from "./notifications";
 import { HorizonalRibbon } from "./ribbon";
 import { Separator } from "./separator";
@@ -67,6 +68,10 @@ export async function MainContainer({
               <VerificationEmailAlert />
             </>
           )}
+
+          {!user && <Separator />}
+
+          {!user && <FolksAboutTop />}
 
           <Separator />
         </header>
