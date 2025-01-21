@@ -1,7 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { EllipsisVerticalIcon, Heart, MessageCircle } from "lucide-react";
+import {
+  EllipsisVerticalIcon,
+  Heart,
+  MessageCircle,
+  SmileIcon,
+  SmilePlusIcon,
+  StickerIcon
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -115,6 +122,10 @@ export function Post({ post, user }: { post: any; user: any }) {
         }
       })
       .catch((err) => {});
+  }
+
+  function stickers() {
+    window.dispatchEvent(new Event("stickers-coming"));
   }
 
   return (
@@ -232,7 +243,7 @@ export function Post({ post, user }: { post: any; user: any }) {
           </div>
         )}
 
-        <div className="flex h-[24px] items-center justify-start gap-6 pt-2">
+        <div className="flex h-[24px] items-center justify-start gap-4 pt-2">
           <div className="flex min-w-12 items-center gap-2">
             <MessageCircle
               className="size-5 min-h-5 min-w-5 cursor-pointer text-slate-700 hover:fill-neutral-400 hover:text-neutral-400 dark:hover:fill-neutral-300 dark:hover:text-neutral-300"
@@ -263,6 +274,18 @@ export function Post({ post, user }: { post: any; user: any }) {
               {lPost.count.likes > 0 ? lPost.count.likes : <span> </span>}
             </span>
           </div>
+
+          {(lPost.id.toString() === "30" || lPost.id.toString() === "27") && (
+            <div className="flex min-w-12 items-center gap-2">
+              <SmileIcon
+                className={cn(
+                  "rotate size-5 rotate-0 cursor-pointer text-slate-700 transition-transform hover:rotate-[-30deg] hover:text-blue-500"
+                )}
+                strokeWidth={1.5}
+                onClick={stickers}
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>

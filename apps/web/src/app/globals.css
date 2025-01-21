@@ -89,3 +89,33 @@ p {
     transform: translateX(-100%);
   }
 }
+
+.stickers-coming {
+  /* run the scaleIn anim */
+  animation: scaleIn 2.5s ease-in-out;
+  animation-fill-mode: forwards;
+}
+
+@keyframes scaleIn {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.95;
+    transform: scale(5);
+  }
+  100% {
+    transform: scale(0);
+    opacity: 0;
+  }
+}
+
+@keyframes new-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.animate-new-spin {
+  animation: new-spin 0.4s linear infinite;
+}
