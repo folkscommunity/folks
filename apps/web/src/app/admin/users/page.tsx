@@ -38,6 +38,9 @@ export default async function Page() {
           liked_posts: true
         }
       }
+    },
+    orderBy: {
+      created_at: "desc"
     }
   });
 

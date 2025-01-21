@@ -264,10 +264,9 @@ router.post("/avatar", authMiddleware, async (req: RequestWithUser, res) => {
         Key: file_key,
         Body: transformed_image_buffer,
         Metadata: {
-          "Content-Type": file_type,
           "Uploaded-By-User": req.user.id.toString()
         },
-        ContentType: file_type,
+        ContentType: "image/webp",
         ACL: "public-read",
         CacheControl: "max-age=2592000" // 30 days
       })
