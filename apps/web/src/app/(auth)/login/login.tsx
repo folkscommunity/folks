@@ -55,7 +55,16 @@ export function Login() {
 
   return (
     <div className="mx-auto flex max-w-3xl flex-1 flex-col gap-4">
-      <p>Use the form below to login to your account.</p>
+      <pre className="font-ansi text-ansi leading-ansi py-8 text-center">{`╭╮╱╱╱╭━━━╮╭━━━╮╭━━╮╭━╮╱╭╮
+┃┃╱╱╱┃╭━╮┃┃╭━╮┃╰┫┣╯┃┃╰╮┃┃
+┃┃╱╱╱┃┃╱┃┃┃┃╱╰╯╱┃┃╱┃╭╮╰╯┃
+┃┃╱╭╮┃┃╱┃┃┃┃╭━╮╱┃┃╱┃┃╰╮┃┃
+┃╰━╯┃┃╰━╯┃┃╰┻━┃╭┫┣╮┃┃╱┃┃┃
+╰━━━╯╰━━━╯╰━━━╯╰━━╯╰╯╱╰━╯`}</pre>
+
+      <p className="text-center">
+        Use the form below to login to your account.
+      </p>
 
       <form
         className="mx-auto flex w-full max-w-2xl flex-col gap-4"

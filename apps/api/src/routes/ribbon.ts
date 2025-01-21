@@ -5,6 +5,7 @@ import { prisma } from "@folks/db";
 import { schemas } from "@folks/utils";
 
 import { authMiddleware, RequestWithUser } from "@/lib/auth_middleware";
+import { posthog } from "@/lib/posthog";
 import { redis } from "@/lib/redis";
 
 const router = Router();
@@ -135,6 +136,14 @@ router.post("/", authMiddleware, async (req: RequestWithUser, res) => {
     }
 
     await redis.del("cache:ribbon");
+
+    await posthog.capture({
+      distinctId: user.id.toString(),
+      event: "ribbon_message",
+      properties: {
+        message: message
+      }
+    });
 
     res.json({ ok: true });
   } catch (e) {

@@ -58,9 +58,15 @@ export function Register() {
 
   return (
     <div className="mx-auto flex max-w-3xl flex-1 flex-col gap-4">
-      <p>
-        Use the form below to create a new account, for the time being all new
-        accounts have to get approved by an admin as we are still in beta.
+      <pre className="font-ansi text-ansi leading-ansi py-8 text-center">{`╭━━━╮╭━━━╮╭━━━╮╭━━╮╭━━━╮╭━━━━╮╭━━━╮╭━━━╮
+┃╭━╮┃┃╭━━╯┃╭━╮┃╰┫┣╯┃╭━╮┃┃╭╮╭╮┃┃╭━━╯┃╭━╮┃
+┃╰━╯┃┃╰━━╮┃┃╱╰╯╱┃┃╱┃╰━━╮╰╯┃┃╰╯┃╰━━╮┃╰━╯┃
+┃╭╮╭╯┃╭━━╯┃┃╭━╮╱┃┃╱╰━━╮┃╱╱┃┃╱╱┃╭━━╯┃╭╮╭╯
+┃┃┃╰╮┃╰━━╮┃╰┻━┃╭┫┣╮┃╰━╯┃╱╱┃┃╱╱┃╰━━╮┃┃┃╰╮
+╰╯╰━╯╰━━━╯╰━━━╯╰━━╯╰━━━╯╱╱╰╯╱╱╰━━━╯╰╯╰━╯`}</pre>
+
+      <p className="text-center">
+        Use the form below to create a new account and join the community!
       </p>
 
       <form

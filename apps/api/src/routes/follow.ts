@@ -3,6 +3,7 @@ import { Router } from "express";
 import { prisma } from "@folks/db";
 
 import { authMiddleware, RequestWithUser } from "@/lib/auth_middleware";
+import { posthog } from "@/lib/posthog";
 
 const router = Router();
 
@@ -53,6 +54,14 @@ router.post("/", authMiddleware, async (req: RequestWithUser, res) => {
       data: {
         user_id: user.id,
         target_id: target.id
+      }
+    });
+
+    await posthog.capture({
+      distinctId: req.user.id.toString(),
+      event: "follow",
+      properties: {
+        target_id: target.id.toString()
       }
     });
 
@@ -110,6 +119,14 @@ router.delete("/", authMiddleware, async (req: RequestWithUser, res) => {
     await prisma.following.delete({
       where: {
         id: following.id
+      }
+    });
+
+    await posthog.capture({
+      distinctId: req.user.id.toString(),
+      event: "unfollow",
+      properties: {
+        target_id: target.id.toString()
       }
     });
 

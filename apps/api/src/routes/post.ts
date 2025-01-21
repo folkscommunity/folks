@@ -10,6 +10,7 @@ import { schemas } from "@folks/utils";
 
 import { authMiddleware, RequestWithUser } from "@/lib/auth_middleware";
 import { s3 } from "@/lib/aws";
+import { posthog } from "@/lib/posthog";
 import { redis } from "@/lib/redis";
 
 const router = Router();
@@ -33,7 +34,14 @@ router.post("/", authMiddleware, async (req: RequestWithUser, res) => {
     if (user.suspended) {
       return res.status(401).json({
         error: "suspended",
-        msg: "Your account is suspended."
+        message: "Your account is suspended."
+      });
+    }
+
+    if (!user.email_verified) {
+      return res.status(401).json({
+        error: "email_not_verified",
+        message: "You must verify your email before posting."
       });
     }
 
@@ -162,12 +170,36 @@ router.post("/", authMiddleware, async (req: RequestWithUser, res) => {
           }
         }
       });
+
+      await posthog.capture({
+        distinctId: req.user.id.toString(),
+        event: "post",
+        properties: {
+          ip_address:
+            req.headers["x-forwarded-for"] || req.headers["cf-connecting-ip"],
+          user_agent: req.headers["user-agent"],
+          replying_to: replying_to ? replying_to : undefined,
+          image: true
+        }
+      });
     } else {
       const post = await prisma.post.create({
         data: {
           body,
           author_id: BigInt(req.user.id),
           reply_to_id: replying_to ? BigInt(replying_to) : undefined
+        }
+      });
+
+      await posthog.capture({
+        distinctId: req.user.id.toString(),
+        event: "post",
+        properties: {
+          ip_address:
+            req.headers["x-forwarded-for"] || req.headers["cf-connecting-ip"],
+          user_agent: req.headers["user-agent"],
+          replying_to: replying_to ? replying_to : undefined,
+          image: false
         }
       });
     }
@@ -476,6 +508,14 @@ router.post("/like", authMiddleware, async (req: RequestWithUser, res) => {
       }
     });
 
+    await posthog.capture({
+      distinctId: req.user.id.toString(),
+      event: "like",
+      properties: {
+        post_id: post_id
+      }
+    });
+
     res.json({ ok: true });
   } catch (e) {
     console.error(e);
@@ -597,6 +637,14 @@ router.delete("/:id", authMiddleware, async (req: RequestWithUser, res) => {
       },
       data: {
         deleted_at: new Date()
+      }
+    });
+
+    await posthog.capture({
+      distinctId: req.user.id.toString(),
+      event: "delete_post",
+      properties: {
+        post_id: id
       }
     });
 

@@ -22,16 +22,19 @@ export async function sendVerifyEmail(id: string) {
     return;
   }
 
-  const token = (randomUUID() + randomUUID()).replaceAll("-", "");
+  const token =
+    user.email_token || (randomUUID() + randomUUID()).replaceAll("-", "");
 
-  await prisma.user.update({
-    where: {
-      id: BigInt(id)
-    },
-    data: {
-      email_token: token
-    }
-  });
+  if (!user.email_token) {
+    await prisma.user.update({
+      where: {
+        id: BigInt(id)
+      },
+      data: {
+        email_token: token
+      }
+    });
+  }
 
   const url = `${url_base}/api/auth/verify/${token}`;
 
@@ -56,7 +59,11 @@ export async function sendVerifyEmail(id: string) {
     }
   };
 
-  await ses.sendEmail(params);
+  if (process.env.NODE_ENV === "production") {
+    await ses.sendEmail(params);
+  } else {
+    console.log("VERIFY EMAIL: ", user.email, url);
+  }
 
   return true;
 }
@@ -110,7 +117,11 @@ export async function sendInviteEmail(email: string) {
     }
   };
 
-  await ses.sendEmail(params);
+  if (process.env.NODE_ENV === "production") {
+    await ses.sendEmail(params);
+  } else {
+    console.log("INVITE: ", email);
+  }
 
   return true;
 }

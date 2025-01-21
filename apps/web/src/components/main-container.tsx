@@ -5,12 +5,12 @@ import { current_release } from "@/app/release-notes/release-notes";
 import { ServerSession } from "@/lib/server-session";
 
 import { AccountDropdown } from "./account-dropdown";
-import { AlphaNotice } from "./alpha-notice";
 import { CreateRibbonModal } from "./create-ribbon-modal";
 import { Notifications } from "./notifications";
 import { HorizonalRibbon } from "./ribbon";
 import { Separator } from "./separator";
 import { StickersComing } from "./stickers-coming";
+import { VerificationEmailAlert } from "./verification-email";
 
 export async function MainContainer({
   children
@@ -53,8 +53,6 @@ export async function MainContainer({
 
               {!user && (
                 <>
-                  <Link href="/request-access">Request Access</Link>
-                  <span>·</span>
                   <Link href="/login">Login</Link>
                   <span>·</span>
                   <Link href="/register">Register</Link>
@@ -62,6 +60,13 @@ export async function MainContainer({
               )}
             </div>
           </div>
+
+          {user && !user.email_verified && (
+            <>
+              <Separator />
+              <VerificationEmailAlert />
+            </>
+          )}
 
           <Separator />
         </header>
@@ -120,7 +125,6 @@ export async function MainContainer({
         </footer>
       </div>
 
-      <AlphaNotice />
       <CreateRibbonModal />
       <StickersComing />
 

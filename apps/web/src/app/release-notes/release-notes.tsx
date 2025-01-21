@@ -2,9 +2,18 @@ import dayjs from "dayjs";
 
 import { parsePostBody } from "@/lib/post-utils";
 
-export const current_release = "0.2";
+export const current_release = "0.3";
 
 const releases = [
+  {
+    version: "0.3",
+    date: "2025-01-22",
+    changes: [
+      "Removed Request Access, users can now Register without an invite.",
+      "Added email verification popup, and blocked posting if email is not verified.",
+      "Added a self-hosted instance PostHog for feature flags to help with testing."
+    ]
+  },
   {
     version: "0.2",
     date: "2025-01-21",

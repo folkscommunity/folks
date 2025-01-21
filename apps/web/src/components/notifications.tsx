@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { usePostHog } from "posthog-js/react";
 
 import {
   Notification,

@@ -82,11 +82,11 @@ export function Composer() {
           setOpen(false);
           onPost();
         } else {
-          setError("An error occured.");
+          setError(res.message || "An error occured.");
         }
       })
       .catch((err) => {
-        setError("An error occured.");
+        setError(err.message || "An error occured.");
       })
       .finally(() => {
         setPosting(false);

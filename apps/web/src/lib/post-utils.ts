@@ -2,17 +2,17 @@ import Autolinker from "autolinker";
 import sanitize from "sanitize-html";
 
 function parsePostBody(text: string): string {
-  // match @ mentions
-  text = text.replace(/@(\w+)/g, (match, username) => {
-    return `<a href="/${username}" class="text-sky-600 hover:underline cursor-pointer inline">@${username}</a>`;
-  });
-
   // autolink urls
   text = Autolinker.link(text, {
     className: "text-sky-600 hover:underline cursor-pointer",
-    stripPrefix: false,
-    stripTrailingSlash: false,
+    stripPrefix: true,
+    stripTrailingSlash: true,
     newWindow: true
+  });
+
+  text = text.replace(/(?:^|[.,]|\s)@(\w+)(?![^<]*>)/g, (match, username) => {
+    const prefix = match.charAt(0) === "@" ? "" : match.charAt(0);
+    return `${prefix}<a href="/${username}" class="text-sky-600 hover:underline cursor-pointer inline">@${username}</a>`;
   });
 
   // sanitize html

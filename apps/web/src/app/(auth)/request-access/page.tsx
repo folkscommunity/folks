@@ -17,6 +17,8 @@ export default async function Page() {
     return redirect("/");
   }
 
+  return redirect("/register");
+
   return (
     <MainContainer>
       <RequestAccess />

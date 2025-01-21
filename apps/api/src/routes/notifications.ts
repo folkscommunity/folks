@@ -4,6 +4,7 @@ import { prisma } from "@folks/db";
 import { NotificationType } from "@folks/utils/notification_types";
 
 import { authMiddleware, RequestWithUser } from "@/lib/auth_middleware";
+import { posthog } from "@/lib/posthog";
 
 const router = Router();
 
@@ -173,6 +174,11 @@ router.post("/read", authMiddleware, async (req: RequestWithUser, res) => {
       data: {
         notifications_last_read_at: new Date()
       }
+    });
+
+    await posthog.capture({
+      distinctId: user.id.toString(),
+      event: "mark_all_notifications_as_read"
     });
 
     res.json({

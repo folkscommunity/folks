@@ -7,6 +7,10 @@ export const emailSchema = z
 
 export const usernameSchema = z
   .string()
+  .regex(
+    /^[a-zA-Z0-9-_]+$/,
+    "Username must only contain letters, numbers, dashes, and underscores."
+  )
   .max(18, "Username must be at most 18 characters.")
   .min(3, "Username must at least 3 characters.");
 

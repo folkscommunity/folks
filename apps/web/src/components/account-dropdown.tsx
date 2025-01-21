@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { usePostHog } from "posthog-js/react";
 
 import { cn } from "@/lib/utils";
 
@@ -9,9 +10,18 @@ export function AccountDropdown({ user }: { user: any }) {
   const dropDownRef = useRef<any>(null);
 
   const [showDropdown, setShowDropdown] = useState(false);
+  const posthog = usePostHog();
 
   useEffect(() => {
     setShowDropdown(false);
+
+    if (user) {
+      posthog.identify(user.id.toString(), {
+        email: user.email,
+        name: user.display_name,
+        username: user.username
+      });
+    }
   }, []);
 
   useEffect(() => {
@@ -27,6 +37,11 @@ export function AccountDropdown({ user }: { user: any }) {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [dropDownRef, showDropdown]);
+
+  function logout() {
+    posthog.reset();
+    window.location.href = "/api/auth/logout";
+  }
 
   return (
     <div className="relative" ref={dropDownRef}>
@@ -84,7 +99,7 @@ export function AccountDropdown({ user }: { user: any }) {
 
           <span
             onClick={() => {
-              window.location.href = "/api/auth/logout";
+              logout();
             }}
             className="font-base text-foreground cursor-pointer px-4 py-1 hover:text-slate-500 hover:underline"
           >

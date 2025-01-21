@@ -6,11 +6,14 @@ import { prisma } from "@folks/db";
 import { schemas } from "@folks/utils";
 
 import { authMiddleware, RequestWithUser } from "@/lib/auth_middleware";
+import { posthog } from "@/lib/posthog";
 import { redis } from "@/lib/redis";
 import { sendDiscordNotification } from "@/lib/send_discord_notification";
 import { sendVerifyEmail } from "@/lib/send_email";
 
 const router = Router();
+
+const WHITELIST_NEEDED = false;
 
 router.get("/", authMiddleware, async (req: RequestWithUser, res) => {
   try {
@@ -74,20 +77,22 @@ router.post("/register", async (req, res) => {
       });
     }
 
-    const whitelist = await prisma.whitelistRequest.findUnique({
-      where: {
-        email: email,
-        accepted_at: {
-          not: null
+    if (WHITELIST_NEEDED) {
+      const whitelist = await prisma.whitelistRequest.findUnique({
+        where: {
+          email: email,
+          accepted_at: {
+            not: null
+          }
         }
-      }
-    });
-
-    if (!whitelist) {
-      return res.status(400).json({
-        error: "not_whitelisted",
-        msg: "Your email has not been invited yet, we are slowly onboarding new users."
       });
+
+      if (!whitelist) {
+        return res.status(400).json({
+          error: "not_whitelisted",
+          msg: "Your email has not been invited yet, we are slowly onboarding new users."
+        });
+      }
     }
 
     const existing_username = await prisma.user.findUnique({
@@ -165,6 +170,15 @@ router.post("/register", async (req, res) => {
     await sendDiscordNotification(
       `${created_user.display_name} (@${created_user.username}) just registered their account!`
     );
+
+    await posthog.capture({
+      distinctId: created_user.id.toString(),
+      event: "register",
+      properties: {
+        ip_address: ip,
+        user_agent: user_agent
+      }
+    });
 
     res.json({ ok: true });
   } catch (err) {
@@ -257,6 +271,15 @@ router.post("/login", async (req, res) => {
 
     await redis.del(`rate_limit:login:${ip_address}`);
 
+    await posthog.capture({
+      distinctId: user.id.toString(),
+      event: "login",
+      properties: {
+        ip_address: ip_address,
+        user_agent: user_agent
+      }
+    });
+
     res.json({ ok: true });
   } catch (err) {
     console.error(err);
@@ -313,6 +336,11 @@ router.get("/verify/:token", async (req, res) => {
       }
     });
 
+    await posthog.capture({
+      distinctId: user.id.toString(),
+      event: "email_verified"
+    });
+
     res.redirect("/");
   } catch (err) {
     console.error(err);
@@ -320,5 +348,90 @@ router.get("/verify/:token", async (req, res) => {
     res.status(500).json({ error: "server_error" });
   }
 });
+
+router.post(
+  "/resend-email",
+  authMiddleware,
+  async (req: RequestWithUser, res) => {
+    try {
+      const user = await prisma.user.findUnique({
+        where: {
+          id: BigInt(req.user.id)
+        }
+      });
+
+      if (!user) {
+        return res.status(400).json({ error: "invalid_request" });
+      }
+
+      if (user.email_verified) {
+        return res.status(400).json({ error: "email_already_verified" });
+      }
+
+      const rate_24h = await redis.get(`rate_limit:verify:${user.email}:24h`);
+
+      if (Number(rate_24h) > 10) {
+        return res.status(429).json({
+          error: "rate_limit_exceeded_24h",
+          msg: "You have exceeded the upper rate limit. Please contact help@folkscommunity.com."
+        });
+      }
+
+      const rate_5m = await redis.get(`rate_limit:verify:${user.email}:5m`);
+
+      if (Number(rate_5m) > 5) {
+        return res.status(429).json({
+          error: "rate_limit_exceeded_5m",
+          msg: "You have exceeded the rate limit. Please try again in 10 minutes. If you continue to experience issues, please contact help@folkscommunity.com."
+        });
+      }
+
+      const last_sent = await redis.get(
+        `rate_limit:verify:${user.email}:last_sent`
+      );
+
+      if (last_sent) {
+        return res.status(429).json({
+          error: "rate_limit_exceeded_60s",
+          msg: "Please wait for 60 seconds before trying again, and check your spam folder if you haven't received the email yet."
+        });
+      }
+
+      sendVerifyEmail(user.id.toString());
+
+      await posthog.capture({
+        distinctId: user.id.toString(),
+        event: "resend_verification_email"
+      });
+
+      await redis.set(
+        `rate_limit:verify:${user.email}:24h`,
+        Number(rate_24h) + 1,
+        "EX",
+        60 * 60 * 24
+      );
+
+      await redis.set(
+        `rate_limit:verify:${user.email}:5m`,
+        Number(rate_5m) + 1,
+        "EX",
+        60 * 5
+      );
+
+      await redis.set(
+        `rate_limit:verify:${user.email}:last_sent`,
+        new Date().toISOString(),
+        "EX",
+        60
+      );
+
+      res.json({ ok: true });
+    } catch (err) {
+      console.error(err);
+
+      res.status(500).json({ error: "server_error" });
+    }
+  }
+);
 
 export default router;
