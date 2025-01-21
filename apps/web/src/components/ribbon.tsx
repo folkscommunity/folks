@@ -1,6 +1,7 @@
 "use client";
 
 import { useContext, useEffect, useRef, useState } from "react";
+import sanitizeHtml from "sanitize-html";
 
 import { cn } from "@/lib/utils";
 
@@ -39,8 +40,9 @@ function Marquee(props: {
             "--iteration-count": "infinite"
           } as any
         }
-        dangerouslySetInnerHTML={{ __html: props.content + "&nbsp;&nbsp;" }}
-      ></div>
+      >
+        {props.content + " " + " "}
+      </div>
       <div
         className="marquee"
         style={
@@ -52,8 +54,9 @@ function Marquee(props: {
             "--iteration-count": "infinite"
           } as any
         }
-        dangerouslySetInnerHTML={{ __html: props.content + "&nbsp;&nbsp;" }}
-      ></div>
+      >
+        {props.content + " " + " "}
+      </div>
     </div>
   );
 }
@@ -95,7 +98,7 @@ export function HorizonalRibbon({
         top ? "border-b" : "border-t"
       )}
     >
-      <Marquee content={ribbonString} />
+      <Marquee content={sanitizeHtml(ribbonString)} />
     </div>
   );
 }

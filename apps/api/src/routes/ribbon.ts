@@ -1,4 +1,5 @@
 import { Router } from "express";
+import sanitizeHtml from "sanitize-html";
 
 import { prisma } from "@folks/db";
 import { schemas } from "@folks/utils";
@@ -52,13 +53,13 @@ router.get("/", async (req, res) => {
         })
         .join(" · ") || "";
 
-    const ribbon_string = `${users.length} People · ${posts.length} Posts · ${ribbon_messages.length} Ribbon Messages  · ${ribbon_messages_string}`;
+    const ribbon_string = `${users.length} People · ${posts.length} Posts · ${ribbon_messages.length} Ribbon Messages · ${ribbon_messages_string} · `;
 
     await redis.set("cache:ribbon", ribbon_string, "EX", 60 * 5);
 
     res.json({
       ok: true,
-      ribbon: ribbon_string
+      ribbon: sanitizeHtml(ribbon_string)
     });
   } catch (e) {
     console.error(e);
