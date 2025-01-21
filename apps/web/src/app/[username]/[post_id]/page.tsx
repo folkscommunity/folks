@@ -13,6 +13,10 @@ export default async function Page({
 }) {
   const post_id = (await params).post_id;
 
+  if (!post_id) {
+    return <NotFound />;
+  }
+
   const user = await ServerSession();
 
   const post = await prisma.post.findUnique({

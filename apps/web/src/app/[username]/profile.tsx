@@ -47,7 +47,7 @@ export default function Profile({
   }, [profile]);
 
   return (
-    <div className="mx-auto w-full max-w-3xl">
+    <div className="mx-auto w-full max-w-3xl flex-1">
       <div className="flex flex-col gap-2 py-2">
         <div className="pb-2">
           {isUser ? (
