@@ -17,6 +17,12 @@ export default async function Page({
     return <NotFound />;
   }
 
+  try {
+    BigInt(post_id);
+  } catch (e) {
+    return <NotFound />;
+  }
+
   const user = await ServerSession();
 
   const post = await prisma.post.findUnique({
