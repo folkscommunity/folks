@@ -5,12 +5,14 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { useLocalStorage } from "@uidotdev/usehooks";
 // import { useIsClient, useLocalStorage } from "@uidotdev/usehooks";
 import dynamic from "next/dynamic";
+import { useFeatureFlagPayload } from "posthog-js/react";
 import { useInView } from "react-intersection-observer";
 
 import { cn } from "@/lib/utils";
 
 import { Composer } from "./composer";
 import { FeedSkeleton, PostSkeleton } from "./feed-skeleton";
+import { PinnedPost } from "./pinned-post";
 import { Post } from "./post";
 
 enum FeedType {
@@ -246,7 +248,7 @@ function FeedEverything({
                   ? isFetching || isFetchingNextPage
                     ? "Loading..."
                     : "Load More"
-                  : ""}
+                  : "You've reached the end of the feed."}
               </button>
             </div>
           )}
@@ -273,6 +275,7 @@ function FeedHighlighted({
 }) {
   const { ref, inView } = useInView();
   const [timesAutoLoaded, setTimesAutoLoaded] = useState(0);
+  const pinned_post_feature_flag = useFeatureFlagPayload("pinned_post");
 
   const fetchProjects = async ({
     pageParam
@@ -341,12 +344,24 @@ function FeedHighlighted({
         <p className="p-4">Error: {error.message}</p>
       ) : (
         <div>
+          {pinned_post_feature_flag && (
+            <PinnedPost id={pinned_post_feature_flag.toString()} user={user} />
+          )}
+
           {data.pages.map(
             (page, i) =>
               page.feed &&
-              page.feed.map((post: any, i: any) => {
-                return <Post user={user} post={post} key={post.id} />;
-              })
+              page.feed
+                .filter((post: any) => {
+                  if (pinned_post_feature_flag) {
+                    return post.id !== pinned_post_feature_flag;
+                  } else {
+                    return true;
+                  }
+                })
+                .map((post: any, i: any) => {
+                  return <Post user={user} post={post} key={post.id} />;
+                })
           )}
 
           {!(data.pages[0].feed && data.pages[0].feed.length === 0) && (
@@ -366,7 +381,7 @@ function FeedHighlighted({
                   ? isFetching || isFetchingNextPage
                     ? "Loading..."
                     : "Load More"
-                  : ""}
+                  : "You've reached the end of the feed."}
               </button>
             </div>
           )}
