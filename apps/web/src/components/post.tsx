@@ -217,11 +217,6 @@ export function Post({ post, user }: { post: any; user: any }) {
           </div>
         </div>
 
-        <div>
-          {stickers_teaser_feature_flag &&
-            JSON.stringify(stickers_teaser_feature_flag, null, 2)}
-        </div>
-
         {lPost.reply_to && lPost.reply_to.id && (
           <div className="pb-1 text-sm opacity-50">
             Replying to{" "}
