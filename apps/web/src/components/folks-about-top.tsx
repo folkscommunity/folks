@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 export function FolksAboutTop() {
   const [expand, setExpand] = useState(false);
@@ -29,6 +30,13 @@ export function FolksAboutTop() {
       )}{" "}
       to share their creations and thoughts with each other and feel comfortable
       doing so.
+      <br />
+      <br />
+      Check out the{" "}
+      <Link href="/manifesto" className="font-bold hover:underline">
+        /manifesto
+      </Link>{" "}
+      page for more info.
     </p>
   );
 }

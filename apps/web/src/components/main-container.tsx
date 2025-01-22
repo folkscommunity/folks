@@ -14,9 +14,11 @@ import { StickersComing } from "./stickers-coming";
 import { VerificationEmailAlert } from "./verification-email";
 
 export async function MainContainer({
-  children
+  children,
+  hideAbout
 }: {
   children: React.ReactNode;
+  hideAbout?: boolean;
 }) {
   const user = await ServerSession();
 
@@ -69,9 +71,9 @@ export async function MainContainer({
             </>
           )}
 
-          {!user && <Separator />}
+          {!user && !hideAbout && <Separator />}
 
-          {!user && <FolksAboutTop />}
+          {!user && !hideAbout && <FolksAboutTop />}
 
           <Separator />
         </header>
