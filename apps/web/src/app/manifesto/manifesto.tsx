@@ -26,12 +26,6 @@ export function Manifesto() {
           comfortable to just post things, I really want everyone else to have
           that experience.
         </p>
-        <div>
-          Design & vibe-wise, I loved what Allan created with Good News. I want
-          to somehow embody that and pay homage to it without it being a direct
-          clone. I want to include the Stickers <Photo /> and the Ribbon with
-          scrolling statuses from all the members.
-        </div>
         <p className="pt-4">
           I plan to support this platform long-term by financing hosting,
           moderating and by managing the open-source repository. Since it is
