@@ -13,6 +13,12 @@ export async function generateMetadata({
 }) {
   const post_id = (await params).post_id;
 
+  try {
+    BigInt(post_id);
+  } catch (e) {
+    return <NotFound />;
+  }
+
   const post = await prisma.post.findUnique({
     where: {
       id: BigInt(post_id),
