@@ -10,7 +10,8 @@ const releases = [
     date: "2025-01-22",
     changes: [
       "Fixed a bug which caused vulnerability scanners to spam Sentry.",
-      "Dropdown on posts now has a copy link option. Thanks @redeux"
+      "Dropdown on posts now has a copy link option. Thanks @redeux",
+      "Added a character counter to the composer."
     ]
   },
   {

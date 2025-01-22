@@ -14,6 +14,8 @@ import {
 } from "use-file-picker/validators";
 import { Drawer } from "vaul";
 
+import { cn } from "@/lib/utils";
+
 export function Composer() {
   const [text, setText] = useState("");
 
@@ -180,6 +182,17 @@ export function Composer() {
                   >
                     <ImagesSquare size={24} />
                   </button>
+
+                  <div
+                    className={cn(
+                      "font-bold opacity-0 transition-opacity duration-300",
+                      text && text.length > 3 && "opacity-100",
+                      text && text.length > 290 && "text-orange-500",
+                      text && text.length === 300 && "text-red-500"
+                    )}
+                  >
+                    {(text && text.length) || "0"} / 300
+                  </div>
 
                   <div className="flex items-center gap-2">
                     <button
