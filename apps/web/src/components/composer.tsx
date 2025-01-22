@@ -94,19 +94,19 @@ export function Composer() {
   }
 
   return (
-    <div className="absolute px-4 py-4">
+    <div className="pointer-events-none absolute px-4 py-4">
       <Drawer.Root open={open} onOpenChange={setOpen}>
-        <Drawer.Trigger asChild>
+        <Drawer.Trigger asChild className="pointer-events-auto">
           <button
             title="Compose a post."
             className="bg-black-900 dark:bg-black-800 text-black-100 fixed bottom-4 right-4 z-[997] rounded-full border border-neutral-300/0 p-2 dark:border-slate-800 dark:text-slate-400"
           >
-            <PlusIcon className="size-6" />
+            <PlusIcon className="size-8" />
           </button>
         </Drawer.Trigger>
         <Drawer.Portal>
           <Drawer.Overlay className="backdrop-blur-smz-[99998] fixed inset-0 bg-black/80" />
-          <Drawer.Content className="dark:bg-black-800 fixed bottom-0 left-0 right-0 z-[99999] flex h-fit min-h-[90dvh] w-full flex-col bg-gray-100 pb-10 outline-none">
+          <Drawer.Content className="dark:bg-black-800 pointer-events-auto fixed bottom-0 left-0 right-0 z-[99999] flex h-fit min-h-[90dvh] w-full flex-col bg-gray-100 pb-10 outline-none">
             <Drawer.Title className="py-4 text-center text-lg font-bold">
               Compose
             </Drawer.Title>
