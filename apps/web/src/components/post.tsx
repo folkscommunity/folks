@@ -277,12 +277,13 @@ export function Post({ post, user }: { post: any; user: any }) {
               className={cn(
                 "size-5 cursor-pointer text-slate-700 hover:text-red-500",
                 isClient &&
+                  user &&
                   lPost.likes &&
                   lPost.likes.length > 0 &&
                   "fill-red-500 text-red-500"
               )}
               weight={
-                isClient && lPost.likes && lPost.likes.length > 0
+                isClient && user && lPost.likes && lPost.likes.length > 0
                   ? "fill"
                   : "regular"
               }

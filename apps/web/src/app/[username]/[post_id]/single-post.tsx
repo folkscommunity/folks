@@ -30,9 +30,13 @@ export function SinglePost({ user, post }: { user: any; post: any }) {
   const [likesModalOpen, setLikesModalOpen] = useState(false);
 
   function fetchPost() {
-    fetch(`/api/post/${post.id}`, {
-      method: "GET"
-    })
+    fetch(
+      `/a
+    /post/${post.id}`,
+      {
+        method: "GET"
+      }
+    )
       .then((res) => res.json())
       .then((res) => {
         if (res.ok) {
@@ -210,11 +214,14 @@ export function SinglePost({ user, post }: { user: any; post: any }) {
           <Heart
             className={cn(
               "size-6 cursor-pointer text-slate-700 hover:text-red-500",
-              lPost.likes &&
+              user &&
+                lPost.likes &&
                 lPost.likes.length > 0 &&
                 "fill-red-500 text-red-500"
             )}
-            weight={lPost.likes && lPost.likes.length > 0 ? "fill" : "regular"}
+            weight={
+              user && lPost.likes && lPost.likes.length > 0 ? "fill" : "regular"
+            }
             onClick={() =>
               lPost.likes && lPost.likes.length > 0 ? unlikePost() : likePost()
             }
