@@ -178,10 +178,12 @@ export function Post({ post, user }: { post: any; user: any }) {
                 <DropdownMenuItem
                   className="dark:hover:bg-black-600 cursor-pointer hover:bg-slate-100"
                   onClick={() =>
-                    navigator.clipboard.writeText(post.id.toString())
+                    navigator.clipboard.writeText(
+                      `https://folkscommunity.com/${lPost.author.username}/${lPost.id}`
+                    )
                   }
                 >
-                  Copy Post ID
+                  Copy Link
                 </DropdownMenuItem>
 
                 {user && user.super_admin && (

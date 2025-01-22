@@ -2,9 +2,17 @@ import dayjs from "dayjs";
 
 import { parsePostBody } from "@/lib/post-utils";
 
-export const current_release = "0.3.2";
+export const current_release = "0.3.3";
 
 const releases = [
+  {
+    version: "0.3.3",
+    date: "2025-01-22",
+    changes: [
+      "Fixed a bug which caused vulnerability scanners to spam Sentry.",
+      "Dropdown on posts now has a copy link option. Thanks @redeux"
+    ]
+  },
   {
     version: "0.3.2",
     date: "2025-01-22",
