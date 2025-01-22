@@ -214,6 +214,7 @@ export function SinglePost({ user, post }: { user: any; post: any }) {
                 lPost.likes.length > 0 &&
                 "fill-red-500 text-red-500"
             )}
+            weight={lPost.likes && lPost.likes.length > 0 ? "fill" : "regular"}
             onClick={() =>
               lPost.likes && lPost.likes.length > 0 ? unlikePost() : likePost()
             }
