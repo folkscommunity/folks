@@ -6,6 +6,41 @@ import { ServerSession } from "@/lib/server-session";
 
 import { SinglePost } from "./single-post";
 
+export async function generateMetadata({
+  params
+}: {
+  params: Promise<{ post_id: string }>;
+}) {
+  const post_id = (await params).post_id;
+
+  const post = await prisma.post.findUnique({
+    where: {
+      id: BigInt(post_id),
+      deleted_at: null
+    },
+    select: {
+      body: true,
+      author: {
+        select: {
+          username: true,
+          display_name: true
+        }
+      }
+    }
+  });
+
+  if (post?.body && post.author.display_name) {
+    return {
+      title: `${post.author.display_name} on Folks – ${post.body.slice(0, 20)}`,
+      description: `@${post.author.username}: ${post.body}`
+    };
+  }
+
+  return {
+    title: "Folks"
+  };
+}
+
 export default async function Page({
   params
 }: {

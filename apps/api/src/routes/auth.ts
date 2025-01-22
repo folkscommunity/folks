@@ -159,7 +159,7 @@ router.post("/register", async (req, res) => {
       domain:
         process.env.NODE_ENV === "production"
           ? "folkscommunity.com"
-          : ".localhost",
+          : req.hostname,
       secure: process.env.NODE_ENV === "production"
     });
 

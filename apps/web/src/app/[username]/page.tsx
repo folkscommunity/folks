@@ -6,6 +6,27 @@ import { ServerSession } from "@/lib/server-session";
 
 import Profile from "./profile";
 
+export async function generateMetadata({
+  params
+}: {
+  params: Promise<{ username: string }>;
+}) {
+  const username = (await params).username;
+
+  const user = await prisma.user.findUnique({
+    where: {
+      username: username
+    },
+    select: {
+      display_name: true
+    }
+  });
+
+  return {
+    title: user ? `${user.display_name}` : "Folks"
+  };
+}
+
 export default async function Page({
   params
 }: {

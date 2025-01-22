@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   EllipsisVerticalIcon,
   Heart,
@@ -12,6 +12,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useFeatureFlagPayload } from "posthog-js/react";
 import { toast } from "sonner";
 
 import { parsePostBody } from "@/lib/post-utils";
@@ -29,6 +30,9 @@ import { TimelinePhoto } from "./timeline-photo";
 
 export function Post({ post, user }: { post: any; user: any }) {
   const [lPost, setLPost] = useState(post);
+  const [isClient, setIsClient] = useState(false);
+  const stickers_teaser_feature_flag = useFeatureFlagPayload("stickers_teaser");
+
   const router = useRouter();
 
   function fetchPost() {
@@ -128,6 +132,10 @@ export function Post({ post, user }: { post: any; user: any }) {
     window.dispatchEvent(new Event("stickers-coming"));
   }
 
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   return (
     <div className="group mx-auto mb-4 flex w-full max-w-3xl gap-4 pb-4">
       <div>
@@ -149,13 +157,17 @@ export function Post({ post, user }: { post: any; user: any }) {
             <Link className="opacity-50" href={`/${lPost.author.username}`}>
               @{lPost.author.username}
             </Link>
-            <span className="px-0.5 opacity-50">·</span>
-            <span
-              className="text-md opacity-50"
-              title={new Date(lPost.created_at).toLocaleString()}
-            >
-              {dateRelativeTiny(new Date(lPost.created_at))}
-            </span>
+            {lPost && lPost.created_at && isClient && (
+              <>
+                <span className="px-0.5 opacity-50">·</span>
+                <span
+                  className="text-md opacity-50"
+                  title={new Date(lPost.created_at).toLocaleString()}
+                >
+                  {dateRelativeTiny(new Date(lPost.created_at))}
+                </span>
+              </>
+            )}
           </div>
           <div>
             <DropdownMenu>
@@ -205,6 +217,11 @@ export function Post({ post, user }: { post: any; user: any }) {
           </div>
         </div>
 
+        <div>
+          {stickers_teaser_feature_flag &&
+            JSON.stringify(stickers_teaser_feature_flag, null, 2)}
+        </div>
+
         {lPost.reply_to && lPost.reply_to.id && (
           <div className="pb-1 text-sm opacity-50">
             Replying to{" "}
@@ -252,14 +269,15 @@ export function Post({ post, user }: { post: any; user: any }) {
                 router.push(`/${lPost.author.username}/${lPost.id}`)
               }
             />
-            <span>{lPost.count.replies || " "}</span>
+            <span>{(isClient && lPost.count.replies) || " "}</span>
           </div>
 
           <div className="flex min-w-12 items-center gap-2">
             <Heart
               className={cn(
                 "size-5 cursor-pointer text-slate-700 hover:text-red-500",
-                lPost.likes &&
+                isClient &&
+                  lPost.likes &&
                   lPost.likes.length > 0 &&
                   "fill-red-500 text-red-500"
               )}
@@ -270,22 +288,24 @@ export function Post({ post, user }: { post: any; user: any }) {
                   : likePost()
               }
             />
-            <span>
-              {lPost.count.likes > 0 ? lPost.count.likes : <span> </span>}
-            </span>
+            <span>{(isClient && lPost.count.likes) || " "}</span>
           </div>
 
-          {(lPost.id.toString() === "30" || lPost.id.toString() === "27") && (
-            <div className="flex min-w-12 items-center gap-2">
-              <SmileIcon
-                className={cn(
-                  "rotate size-5 rotate-0 cursor-pointer text-slate-700 transition-transform hover:rotate-[-30deg] hover:text-blue-500"
-                )}
-                strokeWidth={1.5}
-                onClick={stickers}
-              />
-            </div>
-          )}
+          {isClient &&
+            stickers_teaser_feature_flag &&
+            (stickers_teaser_feature_flag as string[]).includes(
+              lPost.id.toString()
+            ) && (
+              <div className="flex min-w-12 items-center gap-2">
+                <SmileIcon
+                  className={cn(
+                    "rotate size-5 rotate-0 cursor-pointer text-slate-700 transition-transform hover:rotate-[-30deg] hover:text-blue-500"
+                  )}
+                  strokeWidth={1.5}
+                  onClick={stickers}
+                />
+              </div>
+            )}
         </div>
       </div>
     </div>

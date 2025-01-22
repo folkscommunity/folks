@@ -34,13 +34,7 @@ export function SinglePost({ user, post }: { user: any; post: any }) {
   const [lPost, setLPost] = useState(post);
   const [likesModalOpen, setLikesModalOpen] = useState(false);
 
-  useEffect(() => {
-    document.title = `Post by ${lPost.author.display_name} on Folks`;
-  }, [lPost]);
-
   function fetchPost() {
-    console.log("Fetching post...");
-
     fetch(`/api/post/${post.id}`, {
       method: "GET"
     })
@@ -183,7 +177,7 @@ export function SinglePost({ user, post }: { user: any; post: any }) {
           <div className="pt-4">
             {lPost.attachments.map((attachment: any, i: number) => (
               <TimelinePhoto
-                key={i}
+                key={attachment.id}
                 src={attachment.url}
                 width={attachment.width}
                 height={attachment.height}
@@ -302,8 +296,8 @@ export function SinglePost({ user, post }: { user: any; post: any }) {
                 new Date(b.created_at).getTime() -
                 new Date(a.created_at).getTime()
             )
-            .map((reply: any) => (
-              <Post post={reply} user={user} key={reply.id} />
+            .map((reply: any, i: number) => (
+              <Post post={reply} user={user} key={i} />
             ))
         ) : (
           <div>No replies yet.</div>

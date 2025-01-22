@@ -42,10 +42,6 @@ export default function Profile({
   const [followingModal, setFollowingModal] = useState(false);
   const [followersModal, setFollowersModal] = useState(false);
 
-  useEffect(() => {
-    document.title = `${profile.display_name} on Folks`;
-  }, [profile]);
-
   return (
     <div className="mx-auto w-full max-w-3xl flex-1">
       <div className="flex flex-col gap-2 py-2">
