@@ -36,7 +36,7 @@ export async function sendVerifyEmail(id: string) {
     });
   }
 
-  const url = `${url_base}/api/auth/verify/${token}`;
+  const url = `${url_base}/verify/${token}`;
 
   const emailHtml = await renderVerifyEmail(url, user.display_name);
 

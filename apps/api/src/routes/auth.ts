@@ -349,6 +349,48 @@ router.get("/verify/:token", async (req, res) => {
   }
 });
 
+router.post("/verify/:token", async (req, res) => {
+  try {
+    const { token } = req.params;
+
+    const user = await prisma.user.findFirst({
+      where: {
+        email_token: token
+      }
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        error: "invalid_request",
+        msg: "Invalid verification token, please try again."
+      });
+    }
+
+    await prisma.user.update({
+      where: {
+        id: user.id
+      },
+      data: {
+        email_token: null,
+        email_verified: true
+      }
+    });
+
+    await posthog.capture({
+      distinctId: user.id.toString(),
+      event: "email_verified"
+    });
+
+    res.json({
+      ok: true
+    });
+  } catch (err) {
+    console.error(err);
+
+    res.status(500).json({ error: "server_error" });
+  }
+});
+
 router.post(
   "/resend-email",
   authMiddleware,

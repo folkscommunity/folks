@@ -9,6 +9,7 @@ import { schemas } from "@folks/utils";
 
 import { authMiddleware, RequestWithUser } from "@/lib/auth_middleware";
 import { s3 } from "@/lib/aws";
+import { posthog } from "@/lib/posthog";
 
 const router = Router();
 
@@ -290,6 +291,11 @@ router.post("/avatar", authMiddleware, async (req: RequestWithUser, res) => {
           ? `${process.env.CDN_URL}/${file_key}`
           : `https://${process.env.AWS_BUCKET}.s3.amazonaws.com/${file_key}?${new Date().getTime()}`
       }
+    });
+
+    await posthog.capture({
+      distinctId: user.id.toString(),
+      event: "update_avatar"
     });
 
     res.json({ ok: true });
