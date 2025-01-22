@@ -256,6 +256,9 @@ router.get("/:id", async (req: RequestWithUser, res) => {
           }
         },
         replies: {
+          where: {
+            deleted_at: null
+          },
           orderBy: {
             created_at: "asc"
           },
@@ -296,7 +299,11 @@ router.get("/:id", async (req: RequestWithUser, res) => {
             },
             _count: {
               select: {
-                replies: true,
+                replies: {
+                  where: {
+                    deleted_at: null
+                  }
+                },
                 likes: true
               }
             }
@@ -323,7 +330,11 @@ router.get("/:id", async (req: RequestWithUser, res) => {
         likes: user_id ? { where: { user_id: BigInt(user_id) } } : undefined,
         _count: {
           select: {
-            replies: true,
+            replies: {
+              where: {
+                deleted_at: null
+              }
+            },
             likes: true
           }
         }

@@ -2,9 +2,16 @@ import dayjs from "dayjs";
 
 import { parsePostBody } from "@/lib/post-utils";
 
-export const current_release = "0.3";
+export const current_release = "0.3.1";
 
 const releases = [
+  {
+    version: "0.3.1",
+    date: "2025-01-22",
+    changes: [
+      "Fixed a bug which casused deleted posts to be shown in the replies. Thanks @dave"
+    ]
+  },
   {
     version: "0.3",
     date: "2025-01-22",

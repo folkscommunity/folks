@@ -94,7 +94,11 @@ router.get("/everything", async (req, res) => {
         likes: user_id ? { where: { user_id: BigInt(user_id) } } : false,
         _count: {
           select: {
-            replies: true,
+            replies: {
+              where: {
+                deleted_at: null
+              }
+            },
             likes: true
           }
         }
@@ -242,7 +246,11 @@ router.get("/highlighted", async (req, res) => {
         likes: user_id ? { where: { user_id: BigInt(user_id) } } : false,
         _count: {
           select: {
-            replies: true,
+            replies: {
+              where: {
+                deleted_at: null
+              }
+            },
             likes: true
           }
         }
@@ -408,7 +416,11 @@ router.get("/following", authMiddleware, async (req: RequestWithUser, res) => {
         likes: user.id ? { where: { user_id: BigInt(user.id) } } : false,
         _count: {
           select: {
-            replies: true,
+            replies: {
+              where: {
+                deleted_at: null
+              }
+            },
             likes: true
           }
         }
@@ -557,7 +569,11 @@ router.get("/user/:author_id", async (req, res) => {
         likes: user_id ? { where: { user_id: BigInt(user_id) } } : false,
         _count: {
           select: {
-            replies: true,
+            replies: {
+              where: {
+                deleted_at: null
+              }
+            },
             likes: true
           }
         }

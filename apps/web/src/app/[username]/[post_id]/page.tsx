@@ -48,6 +48,9 @@ export default async function Page({
         }
       },
       replies: {
+        where: {
+          deleted_at: null
+        },
         orderBy: {
           created_at: "asc"
         },
@@ -89,7 +92,11 @@ export default async function Page({
           },
           _count: {
             select: {
-              replies: true,
+              replies: {
+                where: {
+                  deleted_at: null
+                }
+              },
               likes: true
             }
           }
@@ -117,7 +124,11 @@ export default async function Page({
         user && user.id ? { where: { user_id: BigInt(user.id) } } : undefined,
       _count: {
         select: {
-          replies: true,
+          replies: {
+            where: {
+              deleted_at: null
+            }
+          },
           likes: true
         }
       }
