@@ -6,7 +6,7 @@ import jwt from "jsonwebtoken";
 import sharp from "sharp";
 
 import { prisma } from "@folks/db";
-import { schemas } from "@folks/utils";
+import { JSONtoString, schemas } from "@folks/utils";
 
 import { authMiddleware, RequestWithUser } from "@/lib/auth_middleware";
 import { s3 } from "@/lib/aws";
@@ -18,6 +18,23 @@ const router = Router();
 router.post("/", authMiddleware, async (req: RequestWithUser, res) => {
   try {
     const { body, files, replying_to } = req.body;
+
+    const rate_limit = await redis.get(`rate_limit:post:${req.user.id}`);
+
+    if (Number(rate_limit) > 2) {
+      return res.status(429).json({
+        error: "rate_limit_exceeded",
+        message:
+          "You have exceeded the rate limit. Please try again in a few minutes."
+      });
+    }
+
+    await redis.set(
+      `rate_limit:post:${req.user.id}`,
+      Number(rate_limit) + 1,
+      "EX",
+      60
+    );
 
     const user = await prisma.user.findUnique({
       where: {
@@ -204,7 +221,8 @@ router.post("/", authMiddleware, async (req: RequestWithUser, res) => {
       });
     }
 
-    res.json({ ok: true });
+    res.setHeader("Content-Type", "application/json");
+    res.send(JSONtoString({ ok: true }));
   } catch (e) {
     console.error(e);
 
@@ -348,52 +366,55 @@ router.get("/:id", async (req: RequestWithUser, res) => {
       });
     }
 
-    res.json({
-      ok: true,
-      post: {
-        ...post,
-        id: post.id.toString(),
-        author: {
-          ...post.author,
-          id: post.author.id.toString()
-        },
-        reply_to: post.reply_to
-          ? {
-              ...post.reply_to,
-              id: post.reply_to.id.toString(),
-              author: {
-                ...post.reply_to.author,
-                id: post.reply_to.author.id.toString()
-              }
-            }
-          : {},
-        replies: post.replies.map((reply) => ({
-          ...reply,
-          id: reply.id.toString(),
+    res.setHeader("Content-Type", "application/json");
+    res.send(
+      JSONtoString({
+        ok: true,
+        post: {
+          ...post,
+          id: post.id.toString(),
           author: {
-            ...reply.author,
-            id: reply.author.id.toString()
+            ...post.author,
+            id: post.author.id.toString()
           },
-          reply_to: {
-            ...reply.reply_to,
-            id: reply.reply_to?.id.toString()
-          },
+          reply_to: post.reply_to
+            ? {
+                ...post.reply_to,
+                id: post.reply_to.id.toString(),
+                author: {
+                  ...post.reply_to.author,
+                  id: post.reply_to.author.id.toString()
+                }
+              }
+            : {},
+          replies: post.replies.map((reply) => ({
+            ...reply,
+            id: reply.id.toString(),
+            author: {
+              ...reply.author,
+              id: reply.author.id.toString()
+            },
+            reply_to: {
+              id: reply.reply_to?.id.toString(),
+              author: reply.reply_to?.author
+            },
+            count: {
+              replies: reply._count.replies.toString(),
+              likes: reply._count.likes.toString()
+            }
+          })),
+          likes: post.likes.map((like) => ({
+            id: like.id.toString(),
+            user_id: like.user_id.toString(),
+            post_id: like.post_id.toString()
+          })),
           count: {
-            replies: reply._count.replies,
-            likes: reply._count.likes
+            replies: post._count.replies.toString(),
+            likes: post._count.likes.toString()
           }
-        })),
-        likes: post.likes.map((like) => ({
-          id: like.id.toString(),
-          user_id: like.user_id.toString(),
-          post_id: like.post_id.toString()
-        })),
-        count: {
-          replies: post._count.replies,
-          likes: post._count.likes
         }
-      }
-    });
+      })
+    );
   } catch (e) {
     console.error(e);
 
@@ -440,18 +461,21 @@ router.get("/:id/likes", async (req, res) => {
       }
     });
 
-    res.json({
-      ok: true,
-      likes: likes.map((like) => ({
-        ...like,
-        id: like.id.toString(),
-        user_id: like.user_id.toString(),
-        post_id: like.post_id.toString()
-      })),
-      count: {
-        likes: likes.length
-      }
-    });
+    res.setHeader("Content-Type", "application/json");
+    res.send(
+      JSONtoString({
+        ok: true,
+        likes: likes.map((like) => ({
+          ...like,
+          id: like.id.toString(),
+          user_id: like.user_id.toString(),
+          post_id: like.post_id.toString()
+        })),
+        count: {
+          likes: likes.length
+        }
+      })
+    );
   } catch (e) {
     console.error(e);
 
@@ -527,7 +551,8 @@ router.post("/like", authMiddleware, async (req: RequestWithUser, res) => {
       }
     });
 
-    res.json({ ok: true });
+    res.setHeader("Content-Type", "application/json");
+    res.send(JSONtoString({ ok: true }));
   } catch (e) {
     console.error(e);
 
@@ -594,7 +619,8 @@ router.delete("/like", authMiddleware, async (req: RequestWithUser, res) => {
       }
     });
 
-    res.json({ ok: true });
+    res.setHeader("Content-Type", "application/json");
+    res.send(JSONtoString({ ok: true }));
   } catch (e) {
     console.error(e);
 
@@ -659,7 +685,8 @@ router.delete("/:id", authMiddleware, async (req: RequestWithUser, res) => {
       }
     });
 
-    res.json({ ok: true });
+    res.setHeader("Content-Type", "application/json");
+    res.send(JSONtoString({ ok: true }));
   } catch (e) {
     console.error(e);
 
@@ -713,7 +740,8 @@ router.post(
         }
       });
 
-      res.json({ ok: true });
+      res.setHeader("Content-Type", "application/json");
+      res.send(JSONtoString({ ok: true }));
     } catch (e) {
       console.error(e);
 
@@ -768,7 +796,8 @@ router.delete(
         }
       });
 
-      res.json({ ok: true });
+      res.setHeader("Content-Type", "application/json");
+      res.send(JSONtoString({ ok: true }));
     } catch (e) {
       console.error(e);
 

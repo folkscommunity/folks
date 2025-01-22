@@ -119,3 +119,29 @@ p {
 .animate-new-spin {
   animation: new-spin 0.4s linear infinite;
 }
+
+@keyframes fadein {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.fadein {
+  animation: fadein 0.15s ease-in-out;
+}
+
+@keyframes slideinfrombottom {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0%);
+  }
+}
+
+.slideinfrombottom {
+  animation: slideinfrombottom 0.12s ease-in-out;
+}

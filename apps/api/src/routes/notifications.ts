@@ -1,6 +1,7 @@
 import { Router } from "express";
 
 import { prisma } from "@folks/db";
+import { JSONtoString } from "@folks/utils";
 import { NotificationType } from "@folks/utils/notification_types";
 
 import { authMiddleware, RequestWithUser } from "@/lib/auth_middleware";
@@ -140,14 +141,17 @@ router.get("/", authMiddleware, async (req: RequestWithUser, res) => {
           : false
       }));
 
-    res.json({
-      ok: true,
-      data: {
-        unread_count: combined.filter((d) => !d.read).length,
-        notifications: combined,
-        last_read_at: last_read_at
-      }
-    });
+    res.setHeader("Content-Type", "application/json");
+    res.send(
+      JSONtoString({
+        ok: true,
+        data: {
+          unread_count: combined.filter((d) => !d.read).length,
+          notifications: combined,
+          last_read_at: last_read_at
+        }
+      })
+    );
   } catch (err) {
     console.error(err);
 
@@ -181,9 +185,12 @@ router.post("/read", authMiddleware, async (req: RequestWithUser, res) => {
       event: "mark_all_notifications_as_read"
     });
 
-    res.json({
-      ok: true
-    });
+    res.setHeader("Content-Type", "application/json");
+    res.send(
+      JSONtoString({
+        ok: true
+      })
+    );
   } catch (err) {
     console.error(err);
 

@@ -35,7 +35,7 @@ export function LikesModal({
         className="fixed left-0 top-0 z-[99995] flex h-screen w-screen items-center justify-center bg-black/5 backdrop-blur-sm transition-opacity"
         onClick={() => onClose()}
       />
-      <div className="bg-black-100 dark:bg-black-800 z-[99999] flex max-h-[600px] w-[400px] max-w-full flex-col gap-4 px-6 py-4">
+      <div className="bg-black-100 dark:bg-black-800 z-[99999] flex max-h-[600px] w-[400px] max-w-full flex-col gap-4 rounded-lg border border-neutral-300 px-6 py-4 dark:border-slate-900">
         <div className="flex justify-between gap-4">
           <div className="pt-1 font-bold">Liked By</div>
           <button onClick={() => onClose()}>[x]</button>

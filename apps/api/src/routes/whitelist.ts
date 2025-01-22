@@ -1,6 +1,7 @@
 import { Router } from "express";
 
 import { prisma } from "@folks/db";
+import { JSONtoString } from "@folks/utils";
 
 import { authMiddleware, RequestWithUser } from "@/lib/auth_middleware";
 import { sendDiscordNotification } from "@/lib/send_discord_notification";
@@ -65,7 +66,8 @@ router.post("/", async (req: RequestWithUser, res) => {
       `${email} (${name}) just requested to join Folks!`
     );
 
-    res.json({ ok: true });
+    res.setHeader("Content-Type", "application/json");
+    res.send(JSONtoString({ ok: true }));
   } catch (e) {
     console.error(e);
 
@@ -95,25 +97,28 @@ router.get("/", authMiddleware, async (req: RequestWithUser, res) => {
 
     const whitelist = await prisma.whitelistRequest.findMany({});
 
-    res.json({
-      ok: true,
-      data: {
-        count: whitelist.length,
-        whitelist: whitelist
-          ? whitelist.map((wl) => {
-              return {
-                id: wl.id.toString(),
-                email: wl.email,
-                name: wl.name,
-                posts_cv_url: wl.posts_cv_url,
-                accepted_at: wl.accepted_at?.toISOString(),
-                created_at: wl.created_at.toISOString(),
-                updated_at: wl.updated_at.toISOString()
-              };
-            })
-          : []
-      }
-    });
+    res.setHeader("Content-Type", "application/json");
+    res.send(
+      JSONtoString({
+        ok: true,
+        data: {
+          count: whitelist.length,
+          whitelist: whitelist
+            ? whitelist.map((wl) => {
+                return {
+                  id: wl.id.toString(),
+                  email: wl.email,
+                  name: wl.name,
+                  posts_cv_url: wl.posts_cv_url,
+                  accepted_at: wl.accepted_at?.toISOString(),
+                  created_at: wl.created_at.toISOString(),
+                  updated_at: wl.updated_at.toISOString()
+                };
+              })
+            : []
+        }
+      })
+    );
   } catch (e) {
     console.error(e);
 

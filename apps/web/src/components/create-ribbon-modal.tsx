@@ -60,9 +60,9 @@ export function CreateRibbonModal() {
         <div className="fixed left-0 top-0 z-[99992] flex h-screen w-screen flex-col items-center justify-center gap-2 p-4">
           <div
             className="fixed left-0 top-0 z-[99995] flex h-screen w-screen items-center justify-center bg-black/5 backdrop-blur-sm transition-opacity"
-            // onClick={() => setOpen(false)}
+            onClick={() => setOpen(false)}
           />
-          <div className="bg-black-100 dark:bg-black-800 z-[99999] flex flex-col gap-4 px-6 py-4">
+          <div className="bg-black-100 dark:bg-black-800 z-[99999] flex flex-col gap-4 rounded-lg border border-neutral-300 px-6 py-4 dark:border-slate-900">
             <div className="flex justify-between gap-4">
               <div className="pt-1 font-bold">The Ribbon</div>
               <button onClick={() => setOpen(false)}>[x]</button>

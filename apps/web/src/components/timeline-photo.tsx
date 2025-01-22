@@ -37,7 +37,7 @@ export function TimelinePhoto({
           alt={alt}
           src={src}
           style={{
-            maxHeight: big ? "80dvh" : "inherit",
+            maxHeight: big ? "90dvh" : "inherit",
             maxWidth: "100%",
             height: "auto",
             width: "auto"

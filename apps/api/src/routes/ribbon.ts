@@ -2,7 +2,7 @@ import { Router } from "express";
 import sanitizeHtml from "sanitize-html";
 
 import { prisma } from "@folks/db";
-import { schemas } from "@folks/utils";
+import { JSONtoString, schemas } from "@folks/utils";
 
 import { authMiddleware, RequestWithUser } from "@/lib/auth_middleware";
 import { posthog } from "@/lib/posthog";
@@ -15,10 +15,13 @@ router.get("/", async (req, res) => {
     const ribbon_cache = await redis.get("cache:ribbon");
 
     if (ribbon_cache) {
-      res.json({
-        ok: true,
-        ribbon: ribbon_cache
-      });
+      res.setHeader("Content-Type", "application/json");
+      res.send(
+        JSONtoString({
+          ok: true,
+          ribbon: ribbon_cache
+        })
+      );
       return;
     }
 
@@ -58,10 +61,13 @@ router.get("/", async (req, res) => {
 
     await redis.set("cache:ribbon", ribbon_string, "EX", 60 * 5);
 
-    res.json({
-      ok: true,
-      ribbon: sanitizeHtml(ribbon_string)
-    });
+    res.setHeader("Content-Type", "application/json");
+    res.send(
+      JSONtoString({
+        ok: true,
+        ribbon: sanitizeHtml(ribbon_string)
+      })
+    );
   } catch (e) {
     console.error(e);
 
@@ -145,7 +151,8 @@ router.post("/", authMiddleware, async (req: RequestWithUser, res) => {
       }
     });
 
-    res.json({ ok: true });
+    res.setHeader("Content-Type", "application/json");
+    res.send(JSONtoString({ ok: true }));
   } catch (e) {
     console.error(e);
 

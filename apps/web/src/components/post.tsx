@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Heart } from "@phosphor-icons/react";
 import {
   EllipsisVerticalIcon,
-  Heart,
   MessageCircle,
   SmileIcon,
   SmilePlusIcon,
@@ -277,6 +277,11 @@ export function Post({ post, user }: { post: any; user: any }) {
                   "fill-red-500 text-red-500"
               )}
               strokeWidth={1.5}
+              weight={
+                isClient && lPost.likes && lPost.likes.length > 0
+                  ? "fill"
+                  : "regular"
+              }
               onClick={() =>
                 lPost.likes && lPost.likes.length > 0
                   ? unlikePost()

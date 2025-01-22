@@ -3,7 +3,7 @@ import { Router } from "express";
 import jwt from "jsonwebtoken";
 
 import { prisma } from "@folks/db";
-import { schemas } from "@folks/utils";
+import { JSONtoString, schemas } from "@folks/utils";
 
 import { authMiddleware, RequestWithUser } from "@/lib/auth_middleware";
 import { posthog } from "@/lib/posthog";
@@ -31,23 +31,26 @@ router.get("/", authMiddleware, async (req: RequestWithUser, res) => {
       return res.status(400).json({ error: "account_suspended" });
     }
 
-    res.json({
-      ok: true,
-      data: {
-        id: user.id.toString(),
-        email: user.email,
-        username: user.username,
-        display_name: user.display_name,
-        avatar_url: user.avatar_url,
-        occupation: user.occupation,
-        location: user.location,
-        pronouns: user.pronouns,
-        website: user.website,
-        created_at: user.created_at,
-        email_verified: user.email_verified,
-        notifications_last_read_at: user.notifications_last_read_at
-      }
-    });
+    res.setHeader("Content-Type", "application/json");
+    res.send(
+      JSONtoString({
+        ok: true,
+        data: {
+          id: user.id.toString(),
+          email: user.email,
+          username: user.username,
+          display_name: user.display_name,
+          avatar_url: user.avatar_url,
+          occupation: user.occupation,
+          location: user.location,
+          pronouns: user.pronouns,
+          website: user.website,
+          created_at: user.created_at,
+          email_verified: user.email_verified,
+          notifications_last_read_at: user.notifications_last_read_at
+        }
+      })
+    );
   } catch (err) {
     console.error(err);
 
@@ -63,6 +66,42 @@ router.post("/register", async (req, res) => {
     if (!email || !password || !username || !display_name) {
       return res.status(400).json({ error: "invalid_request" });
     }
+
+    const ip =
+      req.headers["x-forwarded-for"] || req.headers["cf-connecting-ip"];
+    const user_agent = req.headers["user-agent"];
+
+    const rate_limit_24h = await redis.get(`rate_limit:register:${ip}:24h`);
+
+    if (Number(rate_limit_24h) > 15) {
+      return res.status(429).json({
+        error: "rate_limit_exceeded_24h",
+        msg: "You have exceeded the upper rate limit. Please contact help@folkscommunity.com."
+      });
+    }
+
+    const rate_limit_5m = await redis.get(`rate_limit:register:${ip}:5m`);
+
+    if (Number(rate_limit_5m) > 5) {
+      return res.status(429).json({
+        error: "rate_limit_exceeded_5m",
+        msg: "You have exceeded the rate limit. Please try again in 10 minutes. If you continue to experience issues, please contact help@folkscommunity.com."
+      });
+    }
+
+    await redis.set(
+      `rate_limit:register:${ip}:24h`,
+      Number(rate_limit_24h) + 1,
+      "EX",
+      60 * 60 * 24
+    );
+
+    await redis.set(
+      `rate_limit:register:${ip}:5m`,
+      Number(rate_limit_5m) + 1,
+      "EX",
+      60 * 5
+    );
 
     const existing_user = await prisma.user.findUnique({
       where: {
@@ -136,10 +175,6 @@ router.post("/register", async (req, res) => {
       process.env.JWT_SECRET!
     );
 
-    const ip =
-      req.headers["x-forwarded-for"] || req.headers["cf-connecting-ip"];
-    const user_agent = req.headers["user-agent"];
-
     await redis.set(
       `session:${created_user.id.toString()}:${token}`,
       JSON.stringify({
@@ -159,7 +194,7 @@ router.post("/register", async (req, res) => {
       domain:
         process.env.NODE_ENV === "production"
           ? "folkscommunity.com"
-          : req.hostname,
+          : undefined,
       secure: process.env.NODE_ENV === "production"
     });
 
@@ -180,7 +215,10 @@ router.post("/register", async (req, res) => {
       }
     });
 
-    res.json({ ok: true });
+    await redis.del(`rate_limit:register:${ip}:5m`);
+
+    res.setHeader("Content-Type", "application/json");
+    res.send(JSONtoString({ ok: true }));
   } catch (err) {
     console.error(err);
 
@@ -265,7 +303,7 @@ router.post("/login", async (req, res) => {
       domain:
         process.env.NODE_ENV === "production"
           ? "folkscommunity.com"
-          : ".localhost",
+          : undefined,
       secure: process.env.NODE_ENV === "production"
     });
 
@@ -280,7 +318,8 @@ router.post("/login", async (req, res) => {
       }
     });
 
-    res.json({ ok: true });
+    res.setHeader("Content-Type", "application/json");
+    res.send(JSONtoString({ ok: true }));
   } catch (err) {
     console.error(err);
 
@@ -381,9 +420,12 @@ router.post("/verify/:token", async (req, res) => {
       event: "email_verified"
     });
 
-    res.json({
-      ok: true
-    });
+    res.setHeader("Content-Type", "application/json");
+    res.send(
+      JSONtoString({
+        ok: true
+      })
+    );
   } catch (err) {
     console.error(err);
 
@@ -467,7 +509,8 @@ router.post(
         60
       );
 
-      res.json({ ok: true });
+      res.setHeader("Content-Type", "application/json");
+      res.send(JSONtoString({ ok: true }));
     } catch (err) {
       console.error(err);
 

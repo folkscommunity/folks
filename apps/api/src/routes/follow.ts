@@ -1,6 +1,7 @@
 import { Router } from "express";
 
 import { prisma } from "@folks/db";
+import { JSONtoString } from "@folks/utils";
 
 import { authMiddleware, RequestWithUser } from "@/lib/auth_middleware";
 import { posthog } from "@/lib/posthog";
@@ -65,7 +66,8 @@ router.post("/", authMiddleware, async (req: RequestWithUser, res) => {
       }
     });
 
-    res.json({ ok: true });
+    res.setHeader("Content-Type", "application/json");
+    res.send(JSONtoString({ ok: true }));
   } catch (err) {
     console.error(err);
 
@@ -130,7 +132,8 @@ router.delete("/", authMiddleware, async (req: RequestWithUser, res) => {
       }
     });
 
-    res.json({ ok: true });
+    res.setHeader("Content-Type", "application/json");
+    res.send(JSONtoString({ ok: true }));
   } catch (err) {
     console.error(err);
 
@@ -166,23 +169,26 @@ router.get("/following", authMiddleware, async (req: RequestWithUser, res) => {
       }
     });
 
-    res.json({
-      ok: true,
-      data: {
-        count: following.length,
-        following:
-          following && following.length > 0
-            ? following.map((f) => {
-                return {
-                  id: f.id.toString(),
-                  username: f.target.username,
-                  display_name: f.target.display_name,
-                  avatar_url: f.target.avatar_url
-                };
-              })
-            : []
-      }
-    });
+    res.setHeader("Content-Type", "application/json");
+    res.send(
+      JSONtoString({
+        ok: true,
+        data: {
+          count: following.length,
+          following:
+            following && following.length > 0
+              ? following.map((f) => {
+                  return {
+                    id: f.id.toString(),
+                    username: f.target.username,
+                    display_name: f.target.display_name,
+                    avatar_url: f.target.avatar_url
+                  };
+                })
+              : []
+        }
+      })
+    );
   } catch (err) {
     console.error(err);
 
@@ -218,23 +224,26 @@ router.get("/followers", authMiddleware, async (req: RequestWithUser, res) => {
       }
     });
 
-    res.json({
-      ok: true,
-      data: {
-        count: followers.length,
-        followers:
-          followers && followers.length > 0
-            ? followers.map((f) => {
-                return {
-                  id: f.id.toString(),
-                  username: f.user.username,
-                  display_name: f.user.display_name,
-                  avatar_url: f.user.avatar_url
-                };
-              })
-            : []
-      }
-    });
+    res.setHeader("Content-Type", "application/json");
+    res.send(
+      JSONtoString({
+        ok: true,
+        data: {
+          count: followers.length,
+          followers:
+            followers && followers.length > 0
+              ? followers.map((f) => {
+                  return {
+                    id: f.id.toString(),
+                    username: f.user.username,
+                    display_name: f.user.display_name,
+                    avatar_url: f.user.avatar_url
+                  };
+                })
+              : []
+        }
+      })
+    );
   } catch (err) {
     console.error(err);
 
@@ -282,12 +291,15 @@ router.get("/:target_id", authMiddleware, async (req: RequestWithUser, res) => {
       });
     }
 
-    res.json({
-      ok: true,
-      data: {
-        following: true
-      }
-    });
+    res.setHeader("Content-Type", "application/json");
+    res.send(
+      JSONtoString({
+        ok: true,
+        data: {
+          following: true
+        }
+      })
+    );
   } catch (err) {
     console.error(err);
 

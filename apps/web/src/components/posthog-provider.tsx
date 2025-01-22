@@ -5,7 +5,7 @@ import { PostHogProvider } from "posthog-js/react";
 
 if (typeof window !== "undefined") {
   // hostname does not contain localhost
-  if (!window.location.hostname.includes("localhost")) {
+  if (window.location.hostname.includes("folkscommunity.com")) {
     posthog.init(
       process.env.NEXT_PUBLIC_POSTHOG_KEY ||
         "phc_5ZLKrqFjOwUgBuAp2IuPgyfcaRGKfAEGyWLygD2mZ1K",

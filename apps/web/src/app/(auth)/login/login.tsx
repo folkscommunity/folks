@@ -79,7 +79,7 @@ export function Login() {
             id="email"
             {...register("email")}
             placeholder="Email"
-            className="rounded-none border border-neutral-400 bg-transparent px-2 py-1.5 placeholder:text-neutral-400 focus:border-blue-500 focus:outline-none dark:border-neutral-600 dark:placeholder:text-neutral-600"
+            className="text-md rounded-none border border-neutral-400 bg-transparent px-2 py-1.5 placeholder:text-neutral-400 focus:border-blue-500 focus:outline-none dark:border-neutral-600 dark:placeholder:text-neutral-600"
           />
           {errors.email && (
             <span className="text-red-500">{errors.email.message}</span>
@@ -94,7 +94,7 @@ export function Login() {
             id="password"
             {...register("password")}
             placeholder="Password"
-            className="rounded-none border border-neutral-400 bg-transparent px-2 py-1.5 placeholder:text-neutral-400 focus:border-blue-500 focus:outline-none dark:border-neutral-600 dark:placeholder:text-neutral-600"
+            className="text-md rounded-none border border-neutral-400 bg-transparent px-2 py-1.5 placeholder:text-neutral-400 focus:border-blue-500 focus:outline-none dark:border-neutral-600 dark:placeholder:text-neutral-600"
           />
           {errors.password && (
             <span className="text-red-500">{errors.password.message}</span>

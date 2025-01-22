@@ -2,7 +2,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ImageIcon, LoaderPinwheelIcon, PlusIcon, X } from "lucide-react";
+import { Images, ImagesSquare } from "@phosphor-icons/react";
+import { LoaderPinwheelIcon, PlusIcon, X } from "lucide-react";
 import { toast } from "sonner";
 import { useFilePicker } from "use-file-picker";
 import {
@@ -93,31 +94,48 @@ export function Composer() {
       });
   }
 
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflowY = "hidden";
+    } else {
+      document.body.style.overflowY = "auto";
+    }
+  }, [open]);
+
   return (
     <div className="pointer-events-none absolute px-4 py-4">
-      <Drawer.Root open={open} onOpenChange={setOpen}>
-        <Drawer.Trigger asChild className="pointer-events-auto">
-          <button
-            title="Compose a post."
-            className="bg-black-900 dark:bg-black-800 text-black-100 fixed bottom-4 right-4 z-[997] rounded-full border border-neutral-300/0 p-2 dark:border-slate-800 dark:text-slate-400"
-          >
-            <PlusIcon className="size-8" />
-          </button>
-        </Drawer.Trigger>
-        <Drawer.Portal>
-          <Drawer.Overlay className="backdrop-blur-smz-[99998] fixed inset-0 bg-black/80" />
-          <Drawer.Content className="dark:bg-black-800 pointer-events-auto fixed bottom-0 left-0 right-0 z-[99999] flex h-fit min-h-[90dvh] w-full flex-col bg-gray-100 pb-10 outline-none">
-            <Drawer.Title className="py-4 text-center text-lg font-bold">
-              Compose
-            </Drawer.Title>
-            <Drawer.Close asChild>
-              <button className="absolute right-4 top-4 rounded-md bg-neutral-900 px-1 py-1 text-white dark:bg-slate-900">
-                <X className="size-5" />
-              </button>
-            </Drawer.Close>
+      <div className="pointer-events-auto">
+        <button
+          title="Compose a post."
+          className="bg-black-900 dark:bg-black-800 text-black-100 fixed bottom-4 right-4 z-[997] rounded-full border border-neutral-300/0 p-2 dark:border-slate-800 dark:text-slate-400"
+          onClick={() => setOpen(true)}
+        >
+          <PlusIcon className="size-8" />
+        </button>
+      </div>
+      {open && (
+        <div className="z-[99999] flex h-[100dvh] w-full items-center justify-center">
+          <div className="bg-black-800/60 backdrop fadein fixed inset-0 z-[99998] backdrop-blur-sm transition-all" />
+
+          <div className="dark:bg-black-800 slideinfrombottom pointer-events-auto fixed z-[99999] flex h-[500px] max-h-[80dvh] min-h-[50dvh] w-full max-w-[800px] flex-col rounded-lg border border-neutral-300 bg-gray-100 pb-0 outline-none max-sm:top-0 max-sm:min-h-[100dvh] max-sm:max-w-[100vw] max-sm:rounded-none max-sm:border-none dark:border-slate-900">
+            <div className="flex flex-row items-center justify-between gap-4 overflow-clip border-b border-neutral-300 py-1 dark:border-slate-900">
+              <div></div>
+              <div className="py-4 text-center text-lg font-bold">
+                Compose a Post
+              </div>
+              <div>
+                <button
+                  className="absolute right-4 top-4 rounded-md bg-neutral-900 px-1 py-1 text-white dark:bg-slate-900"
+                  onClick={() => setOpen(false)}
+                >
+                  <X className="size-5" />
+                </button>
+              </div>
+            </div>
+
             <div className="text-md mx-auto flex w-full max-w-3xl flex-1 flex-col">
               <textarea
-                className="w-full flex-1 resize-none border-0 bg-transparent px-4 py-1 placeholder:text-neutral-700 focus:outline-none"
+                className="w-full flex-1 resize-none border-0 bg-transparent px-4 py-1 pt-4 placeholder:text-neutral-700 focus:outline-none"
                 placeholder="Write something..."
                 name="body"
                 maxLength={300}
@@ -126,7 +144,6 @@ export function Composer() {
                 onChange={(e) => {
                   setText(e.target.value);
                 }}
-                autoFocus
               />
 
               {posting && (
@@ -138,7 +155,7 @@ export function Composer() {
               {filesContent.map((file, index) => (
                 <div
                   key={index}
-                  className="group relative flex flex-col items-start"
+                  className="group relative flex flex-col items-start pl-0 pt-4 max-sm:pl-4"
                 >
                   <img
                     alt={file.name}
@@ -155,13 +172,13 @@ export function Composer() {
                 </div>
               ))}
 
-              <div className="p-4">
+              <div className="mt-2 border-t border-neutral-300 p-4 dark:border-slate-900">
                 <div className="flex items-center justify-between gap-2">
                   <button
                     className="rounded-md text-neutral-700 dark:text-neutral-600"
                     onClick={openFilePicker}
                   >
-                    <ImageIcon className="size-6" />
+                    <ImagesSquare size={24} />
                   </button>
 
                   <div className="flex items-center gap-2">
@@ -181,9 +198,9 @@ export function Composer() {
                 </div>
               </div>
             </div>
-          </Drawer.Content>
-        </Drawer.Portal>
-      </Drawer.Root>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -333,7 +350,7 @@ export function ReplyCompose({
                 className="rounded-md text-neutral-700 dark:text-neutral-600"
                 onClick={openFilePicker}
               >
-                <ImageIcon className="size-6" />
+                <ImagesSquare size={24} />
               </button>
 
               <div className="flex items-center gap-2">

@@ -2,6 +2,7 @@ import { Router } from "express";
 import jwt from "jsonwebtoken";
 
 import { prisma } from "@folks/db";
+import { JSONtoString } from "@folks/utils";
 
 import { authMiddleware, RequestWithUser } from "@/lib/auth_middleware";
 import { redis } from "@/lib/redis";
@@ -105,51 +106,54 @@ router.get("/everything", async (req, res) => {
       }
     });
 
-    res.json({
-      ok: true,
-      feed: feed.map((post) => ({
-        ...post,
-        id: post.id.toString(),
-        author: {
-          ...post.author,
-          id: post.author.id.toString()
-        },
-        reply_to: post.reply_to
-          ? {
-              ...post.reply_to,
-              id: post.reply_to.id.toString(),
-              author: {
-                ...post.reply_to.author,
-                id: post.reply_to.author.id.toString()
-              }
-            }
-          : {},
-        replies: post.replies.map((reply) => ({
-          ...reply,
-          id: reply.id.toString(),
+    res.setHeader("Content-Type", "application/json");
+    res.send(
+      JSONtoString({
+        ok: true,
+        feed: feed.map((post) => ({
+          ...post,
+          id: post.id.toString(),
           author: {
-            ...reply.author,
-            id: reply.author.id.toString()
+            ...post.author,
+            id: post.author.id.toString()
+          },
+          reply_to: post.reply_to
+            ? {
+                ...post.reply_to,
+                id: post.reply_to.id.toString(),
+                author: {
+                  ...post.reply_to.author,
+                  id: post.reply_to.author.id.toString()
+                }
+              }
+            : {},
+          replies: post.replies.map((reply) => ({
+            ...reply,
+            id: reply.id.toString(),
+            author: {
+              ...reply.author,
+              id: reply.author.id.toString()
+            }
+          })),
+          likes:
+            post.likes &&
+            post.likes.map((like) => ({
+              id: like.id.toString(),
+              user_id: like.user_id.toString(),
+              post_id: like.post_id.toString()
+            })),
+          highlighted: post.highlighted,
+          count: {
+            replies: post._count.replies,
+            likes: post._count.likes
           }
         })),
-        likes:
-          post.likes &&
-          post.likes.map((like) => ({
-            id: like.id.toString(),
-            user_id: like.user_id.toString(),
-            post_id: like.post_id.toString()
-          })),
-        highlighted: post.highlighted,
-        count: {
-          replies: post._count.replies,
-          likes: post._count.likes
-        }
-      })),
-      nextCursor:
-        feed && feed.length > 0
-          ? feed[feed.length - 1].id.toString()
-          : undefined
-    });
+        nextCursor:
+          feed && feed.length > 0
+            ? feed[feed.length - 1].id.toString()
+            : undefined
+      })
+    );
   } catch (e) {
     console.error(e);
 
@@ -257,51 +261,54 @@ router.get("/highlighted", async (req, res) => {
       }
     });
 
-    res.json({
-      ok: true,
-      feed: feed.map((post) => ({
-        ...post,
-        id: post.id.toString(),
-        author: {
-          ...post.author,
-          id: post.author.id.toString()
-        },
-        reply_to: post.reply_to
-          ? {
-              ...post.reply_to,
-              id: post.reply_to.id.toString(),
-              author: {
-                ...post.reply_to.author,
-                id: post.reply_to.author.id.toString()
-              }
-            }
-          : {},
-        replies: post.replies.map((reply) => ({
-          ...reply,
-          id: reply.id.toString(),
+    res.setHeader("Content-Type", "application/json");
+    res.send(
+      JSONtoString({
+        ok: true,
+        feed: feed.map((post) => ({
+          ...post,
+          id: post.id.toString(),
           author: {
-            ...reply.author,
-            id: reply.author.id.toString()
+            ...post.author,
+            id: post.author.id.toString()
+          },
+          reply_to: post.reply_to
+            ? {
+                ...post.reply_to,
+                id: post.reply_to.id.toString(),
+                author: {
+                  ...post.reply_to.author,
+                  id: post.reply_to.author.id.toString()
+                }
+              }
+            : {},
+          replies: post.replies.map((reply) => ({
+            ...reply,
+            id: reply.id.toString(),
+            author: {
+              ...reply.author,
+              id: reply.author.id.toString()
+            }
+          })),
+          likes:
+            post.likes &&
+            post.likes.map((like) => ({
+              id: like.id.toString(),
+              user_id: like.user_id.toString(),
+              post_id: like.post_id.toString()
+            })),
+          highlighted: post.highlighted,
+          count: {
+            replies: post._count.replies,
+            likes: post._count.likes
           }
         })),
-        likes:
-          post.likes &&
-          post.likes.map((like) => ({
-            id: like.id.toString(),
-            user_id: like.user_id.toString(),
-            post_id: like.post_id.toString()
-          })),
-        highlighted: post.highlighted,
-        count: {
-          replies: post._count.replies,
-          likes: post._count.likes
-        }
-      })),
-      nextCursor:
-        feed && feed.length > 0
-          ? feed[feed.length - 1].id.toString()
-          : undefined
-    });
+        nextCursor:
+          feed && feed.length > 0
+            ? feed[feed.length - 1].id.toString()
+            : undefined
+      })
+    );
   } catch (e) {
     console.error(e);
 
@@ -427,51 +434,54 @@ router.get("/following", authMiddleware, async (req: RequestWithUser, res) => {
       }
     });
 
-    res.json({
-      ok: true,
-      feed: feed.map((post) => ({
-        ...post,
-        id: post.id.toString(),
-        author: {
-          ...post.author,
-          id: post.author.id.toString()
-        },
-        reply_to: post.reply_to
-          ? {
-              ...post.reply_to,
-              id: post.reply_to.id.toString(),
-              author: {
-                ...post.reply_to.author,
-                id: post.reply_to.author.id.toString()
-              }
-            }
-          : {},
-        replies: post.replies.map((reply) => ({
-          ...reply,
-          id: reply.id.toString(),
+    res.setHeader("Content-Type", "application/json");
+    res.send(
+      JSONtoString({
+        ok: true,
+        feed: feed.map((post) => ({
+          ...post,
+          id: post.id.toString(),
           author: {
-            ...reply.author,
-            id: reply.author.id.toString()
+            ...post.author,
+            id: post.author.id.toString()
+          },
+          reply_to: post.reply_to
+            ? {
+                ...post.reply_to,
+                id: post.reply_to.id.toString(),
+                author: {
+                  ...post.reply_to.author,
+                  id: post.reply_to.author.id.toString()
+                }
+              }
+            : {},
+          replies: post.replies.map((reply) => ({
+            ...reply,
+            id: reply.id.toString(),
+            author: {
+              ...reply.author,
+              id: reply.author.id.toString()
+            }
+          })),
+          highlighted: post.highlighted,
+          likes:
+            post.likes &&
+            post.likes.map((like) => ({
+              id: like.id.toString(),
+              user_id: like.user_id.toString(),
+              post_id: like.post_id.toString()
+            })),
+          count: {
+            replies: post._count.replies,
+            likes: post._count.likes
           }
         })),
-        highlighted: post.highlighted,
-        likes:
-          post.likes &&
-          post.likes.map((like) => ({
-            id: like.id.toString(),
-            user_id: like.user_id.toString(),
-            post_id: like.post_id.toString()
-          })),
-        count: {
-          replies: post._count.replies,
-          likes: post._count.likes
-        }
-      })),
-      nextCursor:
-        feed && feed.length > 0
-          ? feed[feed.length - 1].id.toString()
-          : undefined
-    });
+        nextCursor:
+          feed && feed.length > 0
+            ? feed[feed.length - 1].id.toString()
+            : undefined
+      })
+    );
   } catch (e) {
     console.error(e);
 
@@ -580,51 +590,54 @@ router.get("/user/:author_id", async (req, res) => {
       }
     });
 
-    res.json({
-      ok: true,
-      feed: feed.map((post) => ({
-        ...post,
-        id: post.id.toString(),
-        author: {
-          ...post.author,
-          id: post.author.id.toString()
-        },
-        reply_to: post.reply_to
-          ? {
-              ...post.reply_to,
-              id: post.reply_to.id.toString(),
-              author: {
-                ...post.reply_to.author,
-                id: post.reply_to.author.id.toString()
-              }
-            }
-          : {},
-        replies: post.replies.map((reply) => ({
-          ...reply,
-          id: reply.id.toString(),
+    res.setHeader("Content-Type", "application/json");
+    res.send(
+      JSONtoString({
+        ok: true,
+        feed: feed.map((post) => ({
+          ...post,
+          id: post.id.toString(),
           author: {
-            ...reply.author,
-            id: reply.author.id.toString()
+            ...post.author,
+            id: post.author.id.toString()
+          },
+          reply_to: post.reply_to
+            ? {
+                ...post.reply_to,
+                id: post.reply_to.id.toString(),
+                author: {
+                  ...post.reply_to.author,
+                  id: post.reply_to.author.id.toString()
+                }
+              }
+            : {},
+          replies: post.replies.map((reply) => ({
+            ...reply,
+            id: reply.id.toString(),
+            author: {
+              ...reply.author,
+              id: reply.author.id.toString()
+            }
+          })),
+          likes:
+            post.likes &&
+            post.likes.map((like) => ({
+              id: like.id.toString(),
+              user_id: like.user_id.toString(),
+              post_id: like.post_id.toString()
+            })),
+          highlighted: post.highlighted,
+          count: {
+            replies: post._count.replies,
+            likes: post._count.likes
           }
         })),
-        likes:
-          post.likes &&
-          post.likes.map((like) => ({
-            id: like.id.toString(),
-            user_id: like.user_id.toString(),
-            post_id: like.post_id.toString()
-          })),
-        highlighted: post.highlighted,
-        count: {
-          replies: post._count.replies,
-          likes: post._count.likes
-        }
-      })),
-      nextCursor:
-        feed && feed.length > 0
-          ? feed[feed.length - 1].id.toString()
-          : undefined
-    });
+        nextCursor:
+          feed && feed.length > 0
+            ? feed[feed.length - 1].id.toString()
+            : undefined
+      })
+    );
   } catch (e) {
     console.error(e);
 

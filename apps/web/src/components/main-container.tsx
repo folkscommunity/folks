@@ -82,10 +82,10 @@ export async function MainContainer({
           <Separator />
           <div className="flex gap-2 max-md:flex-col max-md:items-center max-md:gap-1">
             <Link
-              href="/about"
+              href="/manifesto"
               className="underline opacity-70 hover:opacity-100"
             >
-              About
+              Manifesto
             </Link>
             <span className="max-md:hidden">·</span>
             <Link

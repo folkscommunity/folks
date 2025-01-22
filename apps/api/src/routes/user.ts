@@ -5,7 +5,7 @@ import { Router } from "express";
 import sharp from "sharp";
 
 import { prisma } from "@folks/db";
-import { schemas } from "@folks/utils";
+import { JSONtoString, schemas } from "@folks/utils";
 
 import { authMiddleware, RequestWithUser } from "@/lib/auth_middleware";
 import { s3 } from "@/lib/aws";
@@ -111,7 +111,8 @@ router.patch("/", authMiddleware, async (req: RequestWithUser, res) => {
       }
     });
 
-    res.json({ ok: true });
+    res.setHeader("Content-Type", "application/json");
+    res.send(JSONtoString({ ok: true }));
   } catch (e) {
     console.error(e);
 
@@ -174,7 +175,8 @@ router.patch("/password", authMiddleware, async (req: RequestWithUser, res) => {
       }
     });
 
-    res.json({ ok: true });
+    res.setHeader("Content-Type", "application/json");
+    res.send(JSONtoString({ ok: true }));
   } catch (e) {
     console.error(e);
 
@@ -298,7 +300,8 @@ router.post("/avatar", authMiddleware, async (req: RequestWithUser, res) => {
       event: "update_avatar"
     });
 
-    res.json({ ok: true });
+    res.setHeader("Content-Type", "application/json");
+    res.send(JSONtoString({ ok: true }));
   } catch (e) {
     console.error(e);
 
