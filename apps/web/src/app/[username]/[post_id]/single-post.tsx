@@ -1,14 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { Heart } from "@phosphor-icons/react";
 import dayjs from "dayjs";
-import {
-  EllipsisIcon,
-  EllipsisVerticalIcon,
-  ExternalLinkIcon,
-  Heart,
-  MessageCircle
-} from "lucide-react";
+import { EllipsisIcon } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 
@@ -199,7 +194,12 @@ export function SinglePost({ user, post }: { user: any; post: any }) {
             {lPost.count.likes > 0 &&
               `${lPost.count.likes} ${lPost.count.likes > 1 ? "Likes" : "Like"}`}
           </span>
-          {lPost.count.replies && lPost.count.likes ? ", " : ""}
+          {lPost.count.replies &&
+          lPost.count.replies > 0 &&
+          lPost.count.likes &&
+          lPost.count.likes > 0
+            ? ", "
+            : ""}
           {lPost.count.replies > 0 &&
             `${lPost.count.replies} ${lPost.count.replies > 1 ? "Replies" : "Reply"}`}
         </div>
@@ -214,7 +214,6 @@ export function SinglePost({ user, post }: { user: any; post: any }) {
                 lPost.likes.length > 0 &&
                 "fill-red-500 text-red-500"
             )}
-            strokeWidth={1.5}
             onClick={() =>
               lPost.likes && lPost.likes.length > 0 ? unlikePost() : likePost()
             }

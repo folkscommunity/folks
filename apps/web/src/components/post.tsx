@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Heart } from "@phosphor-icons/react";
+import { ChatCircle, Heart } from "@phosphor-icons/react";
 import {
   EllipsisVerticalIcon,
   MessageCircle,
@@ -257,14 +257,17 @@ export function Post({ post, user }: { post: any; user: any }) {
 
         <div className="flex h-[24px] items-center justify-start gap-4 pt-2">
           <div className="flex min-w-12 items-center gap-2">
-            <MessageCircle
+            <ChatCircle
               className="size-5 min-h-5 min-w-5 cursor-pointer text-slate-700 hover:fill-neutral-400 hover:text-neutral-400 dark:hover:fill-neutral-300 dark:hover:text-neutral-300"
-              strokeWidth={1.5}
               onClick={() =>
                 router.push(`/${lPost.author.username}/${lPost.id}`)
               }
             />
-            <span>{(isClient && lPost.count.replies) || " "}</span>
+            <span>
+              {isClient && lPost.count.replies && lPost.count.replies > 0
+                ? lPost.count.replies
+                : " "}
+            </span>
           </div>
 
           <div className="flex min-w-12 items-center gap-2">
@@ -276,7 +279,6 @@ export function Post({ post, user }: { post: any; user: any }) {
                   lPost.likes.length > 0 &&
                   "fill-red-500 text-red-500"
               )}
-              strokeWidth={1.5}
               weight={
                 isClient && lPost.likes && lPost.likes.length > 0
                   ? "fill"
@@ -288,7 +290,11 @@ export function Post({ post, user }: { post: any; user: any }) {
                   : likePost()
               }
             />
-            <span>{(isClient && lPost.count.likes) || " "}</span>
+            <span>
+              {isClient && lPost.count.likes && lPost.count.likes > 0
+                ? lPost.count.likes
+                : " "}
+            </span>
           </div>
 
           {isClient &&
