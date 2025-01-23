@@ -2,9 +2,14 @@ import dayjs from "dayjs";
 
 import { parsePostBody } from "@/lib/post-utils";
 
-export const current_release = "0.3.4";
+export const current_release = "0.3.5";
 
 const releases = [
+  {
+    version: "0.3.5",
+    date: "2025-01-23",
+    changes: ["Added reply threads."]
+  },
   {
     version: "0.3.4",
     date: "2025-01-23",

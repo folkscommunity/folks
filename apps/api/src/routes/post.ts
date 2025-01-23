@@ -425,6 +425,162 @@ router.get("/:id", async (req: RequestWithUser, res) => {
   }
 });
 
+async function getReplies(
+  post_id: bigint,
+  user_id: string | null,
+  depth: number = 0,
+  maxDepth: number = 5
+) {
+  // Stop recursion if we've reached max depth
+  if (depth >= maxDepth) {
+    return [];
+  }
+
+  const replies = await prisma.post.findMany({
+    where: {
+      reply_to_id: post_id,
+      deleted_at: null
+    },
+    orderBy: {
+      created_at: "asc"
+    },
+    select: {
+      id: true,
+      body: true,
+      created_at: true,
+      reply_to: {
+        select: {
+          id: true,
+          author: {
+            select: {
+              username: true
+            }
+          }
+        }
+      },
+      attachments: {
+        select: {
+          id: true,
+          url: true,
+          type: true,
+          height: true,
+          width: true
+        }
+      },
+      author: {
+        select: {
+          id: true,
+          avatar_url: true,
+          display_name: true,
+          username: true
+        }
+      },
+      likes: user_id ? { where: { user_id: BigInt(user_id) } } : false,
+      _count: {
+        select: {
+          replies: {
+            where: {
+              deleted_at: null
+            }
+          },
+          likes: true
+        }
+      }
+    }
+  });
+
+  // Recursively get replies for each reply with incremented depth
+  const repliesWithNested = await Promise.all(
+    replies.map(async (reply) => {
+      const nestedReplies = await getReplies(
+        reply.id,
+        user_id,
+        depth + 1,
+        maxDepth
+      );
+      return {
+        ...reply,
+        id: reply.id.toString(),
+        author: {
+          ...reply.author,
+          id: reply.author.id.toString()
+        },
+        reply_to: reply.reply_to
+          ? {
+              id: reply.reply_to.id.toString(),
+              author: {
+                username: reply.reply_to.author.username
+              }
+            }
+          : null,
+        likes:
+          reply.likes &&
+          reply.likes.map((like: any) => ({
+            id: like.id.toString(),
+            user_id: like.user_id.toString(),
+            post_id: like.post_id.toString()
+          })),
+        replies: nestedReplies,
+        depth: depth,
+        count: {
+          replies: reply._count.replies,
+          likes: reply._count.likes
+        }
+      };
+    })
+  );
+
+  return repliesWithNested;
+}
+
+router.get("/:id/thread", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const folks_sid = req.cookies.folks_sid;
+    let user_id = null;
+
+    if (folks_sid) {
+      const jwt_object: any = jwt.decode(folks_sid);
+      const session = await redis.get(`session:${jwt_object.id}:${folks_sid}`);
+      if (session) {
+        user_id = jwt_object.id;
+      }
+    }
+
+    const main_post = await prisma.post.findUnique({
+      where: {
+        id: BigInt(id),
+        deleted_at: null
+      }
+    });
+
+    if (!main_post) {
+      return res.status(400).json({
+        error: "invalid_request",
+        message: "Post not found."
+      });
+    }
+
+    // Pass initial depth of 0 when calling getReplies
+    const replies = await getReplies(main_post.id, user_id, 0);
+
+    res.setHeader("Content-Type", "application/json");
+    res.send(
+      JSONtoString({
+        ok: true,
+        replies
+      })
+    );
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({
+      error: "server_error",
+      message: "Something went wrong."
+    });
+  }
+});
+
 router.get("/:id/likes", async (req, res) => {
   try {
     const { id } = req.params;

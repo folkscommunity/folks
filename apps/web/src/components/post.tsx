@@ -137,7 +137,10 @@ export function Post({ post, user }: { post: any; user: any }) {
   }, []);
 
   return (
-    <div className="group mx-auto mb-4 flex w-full max-w-3xl gap-4 pb-4">
+    <div
+      className="group mx-auto mb-4 flex w-full max-w-3xl gap-4 pb-4"
+      id={`post-${lPost.id}`}
+    >
       <div>
         <Link href={`/${lPost.author.username}`} className="hover:no-underline">
           <Avatar>

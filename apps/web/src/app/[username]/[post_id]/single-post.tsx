@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Heart } from "@phosphor-icons/react";
+import { useEffect, useState } from "react";
+import { ArrowDown, Heart } from "@phosphor-icons/react";
 import dayjs from "dayjs";
 import { EllipsisIcon } from "lucide-react";
 import Link from "next/link";
@@ -28,19 +28,31 @@ import { LikesModal } from "./likes-modal";
 export function SinglePost({ user, post }: { user: any; post: any }) {
   const [lPost, setLPost] = useState(post);
   const [likesModalOpen, setLikesModalOpen] = useState(false);
+  const [replies, setReplies] = useState<any[]>([]);
 
   function fetchPost() {
-    fetch(
-      `/a
-    /post/${post.id}`,
-      {
-        method: "GET"
-      }
-    )
+    fetch(`/api/post/${post.id}`, {
+      method: "GET"
+    })
       .then((res) => res.json())
       .then((res) => {
         if (res.ok) {
           setLPost(res.post);
+        }
+      })
+      .catch((err) => {});
+  }
+
+  function fetchReplies() {
+    fetch(`/api/post/${post.id}/thread`, {
+      method: "GET"
+    })
+      .then((res) => res.json())
+      .then((res) => {
+        if (res.ok) {
+          setReplies(res.replies);
+          //scroll to the bottom
+          window.scrollTo(0, document.body.scrollHeight);
         }
       })
       .catch((err) => {});
@@ -125,6 +137,10 @@ export function SinglePost({ user, post }: { user: any; post: any }) {
       })
       .catch((err) => {});
   }
+
+  useEffect(() => {
+    fetchReplies();
+  }, []);
 
   return (
     <div className="text-md mx-auto w-full max-w-3xl">
@@ -292,24 +308,17 @@ export function SinglePost({ user, post }: { user: any; post: any }) {
             user={user}
             onPost={() => {
               fetchPost();
+              fetchReplies();
             }}
           />
         </div>
       )}
 
       <div className="pt-4">
-        {lPost.replies && lPost.replies.length > 0 ? (
-          lPost.replies
-            .sort(
-              (a: any, b: any) =>
-                new Date(b.created_at).getTime() -
-                new Date(a.created_at).getTime()
-            )
-            .map((reply: any, i: number) => (
-              <Post post={reply} user={user} key={i} />
-            ))
+        {replies && replies.length > 0 ? (
+          <Replies replies={replies} user={user} />
         ) : (
-          <div>No replies yet.</div>
+          <></>
         )}
       </div>
 
@@ -318,6 +327,80 @@ export function SinglePost({ user, post }: { user: any; post: any }) {
         open={likesModalOpen}
         onClose={() => setLikesModalOpen(false)}
       />
+    </div>
+  );
+}
+
+function Replies({ replies, user }: { replies: any[]; user: any }) {
+  return (
+    <div className="flex flex-col gap-0">
+      {replies.map((reply) => (
+        <Reply reply={reply} user={user} key={reply.id} />
+      ))}
+    </div>
+  );
+}
+
+function Reply({ reply, user }: { reply: any; user: any }) {
+  const [showReplies, setShowReplies] = useState(true);
+
+  return (
+    <div key={reply.id} className="flex flex-col gap-2">
+      <div
+        className={"relative flex flex-row gap-2"}
+        style={{
+          paddingLeft: reply.depth > 0 ? `30px` : `0px`
+        }}
+      >
+        {reply.replies && reply.replies.length > 0 && (
+          <div
+            className="group absolute flex min-h-full flex-1 items-stretch justify-center pt-[4px]"
+            style={{
+              width: "20px",
+              marginLeft: "10px",
+              zIndex: 40
+            }}
+          >
+            <div
+              className="pointer-events-auto mb-[45px] mt-[45px] flex min-h-full w-[8px] flex-1 cursor-pointer flex-col items-center justify-stretch text-center"
+              onClick={() => setShowReplies(!showReplies)}
+            >
+              <div className="flex items-center justify-center pb-2">
+                <ArrowDown
+                  weight="bold"
+                  className={cn(
+                    "rotate-0 text-slate-300 transition-all dark:text-slate-700",
+                    !showReplies && "rotate-[-180deg]"
+                  )}
+                />
+              </div>
+
+              <div
+                className={
+                  "min-h-full w-[2px] flex-1 bg-slate-300 opacity-0 transition-opacity delay-0 duration-100 group-hover:opacity-50 dark:bg-slate-700"
+                }
+              ></div>
+            </div>
+          </div>
+        )}
+
+        <div className="flex min-w-full flex-col">
+          <Post post={reply} user={user} />
+
+          <div
+            className={cn(
+              !showReplies &&
+                reply.replies &&
+                reply.replies.length > 0 &&
+                "hidden"
+            )}
+          >
+            {reply.replies && reply.replies.length > 0 && (
+              <Replies replies={reply.replies} user={user} />
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
