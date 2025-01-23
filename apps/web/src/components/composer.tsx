@@ -240,7 +240,7 @@ export function ReplyCompose({
       multiple: false,
       validators: [
         new FileAmountLimitValidator({ max: 1 }),
-        new FileTypeValidator(["jpg", "jpeg", "png", "webp", "gif"]),
+        new FileTypeValidator(["jpg", "jpeg", "png", "webp", "gif", "heic"]),
         new FileSizeValidator({ maxFileSize: 50 * 1024 * 1024 /* 50 MB */ }),
         new ImageDimensionsValidator({
           maxWidth: 8000,

@@ -1,6 +1,7 @@
 import { randomUUID } from "crypto";
 import { Readable } from "stream";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
+import exifReader from "exif-reader";
 import { Router } from "express";
 import jwt from "jsonwebtoken";
 import sharp from "sharp";
@@ -125,7 +126,7 @@ router.post("/", authMiddleware, async (req: RequestWithUser, res) => {
 
       let img = await sharp(buffer, {
         animated: true
-      });
+      }).rotate();
 
       const img_metadata = await img.metadata();
 
