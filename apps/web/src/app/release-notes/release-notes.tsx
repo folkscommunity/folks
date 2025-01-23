@@ -2,9 +2,19 @@ import dayjs from "dayjs";
 
 import { parsePostBody } from "@/lib/post-utils";
 
-export const current_release = "0.3.5";
+export const current_release = "0.3.6";
 
 const releases = [
+  {
+    version: "0.3.6",
+    date: "2025-01-23",
+    changes: [
+      "Added an option to disable ribbon scrolling. (in Account / Settings)",
+      "Added an option to autocomplete a new password in on the registration page.",
+      "Fixed reply composer issues.",
+      "Fixed image metadat rotation issues."
+    ]
+  },
   {
     version: "0.3.5",
     date: "2025-01-23",

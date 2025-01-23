@@ -1,6 +1,7 @@
 "use client";
 
 import { useContext, useEffect, useRef, useState } from "react";
+import { useLocalStorage } from "@uidotdev/usehooks";
 import sanitizeHtml from "sanitize-html";
 
 import { cn } from "@/lib/utils";
@@ -17,6 +18,11 @@ function Marquee(props: {
 
   const duration = props.content.length * 0.1;
 
+  const [stopScrolling, setStopScrolling] = useLocalStorage(
+    "ribbon_stop_scroll",
+    false
+  );
+
   return (
     <div
       className={cn("marquee-container", props.className)}
@@ -25,15 +31,16 @@ function Marquee(props: {
         {
           "--pause-on-hover": "paused",
           "--pause-on-click": "running",
-          height: "40px"
+          height: "40px",
+          paddingLeft: stopScrolling ? "1.5ch" : "0px"
         } as any
       }
     >
       <div
-        className="marquee pr-[1ch]"
+        className="marquee select-none pr-[1ch]"
         style={
           {
-            "--play": !windowIsActive ? "paused" : "playing",
+            "--play": stopScrolling || !windowIsActive ? "paused" : "playing",
             "--direction": props.direction || "normal",
             "--duration": `${duration}s`,
             "--delay": "0s",
@@ -44,10 +51,10 @@ function Marquee(props: {
         {props.content}
       </div>
       <div
-        className="marquee pr-[1ch]"
+        className="marquee select-none pr-[1ch]"
         style={
           {
-            "--play": !windowIsActive ? "paused" : "playing",
+            "--play": stopScrolling || !windowIsActive ? "paused" : "playing",
             "--direction": props.direction || "normal",
             "--duration": `${duration}s`,
             "--delay": "0s",
