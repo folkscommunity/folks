@@ -18,7 +18,8 @@ const mono = IBM_Plex_Mono({
 
 export const metadata: Metadata = {
   title: "Folks",
-  description: "A place for product people.",
+  description:
+    "Folks is a place for product people (designers, engineers, founders, painters, carpenters, and anyone else who crafts something) to share their creations and thoughts with each other and feel comfortable doing so.",
   openGraph: {
     type: "website",
     locale: "en_US",
