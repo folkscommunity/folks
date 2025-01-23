@@ -307,7 +307,7 @@ export function ReplyCompose({
       <div className="text-md mx-auto flex w-full max-w-3xl flex-1 flex-col">
         {open && (
           <div className="text-black-400 dark:text-black-500 px-4 text-sm">
-            Replying to @johny
+            Replying to {`@${post.author.username}`}
           </div>
         )}
 
