@@ -76,6 +76,11 @@ export function HorizonalRibbon({
   top?: boolean;
 }) {
   const [ribbonString, setRibbonString] = useState("");
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   function updateRibbon() {
     fetch("/api/ribbon")
@@ -105,7 +110,7 @@ export function HorizonalRibbon({
         top ? "border-b" : "border-t"
       )}
     >
-      <Marquee content={sanitizeHtml(ribbonString)} />
+      {isClient && <Marquee content={ribbonString} />}
     </div>
   );
 }

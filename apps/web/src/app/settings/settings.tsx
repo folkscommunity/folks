@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocalStorage } from "@uidotdev/usehooks";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -19,10 +19,11 @@ export function Settings({ user }: { user: any }) {
   const [pronouns, setPronouns] = useState(user.pronouns || "");
   const [website, setWebsite] = useState(user.website || "");
 
-  const [stopScrolling, setStopScrolling] = useLocalStorage(
-    "ribbon_stop_scroll",
-    false
-  );
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   function updateProfile() {
     fetch("/api/user", {
@@ -165,17 +166,30 @@ export function Settings({ user }: { user: any }) {
 
         <h3 className="pb-4">Preferences</h3>
 
-        <div className="flex items-center space-x-4">
-          <Label htmlFor="disable-ribbon-scrolling">
-            Disable Ribbon Scrolling
-          </Label>
-          <Switch
-            id="disable-ribbon-scrolling"
-            checked={stopScrolling}
-            onCheckedChange={(checked) => setStopScrolling(checked)}
-          />
-        </div>
+        {isClient && <Preferences />}
       </div>
     </div>
+  );
+}
+
+function Preferences() {
+  const [stopScrolling, setStopScrolling] = useLocalStorage(
+    "ribbon_stop_scroll",
+    false
+  );
+
+  return (
+    <>
+      <div className="flex items-center space-x-4">
+        <Label htmlFor="disable-ribbon-scrolling">
+          Disable Ribbon Scrolling
+        </Label>
+        <Switch
+          id="disable-ribbon-scrolling"
+          checked={stopScrolling}
+          onCheckedChange={(checked) => setStopScrolling(checked)}
+        />
+      </div>
+    </>
   );
 }
