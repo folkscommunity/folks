@@ -366,6 +366,17 @@ export function ReplyCompose({
                 <ImagesSquare size={24} />
               </button>
 
+              <div
+                className={cn(
+                  "font-bold opacity-0 transition-opacity duration-300",
+                  text && text.length > 3 && "opacity-100",
+                  text && text.length > 290 && "text-orange-500",
+                  text && text.length === 300 && "text-red-500"
+                )}
+              >
+                {(text && text.length) || "0"} / 300
+              </div>
+
               <div className="flex items-center gap-2">
                 <button
                   className="rounded-md border border-neutral-900 px-3 py-1 text-black disabled:border-neutral-400 dark:border-neutral-600 dark:text-white dark:disabled:border-neutral-800"

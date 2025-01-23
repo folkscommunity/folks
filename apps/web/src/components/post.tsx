@@ -151,7 +151,7 @@ export function Post({ post, user }: { post: any; user: any }) {
           </Avatar>
         </Link>
       </div>
-      <div className="flex flex-1 flex-col gap-1">
+      <div className="flex max-w-full flex-1 flex-col gap-1">
         <div className="flex items-center justify-between gap-[2px]">
           <div>
             <Link className="font-bold" href={`/${lPost.author.username}`}>
@@ -236,10 +236,10 @@ export function Post({ post, user }: { post: any; user: any }) {
 
         <a
           href={`/${lPost.author.username}/${lPost.id}`}
-          className="hover:no-underline"
+          className="max-w-full hover:no-underline"
         >
           <div
-            className="max-h-[400px]"
+            className="max-h-[400px] max-w-full break-words"
             dangerouslySetInnerHTML={{
               __html: parsePostBody(lPost.body)
             }}
