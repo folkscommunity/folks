@@ -193,11 +193,15 @@ router.post("/", authMiddleware, async (req: RequestWithUser, res) => {
         distinctId: req.user.id.toString(),
         event: "post",
         properties: {
+          post_id: post.id.toString(),
           ip_address:
             req.headers["x-forwarded-for"] || req.headers["cf-connecting-ip"],
           user_agent: req.headers["user-agent"],
           replying_to: replying_to ? replying_to : undefined,
-          image: true
+          image: process.env.CDN_URL
+            ? `${process.env.CDN_URL}/${file_key}`
+            : `https://${process.env.AWS_BUCKET}.s3.amazonaws.com/${file_key}`,
+          body: body
         }
       });
     } else {
@@ -213,11 +217,13 @@ router.post("/", authMiddleware, async (req: RequestWithUser, res) => {
         distinctId: req.user.id.toString(),
         event: "post",
         properties: {
+          post_id: post.id.toString(),
           ip_address:
             req.headers["x-forwarded-for"] || req.headers["cf-connecting-ip"],
           user_agent: req.headers["user-agent"],
           replying_to: replying_to ? replying_to : undefined,
-          image: false
+          image: false,
+          body: body
         }
       });
     }
