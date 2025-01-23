@@ -11,7 +11,8 @@ const router = Router();
 
 router.get("/everything", async (req, res) => {
   try {
-    const { cursor, limit } = req.query;
+    const { cursor } = req.query;
+    let { limit }: any = req.query;
 
     const folks_sid = req.cookies.folks_sid;
 
@@ -27,16 +28,19 @@ router.get("/everything", async (req, res) => {
       }
     }
 
+    if (Number(limit) > 50) {
+      limit = 50;
+    }
+
+    const cursorId = cursor ? BigInt(cursor as any) : undefined;
+
     const feed = await prisma.post.findMany({
       where: {
         deleted_at: null,
         reply_to_id: null
       },
-      cursor: cursor
-        ? {
-            id: BigInt(cursor as any) - 1n
-          }
-        : undefined,
+      cursor: cursorId ? { id: cursorId } : undefined,
+      skip: cursorId ? 1 : 0,
       take: limit ? Number(limit) : 20,
       orderBy: {
         created_at: "desc"
@@ -149,9 +153,7 @@ router.get("/everything", async (req, res) => {
           }
         })),
         nextCursor:
-          feed && feed.length > 0
-            ? feed[feed.length - 1].id.toString()
-            : undefined
+          feed.length > 0 ? feed[feed.length - 1].id.toString() : undefined
       })
     );
   } catch (e) {
@@ -166,7 +168,8 @@ router.get("/everything", async (req, res) => {
 
 router.get("/highlighted", async (req, res) => {
   try {
-    const { cursor, limit } = req.query;
+    const { cursor } = req.query;
+    let { limit }: any = req.query;
 
     const folks_sid = req.cookies.folks_sid;
 
@@ -182,16 +185,19 @@ router.get("/highlighted", async (req, res) => {
       }
     }
 
+    if (Number(limit) > 50) {
+      limit = 50;
+    }
+
+    const cursorId = cursor ? BigInt(cursor as any) : undefined;
+
     const feed = await prisma.post.findMany({
       where: {
         deleted_at: null,
         highlighted: true
       },
-      cursor: cursor
-        ? {
-            id: BigInt(cursor as any) - 1n
-          }
-        : undefined,
+      cursor: cursorId ? { id: cursorId } : undefined,
+      skip: cursorId ? 1 : 0,
       take: limit ? Number(limit) : 20,
       orderBy: {
         created_at: "desc"
@@ -304,9 +310,7 @@ router.get("/highlighted", async (req, res) => {
           }
         })),
         nextCursor:
-          feed && feed.length > 0
-            ? feed[feed.length - 1].id.toString()
-            : undefined
+          feed.length > 0 ? feed[feed.length - 1].id.toString() : undefined
       })
     );
   } catch (e) {
@@ -321,7 +325,8 @@ router.get("/highlighted", async (req, res) => {
 
 router.get("/following", authMiddleware, async (req: RequestWithUser, res) => {
   try {
-    const { cursor, limit } = req.query;
+    const { cursor } = req.query;
+    let { limit }: any = req.query;
 
     const user = await prisma.user.findUnique({
       where: {
@@ -336,6 +341,12 @@ router.get("/following", authMiddleware, async (req: RequestWithUser, res) => {
       });
     }
 
+    if (Number(limit) > 50) {
+      limit = 50;
+    }
+
+    const cursorId = cursor ? BigInt(cursor as any) : undefined;
+
     const following = await prisma.following.findMany({
       where: {
         user_id: BigInt(req.user.id)
@@ -343,14 +354,10 @@ router.get("/following", authMiddleware, async (req: RequestWithUser, res) => {
       include: {
         target: {
           select: {
-            id: true,
-            username: true,
-            display_name: true,
-            avatar_url: true
+            id: true
           }
         }
-      },
-      take: limit ? Number(limit) : 20
+      }
     });
 
     const feed = await prisma.post.findMany({
@@ -360,12 +367,8 @@ router.get("/following", authMiddleware, async (req: RequestWithUser, res) => {
         },
         deleted_at: null
       },
-      cursor: cursor
-        ? {
-            id: BigInt(cursor as any) - 1n
-          }
-        : undefined,
-      take: limit ? Number(limit) : 20,
+      cursor: cursorId ? { id: cursorId } : undefined,
+      skip: cursorId ? 1 : 0,
       orderBy: {
         created_at: "desc"
       },
@@ -477,9 +480,7 @@ router.get("/following", authMiddleware, async (req: RequestWithUser, res) => {
           }
         })),
         nextCursor:
-          feed && feed.length > 0
-            ? feed[feed.length - 1].id.toString()
-            : undefined
+          feed.length > 0 ? feed[feed.length - 1].id.toString() : undefined
       })
     );
   } catch (e) {
@@ -494,7 +495,8 @@ router.get("/following", authMiddleware, async (req: RequestWithUser, res) => {
 
 router.get("/user/:author_id", async (req, res) => {
   try {
-    const { cursor, limit } = req.query;
+    const { cursor } = req.query;
+    let { limit }: any = req.query;
 
     const folks_sid = req.cookies.folks_sid;
 
@@ -510,17 +512,20 @@ router.get("/user/:author_id", async (req, res) => {
       }
     }
 
+    if (Number(limit) > 50) {
+      limit = 50;
+    }
+
+    const cursorId = cursor ? BigInt(cursor as any) : undefined;
+
     const feed = await prisma.post.findMany({
       where: {
         author_id: BigInt(req.params.author_id),
         deleted_at: null,
         reply_to_id: null
       },
-      cursor: cursor
-        ? {
-            id: BigInt(cursor as any) - 1n
-          }
-        : undefined,
+      cursor: cursorId ? { id: cursorId } : undefined,
+      skip: cursorId ? 1 : 0,
       take: limit ? Number(limit) : 20,
       orderBy: {
         created_at: "desc"
@@ -633,9 +638,7 @@ router.get("/user/:author_id", async (req, res) => {
           }
         })),
         nextCursor:
-          feed && feed.length > 0
-            ? feed[feed.length - 1].id.toString()
-            : undefined
+          feed.length > 0 ? feed[feed.length - 1].id.toString() : undefined
       })
     );
   } catch (e) {
