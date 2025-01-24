@@ -9,9 +9,10 @@ import { SinglePost } from "./single-post";
 export async function generateMetadata({
   params
 }: {
-  params: Promise<{ post_id: string }>;
+  params: Promise<{ post_id: string; username: string }>;
 }) {
   const post_id = (await params).post_id;
+  const username = (await params).username;
 
   try {
     BigInt(post_id);
@@ -22,6 +23,9 @@ export async function generateMetadata({
   const post = await prisma.post.findUnique({
     where: {
       id: BigInt(post_id),
+      author: {
+        username: username
+      },
       deleted_at: null
     },
     select: {
@@ -50,9 +54,10 @@ export async function generateMetadata({
 export default async function Page({
   params
 }: {
-  params: Promise<{ post_id: string }>;
+  params: Promise<{ post_id: string; username: string }>;
 }) {
   const post_id = (await params).post_id;
+  const username = (await params).username;
 
   if (!post_id) {
     return <NotFound />;
@@ -69,6 +74,9 @@ export default async function Page({
   const post = await prisma.post.findUnique({
     where: {
       id: BigInt(post_id),
+      author: {
+        username: username
+      },
       deleted_at: null
     },
     select: {

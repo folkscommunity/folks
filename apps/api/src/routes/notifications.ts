@@ -124,10 +124,42 @@ router.get("/", authMiddleware, async (req: RequestWithUser, res) => {
       created_at: reply.created_at
     }));
 
+    const post_mentions = await prisma.postMention.findMany({
+      where: {
+        user_id: user.id
+      },
+      include: {
+        post: {
+          select: {
+            author_id: true,
+            author: {
+              select: {
+                username: true,
+                display_name: true
+              }
+            }
+          }
+        }
+      },
+      orderBy: {
+        created_at: "desc"
+      }
+    });
+
+    const post_mentions_formated = post_mentions.map((mention) => ({
+      user_id: mention.post.author_id.toString(),
+      post_id: mention.post_id.toString(),
+      username: mention.post.author.username,
+      display_name: mention.post.author.display_name,
+      type: NotificationType.Mention,
+      created_at: mention.created_at
+    }));
+
     const combined = [
       ...likes_formated,
       ...follows_formated,
-      ...replies_formated
+      ...replies_formated,
+      ...post_mentions_formated
     ]
       .sort((a, b) => {
         return (

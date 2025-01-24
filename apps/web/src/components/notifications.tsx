@@ -29,7 +29,7 @@ export function NotificationMessage({
         </Link>{" "}
         mentioned you in a{" "}
         <Link
-          href={`/${user.username}/${notification.post_id}`}
+          href={`/${notification.username}/${notification.post_id}`}
           className="font-bold hover:underline"
         >
           post

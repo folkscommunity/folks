@@ -8,7 +8,11 @@ const releases = [
   {
     version: "0.3.7",
     date: "2025-01-24",
-    changes: ["Added a password reset feature.", "Fixed some visual bugs."]
+    changes: [
+      "Added a password reset feature.",
+      "Fixed some visual bugs.",
+      "Mentions now show up in notifications."
+    ]
   },
   {
     version: "0.3.6",

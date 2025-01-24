@@ -1,3 +1,4 @@
+/* eslint-disable prefer-const */
 import { randomUUID } from "crypto";
 import { Readable } from "stream";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
@@ -16,13 +17,67 @@ import { redis } from "@/lib/redis";
 
 const router = Router();
 
+async function generatePostMentions(post_id: string, body: string) {
+  const regex = /(?:^|[.,]|\s)@(\w+)(?![^<]*>)/g;
+
+  const matches = body.match(regex);
+
+  console.log(matches);
+
+  if (!matches) {
+    return;
+  }
+
+  const post = await prisma.post.findUnique({
+    where: {
+      id: BigInt(post_id)
+    }
+  });
+
+  let processed_matches: string[] = [];
+
+  for await (const match of matches) {
+    const match_lower = match
+      .toLowerCase()
+      .replace("@", "")
+      .replaceAll(" ", "");
+
+    if (processed_matches.includes(match_lower)) {
+      continue;
+    }
+
+    const matched_user = await prisma.user.findFirst({
+      where: {
+        username: match_lower
+      }
+    });
+
+    if (matched_user && post.author_id === matched_user.id) {
+      continue;
+    }
+
+    if (matched_user) {
+      await prisma.postMention.create({
+        data: {
+          post_id: BigInt(post_id),
+          user_id: matched_user.id
+        }
+      });
+    }
+
+    await processed_matches.push(match_lower);
+  }
+
+  return;
+}
+
 router.post("/", authMiddleware, async (req: RequestWithUser, res) => {
   try {
     const { body, files, replying_to } = req.body;
 
     const rate_limit = await redis.get(`rate_limit:post:${req.user.id}`);
 
-    if (Number(rate_limit) > 2) {
+    if (Number(rate_limit) > 5) {
       return res.status(429).json({
         error: "rate_limit_exceeded",
         message:
@@ -189,6 +244,8 @@ router.post("/", authMiddleware, async (req: RequestWithUser, res) => {
         }
       });
 
+      await generatePostMentions(post.id.toString(), body);
+
       await posthog.capture({
         distinctId: req.user.id.toString(),
         event: "post",
@@ -212,6 +269,8 @@ router.post("/", authMiddleware, async (req: RequestWithUser, res) => {
           reply_to_id: replying_to ? BigInt(replying_to) : undefined
         }
       });
+
+      await generatePostMentions(post.id.toString(), body);
 
       await posthog.capture({
         distinctId: req.user.id.toString(),
