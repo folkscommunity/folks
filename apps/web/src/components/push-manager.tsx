@@ -28,9 +28,22 @@ function PushNotificationManagerClient() {
     if ("serviceWorker" in navigator && "PushManager" in window) {
       setIsSupported(true);
       registerServiceWorker();
-      subscribeToPush();
     }
   }, []);
+
+  useEffect(() => {
+    if (!subscription) {
+      window.addEventListener("click", async () => {
+        await subscribeToPush();
+      });
+    }
+
+    return () => {
+      window.removeEventListener("click", async () => {
+        await subscribeToPush();
+      });
+    };
+  }, [subscription]);
 
   async function registerServiceWorker() {
     const registration = await navigator.serviceWorker.register("/sw.js", {
@@ -45,10 +58,12 @@ function PushNotificationManagerClient() {
   async function subscribeToPush() {
     try {
       const registration = await navigator.serviceWorker.ready;
+
       const sub = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: vapid_public_key
       });
+
       setSubscription(sub);
 
       await fetch("/api/notifications/register/web", {
@@ -60,7 +75,9 @@ function PushNotificationManagerClient() {
           sub: sub
         })
       });
-    } catch (e) {}
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   async function unsubscribeFromPush() {
