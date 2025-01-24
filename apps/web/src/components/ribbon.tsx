@@ -25,7 +25,7 @@ function Marquee(props: {
 
   return (
     <div
-      className={cn("marquee-container", props.className)}
+      className={cn("marquee-container fadein", props.className)}
       ref={marqueeRef}
       style={
         {

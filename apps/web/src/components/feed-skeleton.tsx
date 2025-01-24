@@ -33,7 +33,7 @@ export function PostSkeleton({ height }: { height: number }) {
           style={{
             height: height
           }}
-          className="mt-2 max-h-[400px] w-[70%] rounded-md bg-neutral-200 max-md:w-full dark:bg-slate-800"
+          className="mt-2 max-h-full w-full rounded-md bg-neutral-200 max-md:w-full dark:bg-slate-800"
         />
 
         <div className="flex h-[24px] items-center justify-start gap-6 pt-2">

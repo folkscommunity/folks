@@ -1,3 +1,4 @@
+import { randomUUID } from "crypto";
 import argon2 from "argon2";
 import { Router } from "express";
 import jwt from "jsonwebtoken";
@@ -9,7 +10,11 @@ import { authMiddleware, RequestWithUser } from "@/lib/auth_middleware";
 import { posthog } from "@/lib/posthog";
 import { redis } from "@/lib/redis";
 import { sendDiscordNotification } from "@/lib/send_discord_notification";
-import { sendVerifyEmail } from "@/lib/send_email";
+import {
+  sendPasswordResetConfirmation,
+  sendPasswordResetRequest,
+  sendVerifyEmail
+} from "@/lib/send_email";
 
 const router = Router();
 
@@ -519,4 +524,171 @@ router.post(
   }
 );
 
+router.post("/reset/request", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const rate_limit_24h = await redis.get(
+      `rate_limit:reset_request:${email}:24h`
+    );
+
+    if (rate_limit_24h && Number(rate_limit_24h) > 4) {
+      return res.status(429).json({
+        error: "rate_limit",
+        msg: "Too many requests. Please try again later or contact help@folkscommunity.com for assistance."
+      });
+    }
+
+    const rate_limit = await redis.get(`rate_limit:reset_request:${email}`);
+
+    if (rate_limit) {
+      return res.status(429).json({
+        error: "rate_limit",
+        msg: "Too many requests. Please try again in 5 minutes."
+      });
+    }
+    const ip =
+      req.headers["x-forwarded-for"] || req.headers["cf-connecting-ip"];
+
+    const ip_rate_limit = await redis.get(`rate_limit:reset_request:${ip}:ip`);
+
+    if (ip_rate_limit && Number(ip_rate_limit) > 5) {
+      return res.status(429).json({
+        error: "rate_limit",
+        msg: "Too many requests. Please try again later or contact help@folkscommunity.com for assistance."
+      });
+    }
+
+    await redis.set(
+      `rate_limit:reset_request:${ip}:ip`,
+      Number(ip_rate_limit) + 1,
+      "EX",
+      60 * 30
+    );
+
+    const user = await prisma.user.findUnique({
+      where: {
+        email: email
+      }
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        error: "invalid_request",
+        msg: "User not found."
+      });
+    }
+
+    const expires = new Date(Date.now() + 1000 * 60 * 20);
+    const generate_reset_password_token = (
+      randomUUID() + randomUUID()
+    ).replaceAll("-", "");
+
+    await prisma.user.update({
+      where: {
+        id: user.id
+      },
+      data: {
+        reset_password_token: generate_reset_password_token,
+        reset_password_expires: expires
+      }
+    });
+
+    await redis.set(
+      `rate_limit:reset_password:${user.id}`,
+      Number(rate_limit) + 1,
+      "EX",
+      300
+    );
+
+    await redis.set(
+      `rate_limit:reset_password:${user.id}:24h`,
+      Number(rate_limit_24h) + 1,
+      "EX",
+      60 * 60 * 24
+    );
+
+    await sendPasswordResetRequest(
+      user.email,
+      user.display_name,
+      `reset-password/${generate_reset_password_token}`
+    );
+
+    await posthog.capture({
+      distinctId: user.id.toString(),
+      event: "password_reset_requested"
+    });
+
+    return res.status(200).json({
+      ok: true,
+      msg: "Your password reset request has been sent."
+    });
+  } catch (e) {
+    console.log(e);
+
+    return res.status(500).json({
+      ok: false,
+      error: "An error occurred while resetting your password."
+    });
+  }
+});
+
+router.post("/reset", async (req, res) => {
+  try {
+    const { token, password } = req.body;
+
+    const user = await prisma.user.findFirst({
+      where: {
+        reset_password_token: token
+      }
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        error: "invalid_request",
+        msg: "Invalid reset token, please try again."
+      });
+    }
+
+    if (
+      user.reset_password_expires &&
+      user.reset_password_expires < new Date()
+    ) {
+      return res.status(400).json({
+        error: "invalid_request",
+        msg: "Invalid reset token, please try again."
+      });
+    }
+
+    await prisma.user.update({
+      where: {
+        id: user.id
+      },
+      data: {
+        password_hash: await argon2.hash(password),
+        reset_password_token: null,
+        reset_password_expires: null
+      }
+    });
+
+    const keys = await redis.keys(`session:${user.id.toString()}:*`);
+
+    for await (const key of keys) {
+      await redis.del(key);
+    }
+
+    await sendPasswordResetConfirmation(user.email, user.display_name);
+
+    await posthog.capture({
+      distinctId: user.id.toString(),
+      event: "password_reset"
+    });
+
+    res.json({ ok: true });
+  } catch (err) {
+    console.error(err);
+
+    res.status(500).json({ error: "server_error" });
+  }
+});
 export default router;

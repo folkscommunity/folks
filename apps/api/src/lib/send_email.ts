@@ -1,7 +1,12 @@
 import { randomUUID } from "crypto";
 
 import { prisma } from "@folks/db";
-import { renderInvite, renderVerifyEmail } from "@folks/email";
+import {
+  renderInvite,
+  renderPasswordResetConfirmation,
+  renderPasswordResetRequest,
+  renderVerifyEmail
+} from "@folks/email";
 
 import { ses } from "./aws";
 
@@ -121,6 +126,71 @@ export async function sendInviteEmail(email: string) {
     await ses.sendEmail(params);
   } else {
     console.log("INVITE: ", email);
+  }
+
+  return true;
+}
+
+export async function sendPasswordResetRequest(
+  email: string,
+  name: string,
+  url: string
+) {
+  const params = {
+    Source: "Folks <folks@folkscommunity.com>",
+    Destination: {
+      ToAddresses: [email]
+    },
+    Message: {
+      Body: {
+        Html: {
+          Charset: "UTF-8",
+          Data: await renderPasswordResetRequest(`${url_base}/${url}`, name)
+        }
+      },
+      Subject: {
+        Charset: "UTF-8",
+        Data: "Reset your password"
+      }
+    }
+  };
+
+  if (process.env.NODE_ENV === "production") {
+    await ses.sendEmail(params);
+  } else {
+    console.log("PASSWORD RESET: ", email, name, url);
+  }
+
+  return true;
+}
+
+export async function sendPasswordResetConfirmation(
+  email: string,
+  name: string
+) {
+  const params = {
+    Source: "Folks <folks@folkscommunity.com>",
+    Destination: {
+      ToAddresses: [email]
+    },
+    Message: {
+      Body: {
+        Html: {
+          Charset: "UTF-8",
+          Data: await renderPasswordResetConfirmation(name)
+        }
+      },
+      Subject: {
+        Charset: "UTF-8",
+        Data: "Reset your password"
+      }
+    }
+  };
+
+  if (process.env.NODE_ENV === "production") {
+    await ses.sendEmail(params);
+  } else {
+    console.log("PASSWORD RESET CONFIRM: ", name);
   }
 
   return true;

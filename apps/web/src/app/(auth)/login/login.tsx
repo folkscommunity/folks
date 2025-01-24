@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -111,6 +112,16 @@ export function Login() {
           >
             Login
           </button>
+        </div>
+
+        <div>
+          <p>
+            If you don't remember your password, you can{" "}
+            <Link href="/reset-password" className="font-bold hover:underline">
+              click here
+            </Link>{" "}
+            to reset it.
+          </p>
         </div>
       </form>
     </div>

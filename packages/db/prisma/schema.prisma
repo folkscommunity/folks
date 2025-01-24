@@ -39,15 +39,42 @@ model User {
 
   notifications_last_read_at DateTime?
 
-  following   Following[] @relation("following")
-  followers   Following[] @relation("followers")
-  posts       Post[]      @relation("posts")
-  liked_posts PostLike[]  @relation("likes")
-  ribbons     Ribbon[]    @relation("ribbons")
+  following              Following[]            @relation("following")
+  followers              Following[]            @relation("followers")
+  posts                  Post[]                 @relation("posts")
+  liked_posts            PostLike[]             @relation("likes")
+  ribbons                Ribbon[]               @relation("ribbons")
+  mentions               PostMention[]          @relation("mentions")
+  notification_endpoints NotificationEndpoint[] @relation("notification_endpoints")
 
   @@index([id])
   @@index([username])
   @@map("users")
+}
+
+enum NotificationEndpointType {
+  WEBPUSH
+  IOS
+  ANDROID
+}
+
+model NotificationEndpoint {
+  id String @id @unique @default(cuid())
+
+  user_id BigInt
+  user    User   @relation(fields: [user_id], references: [id], name: "notification_endpoints", onDelete: Cascade)
+
+  type NotificationEndpointType
+
+  endpoint   Json
+  user_agent String?
+
+  enabled Boolean @default(false)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("notification_endpoints")
 }
 
 model Following {
@@ -84,8 +111,9 @@ model Post {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  replies Post[]     @relation("replies")
-  likes   PostLike[] @relation("likes")
+  replies  Post[]        @relation("replies")
+  likes    PostLike[]    @relation("likes")
+  mentions PostMention[] @relation("mentions")
 
   @@index([author_id])
   @@map("posts")
@@ -103,6 +131,21 @@ model PostLike {
   created_at DateTime @default(now())
 
   @@map("post_likes")
+}
+
+model PostMention {
+  id String @id @unique @default(cuid())
+
+  user_id BigInt
+  user    User   @relation(fields: [user_id], references: [id], name: "mentions", onDelete: Cascade)
+
+  post_id BigInt
+  post    Post   @relation(fields: [post_id], references: [id], name: "mentions", onDelete: Cascade)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("post_mentions")
 }
 
 enum AttachmentType {

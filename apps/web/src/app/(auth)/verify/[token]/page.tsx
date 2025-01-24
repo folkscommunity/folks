@@ -1,6 +1,6 @@
 import { MainContainer } from "@/components/main-container";
 
-import VerifyPage from "./verify_page";
+import VerifyPage from "./verify-page";
 
 export default async function Page({
   params
