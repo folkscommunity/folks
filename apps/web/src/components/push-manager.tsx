@@ -2,7 +2,10 @@
 
 import { useEffect, useState } from "react";
 
-const vapid_public_key = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!;
+// this is safe to be in production, don't worry about it.
+const vapid_public_key =
+  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ||
+  "BG8XGxqkzgvi5rXU7Xew2hyCylCoUbfssCrvJIGPsb24RlXZ1EqFojRmvYphgjd6SMOt6KdiCtBIX1wznyBrvUE";
 
 export function PushNotificationManager() {
   const [isClient, setIsClient] = useState(false);
