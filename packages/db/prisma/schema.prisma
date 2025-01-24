@@ -39,6 +39,11 @@ model User {
 
   notifications_last_read_at DateTime?
 
+  notifications_push_liked_posts Boolean @default(true)
+  notifications_push_replied_to  Boolean @default(true)
+  notifications_push_mentioned   Boolean @default(true)
+  notifications_push_followed    Boolean @default(true)
+
   following              Following[]            @relation("following")
   followers              Following[]            @relation("followers")
   posts                  Post[]                 @relation("posts")

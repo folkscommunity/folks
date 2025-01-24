@@ -12,6 +12,7 @@ import { JSONtoString, schemas } from "@folks/utils";
 
 import { authMiddleware, RequestWithUser } from "@/lib/auth_middleware";
 import { s3 } from "@/lib/aws";
+import { sendNotification } from "@/lib/notification_utils";
 import { posthog } from "@/lib/posthog";
 import { redis } from "@/lib/redis";
 
@@ -22,8 +23,6 @@ async function generatePostMentions(post_id: string, body: string) {
 
   const matches = body.match(regex);
 
-  console.log(matches);
-
   if (!matches) {
     return;
   }
@@ -31,6 +30,15 @@ async function generatePostMentions(post_id: string, body: string) {
   const post = await prisma.post.findUnique({
     where: {
       id: BigInt(post_id)
+    },
+    include: {
+      author: {
+        select: {
+          id: true,
+          username: true,
+          display_name: true
+        }
+      }
     }
   });
 
@@ -63,6 +71,18 @@ async function generatePostMentions(post_id: string, body: string) {
           user_id: matched_user.id
         }
       });
+
+      if (matched_user.notifications_push_mentioned) {
+        await sendNotification(
+          matched_user.id,
+          `Folks`,
+          `${post.author.display_name} mentioned you in a post: ${post.body.slice(
+            0,
+            20
+          )}${post.body.length > 20 ? "..." : ""}`,
+          `${process.env.NODE_ENV === "production" ? "https://folkscommunity.com" : process.env.DEV_URL}/${post.author.username}/${post.id}`
+        );
+      }
     }
 
     await processed_matches.push(match_lower);
@@ -261,6 +281,38 @@ router.post("/", authMiddleware, async (req: RequestWithUser, res) => {
           body: body
         }
       });
+
+      if (replying_to) {
+        const original_post = await prisma.post.findUnique({
+          where: {
+            id: BigInt(replying_to)
+          },
+          include: {
+            author: {
+              select: {
+                id: true,
+                username: true,
+                notifications_push_replied_to: true
+              }
+            }
+          }
+        });
+
+        if (
+          original_post.author.notifications_push_replied_to &&
+          original_post.author_id !== user.id
+        ) {
+          await sendNotification(
+            original_post.author.id,
+            `Folks`,
+            `${user.display_name} replied to your post: ${post.body.slice(
+              0,
+              20
+            )}${post.body.length > 20 ? "..." : ""}`,
+            `${process.env.NODE_ENV === "production" ? "https://folkscommunity.com" : process.env.DEV_URL}/${user.username}/${post.id}`
+          );
+        }
+      }
     } else {
       const post = await prisma.post.create({
         data: {
@@ -285,6 +337,38 @@ router.post("/", authMiddleware, async (req: RequestWithUser, res) => {
           body: body
         }
       });
+
+      if (replying_to) {
+        const original_post = await prisma.post.findUnique({
+          where: {
+            id: BigInt(replying_to)
+          },
+          include: {
+            author: {
+              select: {
+                id: true,
+                username: true,
+                notifications_push_replied_to: true
+              }
+            }
+          }
+        });
+
+        if (
+          original_post.author.notifications_push_replied_to &&
+          original_post.author_id !== user.id
+        ) {
+          await sendNotification(
+            original_post.author.id,
+            `Folks`,
+            `${user.display_name} replied to your post: ${post.body.slice(
+              0,
+              20
+            )}${post.body.length > 20 ? "..." : ""}`,
+            `${process.env.NODE_ENV === "production" ? "https://folkscommunity.com" : process.env.DEV_URL}/${user.username}/${post.id}`
+          );
+        }
+      }
     }
 
     res.setHeader("Content-Type", "application/json");
@@ -734,6 +818,15 @@ router.post("/like", authMiddleware, async (req: RequestWithUser, res) => {
     const post = await prisma.post.findUnique({
       where: {
         id: BigInt(post_id)
+      },
+      include: {
+        author: {
+          select: {
+            id: true,
+            username: true,
+            notifications_push_liked_posts: true
+          }
+        }
       }
     });
 
@@ -772,6 +865,15 @@ router.post("/like", authMiddleware, async (req: RequestWithUser, res) => {
         post_id: post_id
       }
     });
+
+    if (post.author.notifications_push_liked_posts) {
+      await sendNotification(
+        post.author.id,
+        `Folks`,
+        `${user.display_name} liked your post: ${post.body.slice(0, 20)}${post.body.length > 20 ? "..." : ""}`,
+        `${process.env.NODE_ENV === "production" ? "https://folkscommunity.com" : process.env.DEV_URL}/${post.author.username}/${post_id}`
+      );
+    }
 
     res.setHeader("Content-Type", "application/json");
     res.send(JSONtoString({ ok: true }));

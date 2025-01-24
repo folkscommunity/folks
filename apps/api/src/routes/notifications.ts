@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { prisma } from "@folks/db";
+import { NotificationEndpointType, prisma } from "@folks/db";
 import { JSONtoString } from "@folks/utils";
 import { NotificationType } from "@folks/utils/notification_types";
 
@@ -229,5 +229,72 @@ router.post("/read", authMiddleware, async (req: RequestWithUser, res) => {
     res.status(500).json({ error: "server_error" });
   }
 });
+
+router.post(
+  "/register/web",
+  authMiddleware,
+  async (req: RequestWithUser, res) => {
+    try {
+      const user = await prisma.user.findUnique({
+        where: {
+          id: BigInt(req.user.id)
+        }
+      });
+
+      if (!user) {
+        return res.status(400).json({ error: "invalid_request" });
+      }
+
+      const { sub } = req.body;
+
+      if (
+        !sub ||
+        !sub.endpoint ||
+        !sub.keys ||
+        !sub.keys.auth ||
+        !sub.keys.p256dh
+      ) {
+        return res.status(400).json({ error: "invalid_request" });
+      }
+
+      const id = sub.keys.auth + sub.keys.p256dh;
+
+      const user_agent = req.headers["user-agent"];
+
+      const existing = await prisma.notificationEndpoint.findFirst({
+        where: {
+          id: id,
+          user_id: user.id
+        }
+      });
+
+      if (existing) {
+        return res.status(400).json({ error: "already_registered" });
+      }
+
+      await prisma.notificationEndpoint.create({
+        data: {
+          id: id,
+          user_id: user.id,
+          endpoint: sub,
+          type: NotificationEndpointType.WEBPUSH,
+          user_agent: user_agent
+        }
+      });
+
+      res.setHeader("Content-Type", "application/json");
+
+      res.send(
+        JSONtoString({
+          ok: true
+        })
+      );
+    } catch (err) {
+      console.error(err);
+
+      res.status(500).json({ error: "server_error" });
+    }
+  }
+);
 
 export default router;

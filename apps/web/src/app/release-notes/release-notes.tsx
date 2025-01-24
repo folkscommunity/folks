@@ -2,9 +2,19 @@ import dayjs from "dayjs";
 
 import { parsePostBody } from "@/lib/post-utils";
 
-export const current_release = "0.3.7";
+export const current_release = "0.4";
 
 const releases = [
+  {
+    version: "0.4",
+    date: "2025-01-24",
+    changes: [
+      "Added web push notifications.",
+      "Added the ablity to change the speed of the ribbon.",
+      "Improved PWA support.",
+      "Hidden action buttons from user's that are not signed in on the single post view."
+    ]
+  },
   {
     version: "0.3.7",
     date: "2025-01-24",

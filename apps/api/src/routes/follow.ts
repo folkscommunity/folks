@@ -4,6 +4,7 @@ import { prisma } from "@folks/db";
 import { JSONtoString } from "@folks/utils";
 
 import { authMiddleware, RequestWithUser } from "@/lib/auth_middleware";
+import { sendNotification } from "@/lib/notification_utils";
 import { posthog } from "@/lib/posthog";
 
 const router = Router();
@@ -65,6 +66,15 @@ router.post("/", authMiddleware, async (req: RequestWithUser, res) => {
         target_id: target.id.toString()
       }
     });
+
+    if (target.notifications_push_followed) {
+      await sendNotification(
+        target.id,
+        `Folks`,
+        `${user.display_name} (@${user.username}) followed you.`,
+        `${process.env.NODE_ENV === "production" ? "https://folkscommunity.com" : process.env.DEV_URL}/${user.username}`
+      );
+    }
 
     res.setHeader("Content-Type", "application/json");
     res.send(JSONtoString({ ok: true }));

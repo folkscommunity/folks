@@ -8,6 +8,7 @@ import { AccountDropdown } from "./account-dropdown";
 import { CreateRibbonModal } from "./create-ribbon-modal";
 import { FolksAboutTop } from "./folks-about-top";
 import { Notifications } from "./notifications";
+import { PushNotificationManager } from "./push-manager";
 import { HorizonalRibbon } from "./ribbon";
 import { Separator } from "./separator";
 import { StickersComing } from "./stickers-coming";
@@ -74,6 +75,8 @@ export async function MainContainer({
           {!user && !hideAbout && <Separator />}
 
           {!user && !hideAbout && <FolksAboutTop />}
+
+          {user && <PushNotificationManager />}
 
           <Separator />
         </header>

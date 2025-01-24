@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/avatar";
 import { Label } from "@/components/label";
 import { Separator } from "@/components/separator";
+import { Slider } from "@/components/slider";
 import { Switch } from "@/components/switch";
 
 import { ChangeAvatar } from "./change-avatar";
@@ -178,6 +179,8 @@ function Preferences() {
     false
   );
 
+  const [ribbonSpeed, setRibbonSpeed] = useLocalStorage("ribbon_speed", 0.1);
+
   return (
     <>
       <div className="flex items-center space-x-4">
@@ -188,6 +191,18 @@ function Preferences() {
           id="disable-ribbon-scrolling"
           checked={stopScrolling}
           onCheckedChange={(checked) => setStopScrolling(checked)}
+        />
+      </div>
+      <div className="flex items-center space-x-4">
+        <Label htmlFor="ribbon-speed">Ribbon Speed</Label>
+        <Slider
+          id="ribbon-speed"
+          className="max-w-[280px]"
+          min={1}
+          max={50}
+          step={0.01}
+          value={[ribbonSpeed]}
+          onValueChange={(value) => setRibbonSpeed(value[0])}
         />
       </div>
     </>

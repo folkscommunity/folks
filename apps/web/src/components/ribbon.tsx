@@ -16,12 +16,12 @@ function Marquee(props: {
   const { windowIsActive } = useContext(WindowContext);
   const marqueeRef = useRef<HTMLDivElement>(null);
 
-  const duration = props.content.length * 0.1;
-
   const [stopScrolling, setStopScrolling] = useLocalStorage(
     "ribbon_stop_scroll",
     false
   );
+
+  const [ribbonSpeed, setRibbonSpeed] = useLocalStorage("ribbon_speed", 5);
 
   return (
     <div
@@ -42,7 +42,7 @@ function Marquee(props: {
           {
             "--play": stopScrolling || !windowIsActive ? "paused" : "playing",
             "--direction": props.direction || "normal",
-            "--duration": `${duration}s`,
+            "--duration": `${props.content.length / ribbonSpeed}s`,
             "--delay": "0s",
             "--iteration-count": "infinite"
           } as any
@@ -56,7 +56,7 @@ function Marquee(props: {
           {
             "--play": stopScrolling || !windowIsActive ? "paused" : "playing",
             "--direction": props.direction || "normal",
-            "--duration": `${duration}s`,
+            "--duration": `${props.content.length / ribbonSpeed}s`,
             "--delay": "0s",
             "--iteration-count": "infinite"
           } as any

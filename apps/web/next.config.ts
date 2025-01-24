@@ -10,6 +10,9 @@ const nextConfig: NextConfig = {
       }
     ]
   },
+  env: {
+    NEXT_PUBLIC_VAPID_PUBLIC_KEY: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+  },
   async rewrites() {
     return [
       {
@@ -19,6 +22,15 @@ const nextConfig: NextConfig = {
       {
         source: "/js/s.js",
         destination: "https://p.lum.is/js/script.outbound-links.js"
+      }
+    ];
+  },
+  async redirects() {
+    return [
+      {
+        source: "/discord",
+        destination: "https://discord.gg/BmWznBhHzk",
+        permanent: false
       }
     ];
   }

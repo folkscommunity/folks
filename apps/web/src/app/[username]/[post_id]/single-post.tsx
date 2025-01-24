@@ -206,7 +206,7 @@ export function SinglePost({ user, post }: { user: any; post: any }) {
           {dayjs(lPost.created_at).format("MMM D, h:mm A")}
         </div>
 
-        <div className="text-black-500 pt-4 text-sm">
+        <div className="text-black-500 pb-2 pt-4 text-sm">
           <span
             className="cursor-pointer hover:underline"
             onClick={() => setLikesModalOpen(true)}
@@ -224,74 +224,79 @@ export function SinglePost({ user, post }: { user: any; post: any }) {
             `${lPost.count.replies} ${lPost.count.replies > 1 ? "Replies" : "Reply"}`}
         </div>
 
-        <Separator className="h-[12px]" />
+        {user && <Separator className="h-[12px]" />}
+        {user && (
+          <div className="flex w-full flex-row justify-evenly gap-8 px-6 pt-4">
+            <Heart
+              className={cn(
+                "size-6 cursor-pointer text-slate-700 hover:text-red-500",
+                user &&
+                  lPost.likes &&
+                  lPost.likes.length > 0 &&
+                  "fill-red-500 text-red-500"
+              )}
+              weight={
+                user && lPost.likes && lPost.likes.length > 0
+                  ? "fill"
+                  : "regular"
+              }
+              onClick={() =>
+                lPost.likes && lPost.likes.length > 0
+                  ? unlikePost()
+                  : likePost()
+              }
+            />
 
-        <div className="flex w-full flex-row justify-evenly gap-8 px-6 pt-4">
-          <Heart
-            className={cn(
-              "size-6 cursor-pointer text-slate-700 hover:text-red-500",
-              user &&
-                lPost.likes &&
-                lPost.likes.length > 0 &&
-                "fill-red-500 text-red-500"
-            )}
-            weight={
-              user && lPost.likes && lPost.likes.length > 0 ? "fill" : "regular"
-            }
-            onClick={() =>
-              lPost.likes && lPost.likes.length > 0 ? unlikePost() : likePost()
-            }
-          />
-
-          <div>
-            <DropdownMenu>
-              <DropdownMenuTrigger className="h-[20px] outline-none">
-                <EllipsisIcon className="size-5 opacity-75 hover:!opacity-100 focus:block" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="dark:bg-black-800 !z-[99999] bg-white dark:border-slate-900">
-                <DropdownMenuItem
-                  className="dark:hover:bg-black-600 cursor-pointer hover:bg-slate-100"
-                  onClick={() =>
-                    navigator.clipboard.writeText(
-                      `https://folkscommunity.com/${lPost.author.username}/${lPost.id}`
-                    )
-                  }
-                >
-                  Copy Link
-                </DropdownMenuItem>
-
-                {user && user.super_admin && (
+            <div>
+              <DropdownMenu>
+                <DropdownMenuTrigger className="h-[20px] outline-none">
+                  <EllipsisIcon className="size-5 opacity-75 hover:!opacity-100 focus:block" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="dark:bg-black-800 !z-[99999] bg-white dark:border-slate-900">
                   <DropdownMenuItem
                     className="dark:hover:bg-black-600 cursor-pointer hover:bg-slate-100"
-                    onClick={() => {
-                      if (post.highlighted) {
-                        unhighlightPost();
-                      } else {
-                        highlightPost();
-                      }
-                    }}
+                    onClick={() =>
+                      navigator.clipboard.writeText(
+                        `https://folkscommunity.com/${lPost.author.username}/${lPost.id}`
+                      )
+                    }
                   >
-                    {lPost.highlighted ? "Remove Highlight" : "Highlight"}
+                    Copy Link
                   </DropdownMenuItem>
-                )}
 
-                {user &&
-                  (user.super_admin ||
-                    post.author.id.toString() === user.id.toString()) && (
-                    <>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        className="dark:hover:bg-black-600 cursor-pointer text-red-500 hover:bg-slate-100"
-                        onClick={() => deletePost()}
-                      >
-                        Delete Post
-                      </DropdownMenuItem>
-                    </>
+                  {user && user.super_admin && (
+                    <DropdownMenuItem
+                      className="dark:hover:bg-black-600 cursor-pointer hover:bg-slate-100"
+                      onClick={() => {
+                        if (post.highlighted) {
+                          unhighlightPost();
+                        } else {
+                          highlightPost();
+                        }
+                      }}
+                    >
+                      {lPost.highlighted ? "Remove Highlight" : "Highlight"}
+                    </DropdownMenuItem>
                   )}
-              </DropdownMenuContent>
-            </DropdownMenu>
+
+                  {user &&
+                    (user.super_admin ||
+                      post.author.id.toString() === user.id.toString()) && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          className="dark:hover:bg-black-600 cursor-pointer text-red-500 hover:bg-slate-100"
+                          onClick={() => deletePost()}
+                        >
+                          Delete Post
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
-        </div>
+        )}
 
         <Separator className="h-[12px]" />
       </div>
@@ -318,7 +323,7 @@ export function SinglePost({ user, post }: { user: any; post: any }) {
         {replies && replies.length > 0 ? (
           <Replies replies={replies} user={user} />
         ) : (
-          <></>
+          <div className="pt-4 text-center">No replies yet.</div>
         )}
       </div>
 

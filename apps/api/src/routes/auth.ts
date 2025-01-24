@@ -4,7 +4,7 @@ import { Router } from "express";
 import jwt from "jsonwebtoken";
 
 import { prisma } from "@folks/db";
-import { JSONtoString, schemas } from "@folks/utils";
+import { JSONtoString, restricted_usernames, schemas } from "@folks/utils";
 
 import { authMiddleware, RequestWithUser } from "@/lib/auth_middleware";
 import { posthog } from "@/lib/posthog";
@@ -70,6 +70,10 @@ router.post("/register", async (req, res) => {
 
     if (!email || !password || !username || !display_name) {
       return res.status(400).json({ error: "invalid_request" });
+    }
+
+    if (restricted_usernames.includes(username.toLowerCase())) {
+      return res.status(400).json({ error: "username_taken" });
     }
 
     const ip =
@@ -631,7 +635,7 @@ router.post("/reset/request", async (req, res) => {
       msg: "Your password reset request has been sent."
     });
   } catch (e) {
-    console.log(e);
+    console.error(e);
 
     return res.status(500).json({
       ok: false,

@@ -43,7 +43,7 @@ export async function authMiddleware(
       return res.status(401).json({ error: "unauthorized" });
     }
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return res.status(401).json({ error: "unauthorized" });
   }
 }
