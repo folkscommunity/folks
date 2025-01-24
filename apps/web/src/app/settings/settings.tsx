@@ -165,11 +165,166 @@ export function Settings({ user }: { user: any }) {
 
         <Separator />
 
-        <h3 className="pb-4">Preferences</h3>
+        <h3 className="pb-4">Notifications</h3>
+
+        {isClient && <NotificationPreferences />}
+
+        <h3 className="py-4">Ribbon Settings</h3>
 
         {isClient && <Preferences />}
       </div>
     </div>
+  );
+}
+
+function NotificationPreferences() {
+  const [push_reply, setPushReply] = useState(false);
+  const [push_mention, setPushMention] = useState(false);
+  const [push_follow, setPushFollow] = useState(false);
+  const [push_like, setPushLike] = useState(false);
+
+  function fetchPreferences() {
+    fetch("/api/user/notification-preferences", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json"
+      }
+    })
+      .then((res) => res.json())
+      .then((res) => {
+        if (res.ok) {
+          setPushReply(res.data.push_reply);
+          setPushMention(res.data.push_mention);
+          setPushFollow(res.data.push_follow);
+          setPushLike(res.data.push_like);
+        } else {
+          if (res.msg) {
+            toast.error(res.msg);
+          } else {
+            toast.error("Something went wrong.");
+          }
+        }
+      })
+      .catch((err) => {
+        if (err.msg) {
+          toast.error(err.msg);
+        } else {
+          toast.error("Something went wrong.");
+        }
+      });
+  }
+
+  function updatePreferences({
+    var_push_reply,
+    var_push_mention,
+    var_push_follow,
+    var_push_like
+  }: {
+    var_push_reply?: boolean | undefined;
+    var_push_mention?: boolean | undefined;
+    var_push_follow?: boolean | undefined;
+    var_push_like?: boolean | undefined;
+  }) {
+    fetch("/api/user/notification-preferences", {
+      method: "POST",
+      body: JSON.stringify({
+        push_reply: var_push_reply,
+        push_mention: var_push_mention,
+        push_follow: var_push_follow,
+        push_like: var_push_like
+      }),
+      headers: {
+        "Content-Type": "application/json"
+      }
+    })
+      .then((res) => res.json())
+      .then((res) => {
+        if (res.ok) {
+          toast.success("Preferences updated.");
+        } else {
+          if (res.msg) {
+            toast.error(res.msg);
+          } else {
+            toast.error("Something went wrong.");
+          }
+        }
+      })
+      .catch((err) => {
+        if (err.msg) {
+          toast.error(err.msg);
+        } else {
+          toast.error("Something went wrong.");
+        }
+      });
+  }
+
+  useEffect(() => {
+    fetchPreferences();
+  }, []);
+
+  return (
+    <>
+      <div className="flex items-center space-x-4">
+        <div className="w-[200px]">
+          <Label htmlFor="push-reply">Push Reply</Label>
+        </div>
+        <Switch
+          id="push-reply"
+          checked={push_reply}
+          onCheckedChange={(checked) => {
+            setPushReply(checked);
+            updatePreferences({
+              var_push_reply: checked || false
+            });
+          }}
+        />
+      </div>
+      <div className="flex items-center space-x-4">
+        <div className="w-[200px]">
+          <Label htmlFor="push-mention">Push Mention</Label>
+        </div>
+        <Switch
+          id="push-mention"
+          checked={push_mention}
+          onCheckedChange={(checked) => {
+            setPushMention(checked);
+            updatePreferences({
+              var_push_mention: checked || false
+            });
+          }}
+        />
+      </div>
+      <div className="flex items-center space-x-4">
+        <div className="w-[200px]">
+          <Label htmlFor="push-follow">Push Follow</Label>
+        </div>
+        <Switch
+          id="push-follow"
+          checked={push_follow}
+          onCheckedChange={(checked) => {
+            setPushFollow(checked);
+            updatePreferences({
+              var_push_follow: checked || false
+            });
+          }}
+        />
+      </div>
+      <div className="flex items-center space-x-4">
+        <div className="w-[200px]">
+          <Label htmlFor="push-like">Push Like</Label>
+        </div>
+        <Switch
+          id="push-like"
+          checked={push_like}
+          onCheckedChange={(checked) => {
+            setPushLike(checked);
+            updatePreferences({
+              var_push_like: checked || false
+            });
+          }}
+        />
+      </div>
+    </>
   );
 }
 
@@ -184,9 +339,11 @@ function Preferences() {
   return (
     <>
       <div className="flex items-center space-x-4">
-        <Label htmlFor="disable-ribbon-scrolling">
-          Disable Ribbon Scrolling
-        </Label>
+        <div className="w-[200px]">
+          <Label htmlFor="disable-ribbon-scrolling">
+            Disable Ribbon Scrolling
+          </Label>
+        </div>
         <Switch
           id="disable-ribbon-scrolling"
           checked={stopScrolling}
@@ -194,7 +351,9 @@ function Preferences() {
         />
       </div>
       <div className="flex items-center space-x-4">
-        <Label htmlFor="ribbon-speed">Ribbon Speed</Label>
+        <div className="w-[200px]">
+          <Label htmlFor="ribbon-speed">Ribbon Speed</Label>
+        </div>
         <Slider
           id="ribbon-speed"
           className="max-w-[280px]"

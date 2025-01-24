@@ -284,6 +284,15 @@ router.post(
 
       res.setHeader("Content-Type", "application/json");
 
+      await posthog.capture({
+        distinctId: user.id.toString(),
+        event: "register_notification_endpoint",
+        properties: {
+          endpoint_type: "webpush",
+          endpoint_id: id
+        }
+      });
+
       res.send(
         JSONtoString({
           ok: true

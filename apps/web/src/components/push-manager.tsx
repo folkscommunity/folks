@@ -35,7 +35,7 @@ function PushNotificationManagerClient() {
   }, []);
 
   useEffect(() => {
-    if (!subscription) {
+    if (!subscription && isSupported) {
       window.addEventListener("click", async () => {
         await subscribeToPush();
       });
@@ -46,7 +46,7 @@ function PushNotificationManagerClient() {
         await subscribeToPush();
       });
     };
-  }, [subscription]);
+  }, [subscription, isSupported]);
 
   async function registerServiceWorker() {
     const registration = await navigator.serviceWorker.register("/sw.js", {
@@ -78,9 +78,7 @@ function PushNotificationManagerClient() {
           sub: sub
         })
       });
-    } catch (e) {
-      console.error(e);
-    }
+    } catch (e) {}
   }
 
   async function unsubscribeFromPush() {

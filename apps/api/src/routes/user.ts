@@ -312,4 +312,88 @@ router.post("/avatar", authMiddleware, async (req: RequestWithUser, res) => {
   }
 });
 
+router.post(
+  "/notification-preferences",
+  authMiddleware,
+  async (req: RequestWithUser, res) => {
+    try {
+      const { push_reply, push_mention, push_follow, push_like } = req.body;
+
+      const user = await prisma.user.findUnique({
+        where: {
+          id: BigInt(req.user.id)
+        }
+      });
+
+      if (!user) {
+        return res.status(401).json({
+          error: "unauthorized"
+        });
+      }
+
+      await prisma.user.update({
+        where: {
+          id: BigInt(req.user.id)
+        },
+        data: {
+          notifications_push_replied_to: push_reply,
+          notifications_push_mentioned: push_mention,
+          notifications_push_followed: push_follow,
+          notifications_push_liked_posts: push_like
+        }
+      });
+
+      res.setHeader("Content-Type", "application/json");
+      res.send(JSONtoString({ ok: true }));
+    } catch (e) {
+      console.error(e);
+
+      res.status(500).json({
+        error: "server_error",
+        message: "Something went wrong."
+      });
+    }
+  }
+);
+
+router.get(
+  "/notification-preferences",
+  authMiddleware,
+  async (req: RequestWithUser, res) => {
+    try {
+      const user = await prisma.user.findUnique({
+        where: {
+          id: BigInt(req.user.id)
+        }
+      });
+
+      if (!user) {
+        return res.status(401).json({
+          error: "unauthorized"
+        });
+      }
+
+      res.setHeader("Content-Type", "application/json");
+      res.send(
+        JSONtoString({
+          ok: true,
+          data: {
+            push_reply: user.notifications_push_replied_to,
+            push_mention: user.notifications_push_mentioned,
+            push_follow: user.notifications_push_followed,
+            push_like: user.notifications_push_liked_posts
+          }
+        })
+      );
+    } catch (e) {
+      console.error(e);
+
+      res.status(500).json({
+        error: "server_error",
+        message: "Something went wrong."
+      });
+    }
+  }
+);
+
 export default router;
