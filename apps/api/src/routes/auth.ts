@@ -526,9 +526,14 @@ router.post(
 
 router.post("/reset/request", async (req, res) => {
   try {
-    throw new Error("This feature has been disabled.");
-
     const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        error: "invalid_request",
+        msg: "Invalid request."
+      });
+    }
 
     const rate_limit_24h = await redis.get(
       `rate_limit:reset_request:${email}:24h`
@@ -637,8 +642,23 @@ router.post("/reset/request", async (req, res) => {
 
 router.post("/reset", async (req, res) => {
   try {
-    throw new Error("This feature has been disabled.");
     const { token, password } = req.body;
+
+    if (!token || !password) {
+      return res.status(400).json({
+        error: "invalid_request",
+        msg: "Invalid request."
+      });
+    }
+
+    try {
+      await schemas.passwordSchema.parseAsync(password);
+    } catch (err) {
+      return res.status(400).json({
+        error: "invalid_request",
+        msg: JSON.parse(err.message)[0].message
+      });
+    }
 
     const user = await prisma.user.findFirst({
       where: {

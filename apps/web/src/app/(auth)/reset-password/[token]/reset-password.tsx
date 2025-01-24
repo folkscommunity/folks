@@ -45,7 +45,7 @@ export default function ResetPassword({
 
     fetch("/api/auth/reset", {
       method: "POST",
-      body: JSON.stringify(data),
+      body: JSON.stringify({ ...data, token: token }),
       headers: {
         "Content-Type": "application/json"
       }
