@@ -29,6 +29,7 @@ export function SinglePost({ user, post }: { user: any; post: any }) {
   const [lPost, setLPost] = useState(post);
   const [likesModalOpen, setLikesModalOpen] = useState(false);
   const [replies, setReplies] = useState<any[]>([]);
+  const [isClient, setIsClient] = useState(false);
 
   function fetchPost() {
     fetch(`/api/post/${post.id}`, {
@@ -140,6 +141,7 @@ export function SinglePost({ user, post }: { user: any; post: any }) {
 
   useEffect(() => {
     fetchReplies();
+    setIsClient(true);
   }, []);
 
   return (
@@ -202,9 +204,11 @@ export function SinglePost({ user, post }: { user: any; post: any }) {
           </div>
         )}
 
-        <div className="text-black-500 pt-4 text-sm">
-          {dayjs(lPost.created_at).format("MMM D, h:mm A")}
-        </div>
+        {isClient && (
+          <div className="text-black-500 pt-4 text-sm">
+            {dayjs(lPost.created_at).format("MMM D, h:mm A")}
+          </div>
+        )}
 
         <div className="text-black-500 pb-2 pt-4 text-sm">
           <span
