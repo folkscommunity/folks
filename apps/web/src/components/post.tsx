@@ -239,7 +239,7 @@ export function Post({ post, user }: { post: any; user: any }) {
           className="max-w-full hover:no-underline"
         >
           <div
-            className="max-h-[400px] max-w-full break-words"
+            className="breaklinks max-h-[400px] max-w-full break-words"
             dangerouslySetInnerHTML={{
               __html: parsePostBody(lPost.body)
             }}
