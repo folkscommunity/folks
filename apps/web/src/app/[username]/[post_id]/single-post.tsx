@@ -52,8 +52,6 @@ export function SinglePost({ user, post }: { user: any; post: any }) {
       .then((res) => {
         if (res.ok) {
           setReplies(res.replies);
-          //scroll to the bottom
-          window.scrollTo(0, document.body.scrollHeight);
         }
       })
       .catch((err) => {});
@@ -318,6 +316,7 @@ export function SinglePost({ user, post }: { user: any; post: any }) {
             onPost={() => {
               fetchPost();
               fetchReplies();
+              window.scrollTo(0, document.body.scrollHeight);
             }}
           />
         </div>
