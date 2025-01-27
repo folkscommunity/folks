@@ -3,6 +3,7 @@ import { prisma } from "@folks/db";
 import NotFound from "@/app/not-found";
 import { MainContainer } from "@/components/main-container";
 import { ServerSession } from "@/lib/server-session";
+import { getURLFromText, getURLMetadataFromCache } from "@/lib/url-metadata";
 
 import { SinglePost } from "./single-post";
 
@@ -235,7 +236,8 @@ export default async function Page({
           count: {
             replies: post._count.replies,
             likes: post._count.likes
-          }
+          },
+          urls: await getURLFromText(post.body)
         }}
         user={user}
       />

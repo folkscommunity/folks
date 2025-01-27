@@ -17,7 +17,7 @@ import {
   DropdownMenuTrigger
 } from "@/components/dropdown-menu";
 import { FeedUser } from "@/components/feeds";
-import { Post } from "@/components/post";
+import { Post, UrlEmbed } from "@/components/post";
 import { Separator } from "@/components/separator";
 import { TimelinePhoto } from "@/components/timeline-photo";
 import { parsePostBody } from "@/lib/post-utils";
@@ -140,6 +140,7 @@ export function SinglePost({ user, post }: { user: any; post: any }) {
   useEffect(() => {
     fetchReplies();
     setIsClient(true);
+    console.log(lPost);
   }, []);
 
   return (
@@ -202,11 +203,21 @@ export function SinglePost({ user, post }: { user: any; post: any }) {
           </div>
         )}
 
-        {isClient && (
-          <div className="text-black-500 pt-4 text-sm">
-            {dayjs(lPost.created_at).format("MMM D, h:mm A")}
-          </div>
-        )}
+        {lPost.attachments.length === 0 &&
+          lPost.urls &&
+          lPost.urls.length > 0 &&
+          !(
+            lPost.flags &&
+            lPost.flags.filter((d: any) => d.hide_embeds).length > 0
+          ) && <UrlEmbed metadata={lPost.urls[0]} className="mt-4" />}
+
+        <div className="min-h-[38px] pt-4">
+          {isClient && (
+            <div className="text-black-500 text-sm">
+              {dayjs(lPost.created_at).format("MMM D, h:mm A")}
+            </div>
+          )}
+        </div>
 
         <div className="text-black-500 pb-2 pt-4 text-sm">
           <span

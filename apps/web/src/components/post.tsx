@@ -398,7 +398,13 @@ export function Post({ post, user }: { post: any; user: any }) {
   );
 }
 
-function UrlEmbed({ metadata }: { metadata: URLMetadata }) {
+export function UrlEmbed({
+  metadata,
+  className
+}: {
+  metadata: URLMetadata;
+  className?: string;
+}) {
   const horizontal =
     metadata.image &&
     metadata.image.width &&
@@ -408,7 +414,10 @@ function UrlEmbed({ metadata }: { metadata: URLMetadata }) {
   return (
     <Link
       href={metadata.url}
-      className="border-black-200 hover:bg-black-100/50 dark:border-black-700 dark:hover:bg-black-700/25 group/url mt-2 flex w-full max-w-md flex-col overflow-clip rounded-md border hover:no-underline"
+      className={cn(
+        "border-black-200 hover:bg-black-100/50 dark:border-black-700 dark:hover:bg-black-700/25 group/url mt-2 flex w-full max-w-md flex-col overflow-clip rounded-md border hover:no-underline",
+        className
+      )}
       target="_blank"
     >
       {metadata.image && (horizontal || metadata.image?.image_square) && (
