@@ -442,7 +442,7 @@ function UrlEmbed({ metadata }: { metadata: URLMetadata }) {
           <p className="m-0 line-clamp-2 inline w-fit max-w-full pr-2 leading-[17px]">
             {metadata.description?.slice(0, metadata.fetching ? 70 : 89)}
             {metadata.description &&
-              metadata.description.length >= (metadata.fetching ? 70 : 89) &&
+              metadata.description.length >= (metadata.fetching ? 71 : 90) &&
               "..."}
             <br />
           </p>
