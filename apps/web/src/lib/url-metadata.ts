@@ -25,7 +25,7 @@ async function getURLMetadataFromCache(url: string): Promise<any> {
   };
 }
 
-export async function getURLFromText(text: string): Promise<URLMetadata[]> {
+export async function getURLFromText(text: string): Promise<any[]> {
   const urls = text.match(/https?:\/\/(?:www\.)?[^\s/$.?#].[^\s]*/gi);
 
   if (!urls) {
