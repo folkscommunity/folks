@@ -162,10 +162,10 @@ function FeedEverything({
     pageParam: number | undefined;
   }) => {
     if (pageParam === undefined) {
-      const res = await fetch("/api/feed/everything");
+      const res = await fetch("/api/feed?type=everything");
       return res.json();
     } else {
-      const res = await fetch("/api/feed/everything?cursor=" + pageParam);
+      const res = await fetch("/api/feed?type=everything&cursor=" + pageParam);
       return res.json();
     }
   };
@@ -283,10 +283,10 @@ function FeedHighlighted({
     pageParam: number | undefined;
   }) => {
     if (pageParam === undefined) {
-      const res = await fetch("/api/feed/highlighted");
+      const res = await fetch("/api/feed?type=highlighted");
       return res.json();
     } else {
-      const res = await fetch("/api/feed/highlighted?cursor=" + pageParam);
+      const res = await fetch("/api/feed?type=highlighted&cursor=" + pageParam);
       return res.json();
     }
   };
@@ -409,10 +409,10 @@ function FeedFollowing({ is_authed, user }: { is_authed: boolean; user: any }) {
     pageParam: number | undefined;
   }) => {
     if (pageParam === undefined) {
-      const res = await fetch("/api/feed/following");
+      const res = await fetch("/api/feed?type=following");
       return res.json();
     } else {
-      const res = await fetch("/api/feed/following?cursor=" + pageParam);
+      const res = await fetch("/api/feed?type=following&cursor=" + pageParam);
       return res.json();
     }
   };
@@ -526,11 +526,11 @@ export function FeedUser({
     pageParam: number | undefined;
   }) => {
     if (pageParam === undefined) {
-      const res = await fetch(`/api/feed/user/${author_id}`);
+      const res = await fetch(`/api/feed?type=user&user=${author_id}`);
       return res.json();
     } else {
       const res = await fetch(
-        `/api/feed/user/${author_id}?cursor=` + pageParam
+        `/api/feed?type=user&user=${author_id}&cursor=` + pageParam
       );
       return res.json();
     }

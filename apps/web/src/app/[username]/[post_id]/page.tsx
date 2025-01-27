@@ -93,7 +93,8 @@ export default async function Page({
               display_name: true,
               avatar_url: true
             }
-          }
+          },
+          flags: true
         }
       },
       replies: {
@@ -148,7 +149,8 @@ export default async function Page({
               },
               likes: true
             }
-          }
+          },
+          flags: true
         }
       },
       attachments: {
@@ -180,7 +182,8 @@ export default async function Page({
           },
           likes: true
         }
-      }
+      },
+      flags: true
     }
   });
 

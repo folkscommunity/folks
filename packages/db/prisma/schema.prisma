@@ -106,6 +106,8 @@ model Post {
   body        String
   attachments Attachment[] @relation("attachments")
 
+  flags Json[]
+
   highlighted Boolean @default(false)
 
   deleted_at DateTime?

@@ -15,6 +15,7 @@ import { s3 } from "@/lib/aws";
 import { sendNotification } from "@/lib/notification_utils";
 import { posthog } from "@/lib/posthog";
 import { redis } from "@/lib/redis";
+import { getURLFromText } from "@/lib/url_metadata";
 
 const router = Router();
 
@@ -93,7 +94,7 @@ async function generatePostMentions(post_id: string, body: string) {
 
 router.post("/", authMiddleware, async (req: RequestWithUser, res) => {
   try {
-    const { body, files, replying_to } = req.body;
+    const { body, files, replying_to, hide_embeds } = req.body;
 
     const rate_limit = await redis.get(`rate_limit:post:${req.user.id}`);
 
@@ -167,6 +168,12 @@ router.post("/", authMiddleware, async (req: RequestWithUser, res) => {
         error: "invalid_request",
         message: "You can only upload one photo."
       });
+    }
+
+    let flags: any[] = [];
+
+    if (hide_embeds) {
+      flags = [...flags, { hide_embeds: true }];
     }
 
     if (files && files.length > 0) {
@@ -251,6 +258,7 @@ router.post("/", authMiddleware, async (req: RequestWithUser, res) => {
           body,
           author_id: BigInt(req.user.id),
           reply_to_id: replying_to ? BigInt(replying_to) : undefined,
+          flags: flags,
           attachments: {
             create: {
               type: "Image",
@@ -317,6 +325,7 @@ router.post("/", authMiddleware, async (req: RequestWithUser, res) => {
       const post = await prisma.post.create({
         data: {
           body,
+          flags: flags,
           author_id: BigInt(req.user.id),
           reply_to_id: replying_to ? BigInt(replying_to) : undefined
         }
@@ -409,6 +418,7 @@ router.get("/:id", async (req: RequestWithUser, res) => {
       select: {
         id: true,
         body: true,
+        flags: true,
         reply_to: {
           select: {
             id: true,
@@ -420,7 +430,8 @@ router.get("/:id", async (req: RequestWithUser, res) => {
                 display_name: true,
                 avatar_url: true
               }
-            }
+            },
+            flags: true
           }
         },
         replies: {
@@ -445,6 +456,7 @@ router.get("/:id", async (req: RequestWithUser, res) => {
                 }
               }
             },
+            flags: true,
             attachments: {
               select: {
                 id: true,
@@ -486,6 +498,7 @@ router.get("/:id", async (req: RequestWithUser, res) => {
             width: true
           }
         },
+
         author: {
           select: {
             id: true,
@@ -561,7 +574,8 @@ router.get("/:id", async (req: RequestWithUser, res) => {
           count: {
             replies: post._count.replies.toString(),
             likes: post._count.likes.toString()
-          }
+          },
+          urls: await getURLFromText(post.body)
         }
       })
     );
@@ -635,7 +649,8 @@ async function getReplies(
           },
           likes: true
         }
-      }
+      },
+      flags: true
     }
   });
 
@@ -675,7 +690,8 @@ async function getReplies(
         count: {
           replies: reply._count.replies,
           likes: reply._count.likes
-        }
+        },
+        urls: await getURLFromText(reply.body)
       };
     })
   );
@@ -1020,6 +1036,90 @@ router.delete("/:id", authMiddleware, async (req: RequestWithUser, res) => {
     });
   }
 });
+
+router.post(
+  "/:id/embeds",
+  authMiddleware,
+  async (req: RequestWithUser, res) => {
+    try {
+      const { id } = req.params;
+      const { hide_embeds } = req.body;
+
+      const user = await prisma.user.findUnique({
+        where: {
+          id: BigInt(req.user.id)
+        }
+      });
+
+      if (!user) {
+        return res.status(401).json({
+          error: "unauthorized"
+        });
+      }
+
+      if (user.suspended) {
+        return res.status(401).json({
+          error: "suspended",
+          msg: "Your account is suspended."
+        });
+      }
+
+      const post = await prisma.post.findUnique({
+        where: {
+          id: BigInt(id),
+          OR: [
+            {
+              author_id: user.id
+            },
+            {
+              author: {
+                super_admin: true
+              }
+            }
+          ]
+        }
+      });
+
+      if (!post) {
+        return res.status(400).json({
+          error: "invalid_request",
+          message: "Post not found."
+        });
+      }
+
+      await prisma.post.update({
+        where: {
+          id: BigInt(id),
+          OR: [
+            {
+              author_id: user.id
+            },
+            {
+              author: {
+                super_admin: true
+              }
+            }
+          ]
+        },
+        data: {
+          flags: !hide_embeds
+            ? post.flags.filter((d: any) => !d.hide_embeds)
+            : [...post.flags, { hide_embeds: true }]
+        }
+      });
+
+      res.setHeader("Content-Type", "application/json");
+      res.send(JSONtoString({ ok: true }));
+    } catch (e) {
+      console.error(e);
+
+      res.status(500).json({
+        error: "server_error",
+        message: "Something went wrong."
+      });
+    }
+  }
+);
 
 // admin only
 router.post(

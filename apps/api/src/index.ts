@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import express from "express";
 import { Server, Socket } from "socket.io";
+import throng from "throng";
 
 import auth_router from "./routes/auth";
 import feed_router from "./routes/feed";
@@ -13,6 +14,7 @@ import post_router from "./routes/post";
 import ribbon_router from "./routes/ribbon";
 import user_router from "./routes/user";
 import whitelist_router from "./routes/whitelist";
+import { workerThread } from "./worker";
 
 dotenv.config({ path: "../../.env" });
 
@@ -62,4 +64,8 @@ async function mainThread() {
   });
 }
 
-mainThread();
+throng({
+  workers: 1,
+  master: mainThread,
+  worker: workerThread
+});

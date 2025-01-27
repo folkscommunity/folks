@@ -6,524 +6,117 @@ import { JSONtoString } from "@folks/utils";
 
 import { authMiddleware, RequestWithUser } from "@/lib/auth_middleware";
 import { redis } from "@/lib/redis";
+import {
+  getURLFromText,
+  getURLMetadata,
+  getURLMetadataFromCache
+} from "@/lib/url_metadata";
 
 const router = Router();
 
-router.get("/everything", async (req, res) => {
+router.get("/", async (req, res) => {
   try {
-    const { cursor } = req.query;
+    const { cursor, type, user } = req.query;
     let { limit }: any = req.query;
 
-    const folks_sid = req.cookies.folks_sid;
-
-    let user_id = null;
-
-    if (folks_sid) {
-      const jwt_object: any = jwt.decode(folks_sid);
-
-      const session = await redis.get(`session:${jwt_object.id}:${folks_sid}`);
-
-      if (session) {
-        user_id = jwt_object.id;
-      }
-    }
-
-    if (Number(limit) > 50) {
-      limit = 50;
-    }
-
-    const cursorId = cursor ? BigInt(cursor as any) : undefined;
-
-    const feed = await prisma.post.findMany({
-      where: {
-        deleted_at: null,
-        reply_to_id: null
-      },
-      cursor: cursorId ? { id: cursorId } : undefined,
-      skip: cursorId ? 1 : 0,
-      take: limit ? Number(limit) : 20,
-      orderBy: {
-        created_at: "desc"
-      },
-      select: {
-        id: true,
-        body: true,
-        reply_to: {
-          select: {
-            id: true,
-            body: true,
-            author: {
-              select: {
-                id: true,
-                username: true,
-                display_name: true,
-                avatar_url: true
-              }
-            }
-          }
-        },
-        replies: {
-          select: {
-            id: true,
-            created_at: true,
-            body: true,
-            author: {
-              select: {
-                id: true,
-                avatar_url: true,
-                display_name: true,
-                username: true
-              }
-            }
-          }
-        },
-        attachments: {
-          select: {
-            id: true,
-            url: true,
-            type: true,
-            height: true,
-            width: true
-          }
-        },
-        author: {
-          select: {
-            id: true,
-            avatar_url: true,
-            display_name: true,
-            username: true
-          }
-        },
-        highlighted: true,
-        created_at: true,
-        likes: user_id ? { where: { user_id: BigInt(user_id) } } : false,
-        _count: {
-          select: {
-            replies: {
-              where: {
-                deleted_at: null
-              }
-            },
-            likes: true
-          }
-        }
-      }
-    });
-
-    res.setHeader("Content-Type", "application/json");
-    res.send(
-      JSONtoString({
-        ok: true,
-        feed: feed.map((post) => ({
-          ...post,
-          id: post.id.toString(),
-          author: {
-            ...post.author,
-            id: post.author.id.toString()
-          },
-          reply_to: post.reply_to
-            ? {
-                ...post.reply_to,
-                id: post.reply_to.id.toString(),
-                author: {
-                  ...post.reply_to.author,
-                  id: post.reply_to.author.id.toString()
-                }
-              }
-            : {},
-          replies: post.replies.map((reply) => ({
-            ...reply,
-            id: reply.id.toString(),
-            author: {
-              ...reply.author,
-              id: reply.author.id.toString()
-            }
-          })),
-          likes:
-            post.likes &&
-            post.likes.map((like) => ({
-              id: like.id.toString(),
-              user_id: like.user_id.toString(),
-              post_id: like.post_id.toString()
-            })),
-          highlighted: post.highlighted,
-          count: {
-            replies: post._count.replies,
-            likes: post._count.likes
-          }
-        })),
-        nextCursor:
-          feed.length > 0 ? feed[feed.length - 1].id.toString() : undefined
-      })
-    );
-  } catch (e) {
-    console.error(e);
-
-    res.status(500).json({
-      error: "server_error",
-      message: "Something went wrong."
-    });
-  }
-});
-
-router.get("/highlighted", async (req, res) => {
-  try {
-    const { cursor } = req.query;
-    let { limit }: any = req.query;
-
-    const folks_sid = req.cookies.folks_sid;
-
-    let user_id = null;
-
-    if (folks_sid) {
-      const jwt_object: any = jwt.decode(folks_sid);
-
-      const session = await redis.get(`session:${jwt_object.id}:${folks_sid}`);
-
-      if (session) {
-        user_id = jwt_object.id;
-      }
-    }
-
-    if (Number(limit) > 50) {
-      limit = 50;
-    }
-
-    const cursorId = cursor ? BigInt(cursor as any) : undefined;
-
-    const feed = await prisma.post.findMany({
-      where: {
-        deleted_at: null,
-        highlighted: true
-      },
-      cursor: cursorId ? { id: cursorId } : undefined,
-      skip: cursorId ? 1 : 0,
-      take: limit ? Number(limit) : 20,
-      orderBy: {
-        created_at: "desc"
-      },
-      select: {
-        id: true,
-        body: true,
-        reply_to: {
-          select: {
-            id: true,
-            body: true,
-            author: {
-              select: {
-                id: true,
-                username: true,
-                display_name: true,
-                avatar_url: true
-              }
-            }
-          }
-        },
-        replies: {
-          select: {
-            id: true,
-            created_at: true,
-            body: true,
-            author: {
-              select: {
-                id: true,
-                avatar_url: true,
-                display_name: true,
-                username: true
-              }
-            }
-          }
-        },
-        attachments: {
-          select: {
-            id: true,
-            url: true,
-            type: true,
-            height: true,
-            width: true
-          }
-        },
-        author: {
-          select: {
-            id: true,
-            avatar_url: true,
-            display_name: true,
-            username: true
-          }
-        },
-        highlighted: true,
-        created_at: true,
-        likes: user_id ? { where: { user_id: BigInt(user_id) } } : false,
-        _count: {
-          select: {
-            replies: {
-              where: {
-                deleted_at: null
-              }
-            },
-            likes: true
-          }
-        }
-      }
-    });
-
-    res.setHeader("Content-Type", "application/json");
-    res.send(
-      JSONtoString({
-        ok: true,
-        feed: feed.map((post) => ({
-          ...post,
-          id: post.id.toString(),
-          author: {
-            ...post.author,
-            id: post.author.id.toString()
-          },
-          reply_to: post.reply_to
-            ? {
-                ...post.reply_to,
-                id: post.reply_to.id.toString(),
-                author: {
-                  ...post.reply_to.author,
-                  id: post.reply_to.author.id.toString()
-                }
-              }
-            : {},
-          replies: post.replies.map((reply) => ({
-            ...reply,
-            id: reply.id.toString(),
-            author: {
-              ...reply.author,
-              id: reply.author.id.toString()
-            }
-          })),
-          likes:
-            post.likes &&
-            post.likes.map((like) => ({
-              id: like.id.toString(),
-              user_id: like.user_id.toString(),
-              post_id: like.post_id.toString()
-            })),
-          highlighted: post.highlighted,
-          count: {
-            replies: post._count.replies,
-            likes: post._count.likes
-          }
-        })),
-        nextCursor:
-          feed.length > 0 ? feed[feed.length - 1].id.toString() : undefined
-      })
-    );
-  } catch (e) {
-    console.error(e);
-
-    res.status(500).json({
-      error: "server_error",
-      message: "Something went wrong."
-    });
-  }
-});
-
-router.get("/following", authMiddleware, async (req: RequestWithUser, res) => {
-  try {
-    const { cursor } = req.query;
-    let { limit }: any = req.query;
-
-    const user = await prisma.user.findUnique({
-      where: {
-        id: BigInt(req.user.id)
-      }
-    });
-
-    if (!user) {
+    if (
+      !type ||
+      (type !== "everything" &&
+        type !== "following" &&
+        type !== "highlighted" &&
+        type !== "user")
+    ) {
       return res.status(400).json({
         error: "invalid_request",
-        message: "User not found."
+        message: "Invalid type."
       });
     }
 
+    const folks_sid = req.cookies.folks_sid;
+
+    let user_id = null;
+
+    if (folks_sid) {
+      const jwt_object: any = jwt.decode(folks_sid);
+
+      const session = await redis.get(`session:${jwt_object.id}:${folks_sid}`);
+
+      if (session) {
+        user_id = jwt_object.id;
+      }
+    }
+
     if (Number(limit) > 50) {
       limit = 50;
     }
 
     const cursorId = cursor ? BigInt(cursor as any) : undefined;
 
-    const following = await prisma.following.findMany({
-      where: {
-        user_id: BigInt(req.user.id)
-      },
-      include: {
-        target: {
-          select: {
-            id: true
+    let where: any;
+
+    if (type === "everything") {
+      where = {
+        deleted_at: null,
+        reply_to_id: null
+      };
+    } else if (type === "highlighted") {
+      where = {
+        deleted_at: null,
+        highlighted: true
+      };
+    } else if (type === "following") {
+      if (!user_id) {
+        return res.status(401).json({
+          error: "unauthorized",
+          message: "Not authorized."
+        });
+      }
+
+      const following = await prisma.following.findMany({
+        where: {
+          user_id: BigInt(user_id)
+        },
+        include: {
+          target: {
+            select: {
+              id: true
+            }
           }
         }
-      }
-    });
+      });
 
-    const feed = await prisma.post.findMany({
-      where: {
+      where = {
         author_id: {
           in: following.map((following) => following.target_id)
         },
         deleted_at: null
-      },
-      cursor: cursorId ? { id: cursorId } : undefined,
-      skip: cursorId ? 1 : 0,
-      orderBy: {
-        created_at: "desc"
-      },
-      select: {
-        id: true,
-        body: true,
-        reply_to: {
-          select: {
-            id: true,
-            body: true,
-            author: {
-              select: {
-                id: true,
-                username: true,
-                display_name: true,
-                avatar_url: true
-              }
-            }
-          }
-        },
-        replies: {
-          select: {
-            id: true,
-            created_at: true,
-            body: true,
-            author: {
-              select: {
-                id: true,
-                avatar_url: true,
-                display_name: true,
-                username: true
-              }
-            }
-          }
-        },
-        attachments: {
-          select: {
-            id: true,
-            url: true,
-            type: true,
-            height: true,
-            width: true
-          }
-        },
-        author: {
-          select: {
-            id: true,
-            avatar_url: true,
-            display_name: true,
-            username: true
-          }
-        },
-        highlighted: true,
-        created_at: true,
-        likes: user.id ? { where: { user_id: BigInt(user.id) } } : false,
-        _count: {
-          select: {
-            replies: {
-              where: {
-                deleted_at: null
-              }
-            },
-            likes: true
-          }
-        }
+      };
+    } else if (type === "user") {
+      if (!user) {
+        return res.status(400).json({
+          error: "invalid_request",
+          message: "Invalid user."
+        });
       }
-    });
 
-    res.setHeader("Content-Type", "application/json");
-    res.send(
-      JSONtoString({
-        ok: true,
-        feed: feed.map((post) => ({
-          ...post,
-          id: post.id.toString(),
-          author: {
-            ...post.author,
-            id: post.author.id.toString()
-          },
-          reply_to: post.reply_to
-            ? {
-                ...post.reply_to,
-                id: post.reply_to.id.toString(),
-                author: {
-                  ...post.reply_to.author,
-                  id: post.reply_to.author.id.toString()
-                }
-              }
-            : {},
-          replies: post.replies.map((reply) => ({
-            ...reply,
-            id: reply.id.toString(),
-            author: {
-              ...reply.author,
-              id: reply.author.id.toString()
-            }
-          })),
-          highlighted: post.highlighted,
-          likes:
-            post.likes &&
-            post.likes.map((like) => ({
-              id: like.id.toString(),
-              user_id: like.user_id.toString(),
-              post_id: like.post_id.toString()
-            })),
-          count: {
-            replies: post._count.replies,
-            likes: post._count.likes
-          }
-        })),
-        nextCursor:
-          feed.length > 0 ? feed[feed.length - 1].id.toString() : undefined
-      })
-    );
-  } catch (e) {
-    console.error(e);
-
-    res.status(500).json({
-      error: "server_error",
-      message: "Something went wrong."
-    });
-  }
-});
-
-router.get("/user/:author_id", async (req, res) => {
-  try {
-    const { cursor } = req.query;
-    let { limit }: any = req.query;
-
-    const folks_sid = req.cookies.folks_sid;
-
-    let user_id = null;
-
-    if (folks_sid) {
-      const jwt_object: any = jwt.decode(folks_sid);
-
-      const session = await redis.get(`session:${jwt_object.id}:${folks_sid}`);
-
-      if (session) {
-        user_id = jwt_object.id;
+      try {
+        BigInt(user.toString());
+      } catch (e) {
+        return res.status(400).json({
+          error: "invalid_request",
+          message: "Invalid user."
+        });
       }
-    }
 
-    if (Number(limit) > 50) {
-      limit = 50;
+      where = {
+        author_id: BigInt(user.toString()),
+        reply_to_id: null,
+        deleted_at: null
+      };
     }
-
-    const cursorId = cursor ? BigInt(cursor as any) : undefined;
 
     const feed = await prisma.post.findMany({
-      where: {
-        author_id: BigInt(req.params.author_id),
-        deleted_at: null,
-        reply_to_id: null
-      },
+      where: where,
       cursor: cursorId ? { id: cursorId } : undefined,
       skip: cursorId ? 1 : 0,
       take: limit ? Number(limit) : 20,
@@ -533,6 +126,7 @@ router.get("/user/:author_id", async (req, res) => {
       select: {
         id: true,
         body: true,
+        flags: true,
         reply_to: {
           select: {
             id: true,
@@ -544,7 +138,8 @@ router.get("/user/:author_id", async (req, res) => {
                 display_name: true,
                 avatar_url: true
               }
-            }
+            },
+            flags: true
           }
         },
         replies: {
@@ -559,7 +154,8 @@ router.get("/user/:author_id", async (req, res) => {
                 display_name: true,
                 username: true
               }
-            }
+            },
+            flags: true
           }
         },
         attachments: {
@@ -599,48 +195,80 @@ router.get("/user/:author_id", async (req, res) => {
     res.send(
       JSONtoString({
         ok: true,
-        feed: feed.map((post) => ({
-          ...post,
-          id: post.id.toString(),
-          author: {
-            ...post.author,
-            id: post.author.id.toString()
-          },
-          reply_to: post.reply_to
-            ? {
-                ...post.reply_to,
-                id: post.reply_to.id.toString(),
+        feed: await Promise.all(
+          feed.map(async (post) => {
+            const urls = await getURLFromText(post.body);
+
+            return {
+              ...post,
+              id: post.id.toString(),
+              author: {
+                ...post.author,
+                id: post.author.id.toString()
+              },
+              reply_to: post.reply_to
+                ? {
+                    ...post.reply_to,
+                    id: post.reply_to.id.toString(),
+                    author: {
+                      ...post.reply_to.author,
+                      id: post.reply_to.author.id.toString()
+                    }
+                  }
+                : {},
+              replies: post.replies.map((reply) => ({
+                ...reply,
+                id: reply.id.toString(),
                 author: {
-                  ...post.reply_to.author,
-                  id: post.reply_to.author.id.toString()
+                  ...reply.author,
+                  id: reply.author.id.toString()
                 }
-              }
-            : {},
-          replies: post.replies.map((reply) => ({
-            ...reply,
-            id: reply.id.toString(),
-            author: {
-              ...reply.author,
-              id: reply.author.id.toString()
-            }
-          })),
-          likes:
-            post.likes &&
-            post.likes.map((like) => ({
-              id: like.id.toString(),
-              user_id: like.user_id.toString(),
-              post_id: like.post_id.toString()
-            })),
-          highlighted: post.highlighted,
-          count: {
-            replies: post._count.replies,
-            likes: post._count.likes
-          }
-        })),
+              })),
+              likes:
+                post.likes &&
+                post.likes.map((like) => ({
+                  id: like.id.toString(),
+                  user_id: like.user_id.toString(),
+                  post_id: like.post_id.toString()
+                })),
+              highlighted: post.highlighted,
+              count: {
+                replies: post._count.replies,
+                likes: post._count.likes
+              },
+              urls: urls
+            };
+          })
+        ),
         nextCursor:
           feed.length > 0 ? feed[feed.length - 1].id.toString() : undefined
       })
     );
+  } catch (e) {
+    console.error(e);
+
+    res.status(500).json({
+      error: "server_error",
+      message: "Something went wrong."
+    });
+  }
+});
+
+router.get("/metadata", async (req, res) => {
+  try {
+    const { url } = req.query;
+
+    if (!url) {
+      return res.status(400).json({
+        error: "invalid_request",
+        message: "Invalid URL."
+      });
+    }
+
+    const url_metadata = await getURLMetadataFromCache(url.toString());
+
+    res.setHeader("Content-Type", "application/json");
+    res.send(JSONtoString({ ok: true, data: url_metadata }));
   } catch (e) {
     console.error(e);
 

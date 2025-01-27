@@ -36,16 +36,10 @@ function PushNotificationManagerClient() {
 
   useEffect(() => {
     if (!subscription && isSupported) {
-      window.addEventListener("click", async () => {
+      (async () => {
         await subscribeToPush();
-      });
+      })();
     }
-
-    return () => {
-      window.removeEventListener("click", async () => {
-        await subscribeToPush();
-      });
-    };
   }, [subscription, isSupported]);
 
   async function registerServiceWorker() {

@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -27,6 +28,21 @@ import {
   DropdownMenuTrigger
 } from "./dropdown-menu";
 import { TimelinePhoto } from "./timeline-photo";
+
+interface URLMetadata {
+  url: string;
+  hostname: string;
+  title: string;
+  description?: string;
+  image?: {
+    url: string;
+    width?: number;
+    height?: number;
+    image_square?: boolean;
+  };
+  favicon?: string;
+  fetching?: boolean;
+}
 
 export function Post({ post, user }: { post: any; user: any }) {
   const [lPost, setLPost] = useState(post);
@@ -132,9 +148,37 @@ export function Post({ post, user }: { post: any; user: any }) {
     window.dispatchEvent(new Event("stickers-coming"));
   }
 
+  async function setHideEmbeds(hide: boolean) {
+    fetch(`/api/post/${post.id}/embeds`, {
+      method: "POST",
+      body: JSON.stringify({
+        hide_embeds: hide
+      }),
+      headers: {
+        "Content-Type": "application/json"
+      }
+    })
+      .then((res) => res.json())
+      .then((res) => {
+        if (res.ok) {
+          fetchPost();
+        }
+      });
+  }
+
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  useEffect(() => {
+    if (lPost.urls && lPost.urls.length > 0) {
+      if (lPost.urls[0].fetching) {
+        setTimeout(() => {
+          fetchPost();
+        }, 3000);
+      }
+    }
+  }, [lPost]);
 
   return (
     <div
@@ -193,7 +237,7 @@ export function Post({ post, user }: { post: any; user: any }) {
                   <DropdownMenuItem
                     className="dark:hover:bg-black-600 cursor-pointer hover:bg-slate-100"
                     onClick={() => {
-                      if (post.highlighted) {
+                      if (lPost.highlighted) {
                         unhighlightPost();
                       } else {
                         highlightPost();
@@ -206,9 +250,31 @@ export function Post({ post, user }: { post: any; user: any }) {
 
                 {user &&
                   (user.super_admin ||
-                    post.author.id.toString() === user.id.toString()) && (
+                    lPost.author.id.toString() === user.id.toString()) && (
                     <>
+                      {lPost.flags &&
+                        lPost.flags.filter((d: any) => d.hide_embeds).length ===
+                          0 && (
+                          <DropdownMenuItem
+                            className="dark:hover:bg-black-600 cursor-pointer hover:bg-slate-100"
+                            onClick={() => setHideEmbeds(true)}
+                          >
+                            Hide Embeds
+                          </DropdownMenuItem>
+                        )}
+
+                      {lPost.flags &&
+                        lPost.flags.filter((d: any) => d.hide_embeds).length >
+                          0 && (
+                          <DropdownMenuItem
+                            className="dark:hover:bg-black-600 cursor-pointer hover:bg-slate-100"
+                            onClick={() => setHideEmbeds(false)}
+                          >
+                            Show Embeds
+                          </DropdownMenuItem>
+                        )}
                       <DropdownMenuSeparator />
+
                       <DropdownMenuItem
                         className="dark:hover:bg-black-600 cursor-pointer text-red-500 hover:bg-slate-100"
                         onClick={() => deletePost()}
@@ -259,6 +325,14 @@ export function Post({ post, user }: { post: any; user: any }) {
             ))}
           </div>
         )}
+
+        {lPost.attachments.length === 0 &&
+          lPost.urls &&
+          lPost.urls.length > 0 &&
+          !(
+            lPost.flags &&
+            lPost.flags.filter((d: any) => d.hide_embeds).length > 0
+          ) && <UrlEmbed metadata={lPost.urls[0]} />}
 
         <div className="flex h-[24px] items-center justify-start gap-4 pt-2">
           <div className="flex min-w-12 items-center gap-2">
@@ -321,5 +395,62 @@ export function Post({ post, user }: { post: any; user: any }) {
         </div>
       </div>
     </div>
+  );
+}
+
+function UrlEmbed({ metadata }: { metadata: URLMetadata }) {
+  const horizontal =
+    metadata.image &&
+    metadata.image.width &&
+    metadata.image.height &&
+    metadata.image.width > metadata.image.height;
+
+  return (
+    <Link
+      href={metadata.url}
+      className="border-black-200 hover:bg-black-100/50 dark:border-black-700 dark:hover:bg-black-700/25 group/url mt-2 flex w-full max-w-md flex-col overflow-clip rounded-md border hover:no-underline"
+      target="_blank"
+    >
+      {metadata.image && (horizontal || metadata.image?.image_square) && (
+        <div className="border-black-200 dark:border-black-700 border-b">
+          <img src={metadata.image.url} alt={metadata.title} width="100%" />
+        </div>
+      )}
+      <div className="flex items-center gap-2 pr-3">
+        {!(metadata.image && (horizontal || metadata.image?.image_square)) && (
+          <div className="border-black-200 dark:border-black-700 flex aspect-square h-full min-h-[105px] min-w-[105px] flex-1 items-center justify-center border-r">
+            <img
+              width="24px"
+              height="24px"
+              className="aspect-square rounded-md"
+              src={metadata.favicon}
+              alt={metadata.title}
+            />
+          </div>
+        )}
+        <div
+          className={cn(
+            "flex w-full flex-col gap-0.5 px-1.5 py-3 text-sm",
+            metadata.image &&
+              (horizontal || metadata.image?.image_square) &&
+              "px-4"
+          )}
+        >
+          <div className="inline w-fit font-bold group-hover/url:underline">
+            {metadata.title}
+          </div>
+          <p className="m-0 line-clamp-2 inline w-fit max-w-full pr-2 leading-[17px]">
+            {metadata.description?.slice(0, metadata.fetching ? 70 : 89)}
+            {metadata.description &&
+              metadata.description.length >= (metadata.fetching ? 70 : 89) &&
+              "..."}
+            <br />
+          </p>
+          <div className="inline w-fit pt-1 leading-[17px] opacity-50">
+            {metadata.hostname}
+          </div>
+        </div>
+      </div>
+    </Link>
   );
 }

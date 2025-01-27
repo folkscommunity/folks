@@ -1,3 +1,4 @@
+import lineClamp from "@tailwindcss/line-clamp";
 import type { Config } from "tailwindcss";
 
 export default {
@@ -68,5 +69,5 @@ export default {
     }
   },
   safelist: ["text-sky-600"],
-  plugins: []
+  plugins: [lineClamp]
 } satisfies Config;

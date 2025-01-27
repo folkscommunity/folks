@@ -51,6 +51,7 @@
     "throng": "^5.0.0",
     "tsx": "^4.16.2",
     "typescript-eslint": "^7.15.0",
+    "unfurl.js": "^6.4.0",
     "web-push": "^3.6.7"
   }
 }
