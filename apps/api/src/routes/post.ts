@@ -206,6 +206,12 @@ router.post("/", authMiddleware, async (req: RequestWithUser, res) => {
         });
       }
 
+      let quality = 80;
+
+      if (buffer.length < 2 * 1024 * 1024) {
+        quality = 100;
+      }
+
       let img = await sharp(buffer, {
         animated: true
       }).rotate();
@@ -222,7 +228,7 @@ router.post("/", authMiddleware, async (req: RequestWithUser, res) => {
         });
       }
 
-      img = await img.webp({ quality: 80 });
+      img = await img.webp({ quality: quality });
 
       const transformed_image_buffer = await img.toBuffer();
 
