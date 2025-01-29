@@ -20,6 +20,7 @@ import { parsePostBody } from "@/lib/post-utils";
 import { cn, dateRelativeTiny } from "@/lib/utils";
 
 import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
+import { ReplyComposeFloating } from "./composer";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -50,6 +51,7 @@ export function Post({ post, user }: { post: any; user: any }) {
   const stickers_teaser_feature_flag = useFeatureFlagPayload("stickers_teaser");
 
   const router = useRouter();
+  const [replyComposerOpen, setReplyComposerOpen] = useState(false);
 
   function fetchPost() {
     fetch(`/api/post/${post.id}`, {
@@ -338,9 +340,13 @@ export function Post({ post, user }: { post: any; user: any }) {
           <div className="flex min-w-12 items-center gap-2">
             <ChatCircle
               className="size-5 min-h-5 min-w-5 cursor-pointer text-slate-700 hover:fill-neutral-400 hover:text-neutral-400 dark:hover:fill-neutral-300 dark:hover:text-neutral-300"
-              onClick={() =>
-                router.push(`/${lPost.author.username}/${lPost.id}`)
-              }
+              onClick={() => {
+                if (lPost.depth !== undefined && lPost.depth < 4 && user) {
+                  setReplyComposerOpen(true);
+                } else {
+                  router.push(`/${lPost.author.username}/${lPost.id}`);
+                }
+              }}
             />
             <span>
               {isClient && lPost.count.replies && lPost.count.replies > 0
@@ -394,6 +400,18 @@ export function Post({ post, user }: { post: any; user: any }) {
             )}
         </div>
       </div>
+
+      {isClient && user && (
+        <ReplyComposeFloating
+          open={replyComposerOpen}
+          setOpen={setReplyComposerOpen}
+          post={lPost}
+          user={user}
+          onPost={() => {
+            fetchPost();
+          }}
+        />
+      )}
     </div>
   );
 }

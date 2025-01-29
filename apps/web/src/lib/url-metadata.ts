@@ -6,8 +6,6 @@ async function getURLMetadataFromCache(url: string): Promise<any> {
   const url_as_base64 = Buffer.from(url).toString("base64");
   const cached_metadata = await redis.get(`url_metadata:${url_as_base64}`);
 
-  console.log(url);
-
   if (cached_metadata) {
     return JSON.parse(cached_metadata);
   }

@@ -98,7 +98,7 @@ router.post("/", authMiddleware, async (req: RequestWithUser, res) => {
 
     const rate_limit = await redis.get(`rate_limit:post:${req.user.id}`);
 
-    if (Number(rate_limit) > 5) {
+    if (Number(rate_limit) > 8 && req.user.id !== "1") {
       return res.status(429).json({
         error: "rate_limit_exceeded",
         message:

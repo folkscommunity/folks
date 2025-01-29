@@ -140,7 +140,12 @@ export function SinglePost({ user, post }: { user: any; post: any }) {
   useEffect(() => {
     fetchReplies();
     setIsClient(true);
-    console.log(lPost);
+
+    window.addEventListener("refresh_replies", () => fetchReplies());
+
+    return () => {
+      window.removeEventListener("refresh_replies", () => fetchReplies());
+    };
   }, []);
 
   return (

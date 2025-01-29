@@ -2,9 +2,17 @@ import dayjs from "dayjs";
 
 import { parsePostBody } from "@/lib/post-utils";
 
-export const current_release = "0.4.2";
+export const current_release = "0.4.3";
 
 const releases = [
+  {
+    version: "0.4.3",
+    date: "2025-01-29",
+    changes: [
+      "Added a new reply composer.",
+      "Performed some a little bit of code cleanup."
+    ]
+  },
   {
     version: "0.4.2",
     date: "2025-01-27",
