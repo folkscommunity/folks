@@ -2,6 +2,7 @@
 import { randomUUID } from "crypto";
 import { Readable } from "stream";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
+import Queue from "bull";
 import exifReader from "exif-reader";
 import { Router } from "express";
 import jwt from "jsonwebtoken";
@@ -275,7 +276,20 @@ router.post("/", authMiddleware, async (req: RequestWithUser, res) => {
               height: img_metadata.height
             }
           }
+        },
+        include: {
+          attachments: true
         }
+      });
+
+      const queue_scan_images = new Queue(
+        "queue_scan_images",
+        process.env.REDIS_URL!
+      );
+
+      await queue_scan_images.add({
+        attachment_id: post.attachments[0].id,
+        data: buffer
       });
 
       await generatePostMentions(post.id.toString(), body);

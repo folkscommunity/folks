@@ -112,6 +112,8 @@ model Post {
 
   deleted_at DateTime?
 
+  scan_status String?
+
   reply_to_id BigInt?
   reply_to    Post?   @relation(fields: [reply_to_id], references: [id], name: "replies", onDelete: SetNull)
 
@@ -172,6 +174,8 @@ model Attachment {
 
   width  Int
   height Int
+
+  scan_status String?
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt

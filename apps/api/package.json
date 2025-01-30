@@ -25,6 +25,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "@aws-sdk/client-rekognition": "^3.738.0",
     "@aws-sdk/client-s3": "^3.689.0",
     "@aws-sdk/client-ses": "^3.687.0",
     "@folks/db": "workspace:^",
