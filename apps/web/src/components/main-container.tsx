@@ -108,6 +108,13 @@ export async function MainContainer({
             </Link>
             <span className="max-md:hidden">·</span>
             <Link
+              href="/support"
+              className="underline opacity-70 hover:opacity-100"
+            >
+              Support
+            </Link>
+            <span className="max-md:hidden">·</span>
+            <Link
               href="/discord"
               className="underline opacity-70 hover:opacity-100"
             >

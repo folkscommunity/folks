@@ -64,8 +64,8 @@ export function PrivacyPolicy() {
             memory.
           </p>
           <p className="font-bold">
-            We use cookies for authentication, and to enable certain features.
-            We DO NOT use cookies to track you across the internet.
+            We use cookies for authentication, for internal analytics, and to
+            enable certain features such as authentication.
           </p>
           <h3>Data Sale Policy</h3>
           <p>
@@ -100,13 +100,10 @@ export function PrivacyPolicy() {
           <p>Current third party service providers include:</p>
           <ul className="list-disc space-y-1 pl-6">
             <li>Cloudflare - reverse proxy & cdn</li>
-            <li>DigitaOcean - service hosting</li>
             <li>AWS - attachment storage, cdn and email delivery</li>
             <li>PostHog (self hosted) - feature flagging, analytics</li>
             <li>Plausible (self hosted) - analytics</li>
           </ul>
-
-          <p>Self hosted services are hosted on DigitalOcean.</p>
 
           <h3>Security</h3>
           <p>

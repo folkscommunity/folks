@@ -71,6 +71,9 @@ export function AccountDropdown({ user }: { user: any }) {
           >
             Profile
           </Link>
+
+          <div className="text-black-600 px-4 text-sm">· · ·</div>
+
           <div
             onClick={() => {
               window.dispatchEvent(new Event("ribbon_create_open"));
@@ -80,7 +83,20 @@ export function AccountDropdown({ user }: { user: any }) {
             Create Ribbon
           </div>
 
+          <Link
+            href="/settings"
+            className="font-base text-foreground cursor-pointer px-4 py-1 hover:text-slate-500 hover:underline"
+          >
+            Settings
+          </Link>
           <div className="text-black-600 px-4 text-sm">· · ·</div>
+
+          <Link
+            href="/support"
+            className="font-base text-foreground cursor-pointer px-4 py-1 hover:text-slate-500 hover:underline"
+          >
+            Support
+          </Link>
 
           <Link
             href="/manifesto"
@@ -89,12 +105,6 @@ export function AccountDropdown({ user }: { user: any }) {
             Manifesto
           </Link>
 
-          <Link
-            href="/settings"
-            className="font-base text-foreground cursor-pointer px-4 py-1 hover:text-slate-500 hover:underline"
-          >
-            Settings
-          </Link>
           <div className="text-black-600 px-4 text-sm">· · ·</div>
 
           <span

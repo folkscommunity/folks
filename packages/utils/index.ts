@@ -12,6 +12,7 @@ export const restricted_usernames = [
   "admin",
   "manifest",
   "privacy-policy",
+  "bug",
   "legal",
   "root",
   "support",

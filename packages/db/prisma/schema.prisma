@@ -51,6 +51,7 @@ model User {
   ribbons                Ribbon[]               @relation("ribbons")
   mentions               PostMention[]          @relation("mentions")
   notification_endpoints NotificationEndpoint[] @relation("notification_endpoints")
+  support_requests       SupportRequest[]       @relation("support_requests")
 
   @@index([id])
   @@index([username])
@@ -210,4 +211,22 @@ model WhitelistRequest {
   updated_at DateTime @updatedAt
 
   @@map("whitelist")
+}
+
+model SupportRequest {
+  id String @id @unique @default(cuid())
+
+  email String
+  body  String
+  type  String
+
+  completed_at DateTime?
+
+  user_id BigInt?
+  user    User?   @relation(fields: [user_id], references: [id], name: "support_requests", onDelete: Cascade)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("support_requests")
 }

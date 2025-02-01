@@ -12,6 +12,7 @@ import follow_router from "./routes/follow";
 import notifications_router from "./routes/notifications";
 import post_router from "./routes/post";
 import ribbon_router from "./routes/ribbon";
+import support_router from "./routes/support";
 import user_router from "./routes/user";
 import whitelist_router from "./routes/whitelist";
 import { workerThread } from "./worker";
@@ -58,6 +59,7 @@ async function mainThread() {
   app.use("/api/user", user_router);
   app.use("/api/ribbon", ribbon_router);
   app.use("/api/notifications", notifications_router);
+  app.use("/api/support", support_router);
 
   httpServer.listen(process.env.PORT || 3002, () => {
     console.log("API started!");

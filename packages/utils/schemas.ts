@@ -55,3 +55,8 @@ export const ribbonBodySchema = z
   .string()
   .min(1, "A ribbon message must be more than 1 characters.")
   .max(30, "A ribbon message must be less than 30 characters.");
+
+export const supportRequestBodySchema = z
+  .string()
+  .min(5, "Must be more than 5 characters.")
+  .max(1000, "Must be less than 1000 characters.");
