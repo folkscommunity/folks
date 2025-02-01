@@ -83,7 +83,7 @@ export function Support({ email }: { email: string | null }) {
               autoComplete="email"
               id="email"
               {...register("email")}
-              defaultValue={email}
+              defaultValue={email || ""}
               placeholder="Email"
               className="text-md rounded-none border border-neutral-400 bg-transparent px-2 py-1.5 placeholder:text-neutral-400 focus:border-blue-500 focus:outline-none dark:border-neutral-600 dark:placeholder:text-neutral-600"
             />
