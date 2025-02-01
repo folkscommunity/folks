@@ -56,8 +56,7 @@ router.get("/", async (req, res) => {
 
     if (type === "everything") {
       where = {
-        deleted_at: null,
-        reply_to_id: null
+        deleted_at: null
       };
     } else if (type === "highlighted") {
       where = {
