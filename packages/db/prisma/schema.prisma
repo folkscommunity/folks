@@ -44,6 +44,8 @@ model User {
   notifications_push_mentioned   Boolean @default(true)
   notifications_push_followed    Boolean @default(true)
 
+  marketing_emails Boolean @default(true)
+
   following              Following[]            @relation("following")
   followers              Following[]            @relation("followers")
   posts                  Post[]                 @relation("posts")

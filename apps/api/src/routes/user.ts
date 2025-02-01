@@ -317,7 +317,13 @@ router.post(
   authMiddleware,
   async (req: RequestWithUser, res) => {
     try {
-      const { push_reply, push_mention, push_follow, push_like } = req.body;
+      const {
+        push_reply,
+        push_mention,
+        push_follow,
+        push_like,
+        marketing_emails
+      } = req.body;
 
       const user = await prisma.user.findUnique({
         where: {
@@ -339,7 +345,8 @@ router.post(
           notifications_push_replied_to: push_reply,
           notifications_push_mentioned: push_mention,
           notifications_push_followed: push_follow,
-          notifications_push_liked_posts: push_like
+          notifications_push_liked_posts: push_like,
+          marketing_emails: marketing_emails
         }
       });
 
@@ -381,7 +388,8 @@ router.get(
             push_reply: user.notifications_push_replied_to,
             push_mention: user.notifications_push_mentioned,
             push_follow: user.notifications_push_followed,
-            push_like: user.notifications_push_liked_posts
+            push_like: user.notifications_push_liked_posts,
+            marketing_emails: user.marketing_emails
           }
         })
       );
@@ -395,5 +403,48 @@ router.get(
     }
   }
 );
+
+router.post("/unsubscribe", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        error: "invalid_request",
+        msg: "You must provide an email."
+      });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: {
+        email: email
+      }
+    });
+
+    if (!user) {
+      res.setHeader("Content-Type", "application/json");
+      return res.send(JSONtoString({ ok: true }));
+    }
+
+    await prisma.user.update({
+      where: {
+        id: BigInt(user.id)
+      },
+      data: {
+        marketing_emails: false
+      }
+    });
+
+    res.setHeader("Content-Type", "application/json");
+    res.send(JSONtoString({ ok: true }));
+  } catch (e) {
+    console.error(e);
+
+    res.status(500).json({
+      error: "server_error",
+      message: "Something went wrong."
+    });
+  }
+});
 
 export default router;

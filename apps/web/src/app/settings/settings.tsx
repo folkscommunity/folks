@@ -182,6 +182,7 @@ function NotificationPreferences() {
   const [push_mention, setPushMention] = useState(false);
   const [push_follow, setPushFollow] = useState(false);
   const [push_like, setPushLike] = useState(false);
+  const [marketing_emails, setMarketingEmails] = useState(false);
 
   function fetchPreferences() {
     fetch("/api/user/notification-preferences", {
@@ -197,6 +198,7 @@ function NotificationPreferences() {
           setPushMention(res.data.push_mention);
           setPushFollow(res.data.push_follow);
           setPushLike(res.data.push_like);
+          setMarketingEmails(res.data.marketing_emails);
         } else {
           if (res.msg) {
             toast.error(res.msg);
@@ -218,12 +220,14 @@ function NotificationPreferences() {
     var_push_reply,
     var_push_mention,
     var_push_follow,
-    var_push_like
+    var_push_like,
+    var_marketing_emails
   }: {
     var_push_reply?: boolean | undefined;
     var_push_mention?: boolean | undefined;
     var_push_follow?: boolean | undefined;
     var_push_like?: boolean | undefined;
+    var_marketing_emails?: boolean | undefined;
   }) {
     fetch("/api/user/notification-preferences", {
       method: "POST",
@@ -231,7 +235,8 @@ function NotificationPreferences() {
         push_reply: var_push_reply,
         push_mention: var_push_mention,
         push_follow: var_push_follow,
-        push_like: var_push_like
+        push_like: var_push_like,
+        marketing_emails: var_marketing_emails
       }),
       headers: {
         "Content-Type": "application/json"
@@ -320,6 +325,22 @@ function NotificationPreferences() {
             setPushLike(checked);
             updatePreferences({
               var_push_like: checked || false
+            });
+          }}
+        />
+      </div>
+      <h3 className="pb-4 pt-4">Emails</h3>
+      <div className="flex items-center space-x-4">
+        <div className="w-[200px]">
+          <Label htmlFor="emails-marketing">Marketing Emails</Label>
+        </div>
+        <Switch
+          id="emails-marketing"
+          checked={marketing_emails}
+          onCheckedChange={(checked) => {
+            setMarketingEmails(checked);
+            updatePreferences({
+              var_marketing_emails: checked || false
             });
           }}
         />
