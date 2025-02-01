@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { ExternalLinkIcon } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/avatar";
+import { Composer } from "@/components/composer";
 import { FeedUser } from "@/components/feeds";
 import { Separator } from "@/components/separator";
 
@@ -43,89 +44,92 @@ export default function Profile({
   const [followersModal, setFollowersModal] = useState(false);
 
   return (
-    <div className="mx-auto w-full max-w-3xl flex-1">
-      <div className="flex flex-col gap-2 py-2">
-        <div className="pb-2">
-          {isUser ? (
-            <ChangeAvatar user={user} />
-          ) : (
-            <Avatar className="size-[80px]">
-              <AvatarImage src={profile.avatar_url} />
-              <AvatarFallback className="text-3xl">
-                {profile.username[0].toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
+    <>
+      {user && isUser && <Composer />}
+      <div className="mx-auto w-full max-w-3xl flex-1">
+        <div className="flex flex-col gap-2 py-2">
+          <div className="pb-2">
+            {isUser ? (
+              <ChangeAvatar user={user} />
+            ) : (
+              <Avatar className="size-[80px]">
+                <AvatarImage src={profile.avatar_url} />
+                <AvatarFallback className="text-3xl">
+                  {profile.username[0].toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+            )}
+          </div>
+
+          <div className="flex flex-row justify-between gap-4">
+            <h1 className="font-black">{profile.display_name}</h1>
+
+            {!isUser && <FollowButton target_id={profile.id.toString()} />}
+          </div>
+
+          <p>
+            @{profile.username} (#{profile.id})
+          </p>
+
+          <p className="mb-0">
+            {profile.occupation && `${profile.occupation}`}
+            {profile.location && `, ${profile.location}`}
+            {profile.pronouns && `, ${profile.pronouns}`}
+          </p>
+
+          {profile.website && (
+            <a
+              href={profile.website}
+              target="_blank"
+              className="inline w-fit cursor-pointer text-sky-600 hover:underline"
+            >
+              <div className="inline">
+                {profile.website.replace("https://", "")}{" "}
+                <ExternalLinkIcon className="mt-[-2px] inline size-3" />
+              </div>
+            </a>
+          )}
+
+          {isUser && (
+            <div className="flex gap-4 pt-2 text-sm">
+              <button
+                onClick={() => setFollowingModal(true)}
+                className="dark:border-black-300 dark:text-black-300 border-black-700 text-black-700 rounded-2xl border px-5 py-1"
+              >
+                {profile.count.following} following
+              </button>
+
+              <button
+                onClick={() => setFollowersModal(true)}
+                className="dark:border-black-300 dark:text-black-300 border-black-700 text-black-700 rounded-2xl border px-5 py-1"
+              >
+                {profile.count.followers} followers
+              </button>
+            </div>
           )}
         </div>
 
-        <div className="flex flex-row justify-between gap-4">
-          <h1 className="font-black">{profile.display_name}</h1>
-
-          {!isUser && <FollowButton target_id={profile.id.toString()} />}
+        <div className="pb-8">
+          <Separator />
         </div>
 
-        <p>
-          @{profile.username} (#{profile.id})
-        </p>
+        <FeedUser author_id={profile.id.toString()} user={user} />
 
-        <p className="mb-0">
-          {profile.occupation && `${profile.occupation}`}
-          {profile.location && `, ${profile.location}`}
-          {profile.pronouns && `, ${profile.pronouns}`}
-        </p>
-
-        {profile.website && (
-          <a
-            href={profile.website}
-            target="_blank"
-            className="inline w-fit cursor-pointer text-sky-600 hover:underline"
-          >
-            <div className="inline">
-              {profile.website.replace("https://", "")}{" "}
-              <ExternalLinkIcon className="mt-[-2px] inline size-3" />
-            </div>
-          </a>
-        )}
-
-        {isUser && (
-          <div className="flex gap-4 pt-2 text-sm">
-            <button
-              onClick={() => setFollowingModal(true)}
-              className="dark:border-black-300 dark:text-black-300 border-black-700 text-black-700 rounded-2xl border px-5 py-1"
-            >
-              {profile.count.following} following
-            </button>
-
-            <button
-              onClick={() => setFollowersModal(true)}
-              className="dark:border-black-300 dark:text-black-300 border-black-700 text-black-700 rounded-2xl border px-5 py-1"
-            >
-              {profile.count.followers} followers
-            </button>
-          </div>
-        )}
+        <FollowersModal
+          open={followersModal}
+          onClose={() => {
+            setFollowersModal(false);
+            setFollowingModal(false);
+          }}
+        />
+        <FollowingModal
+          open={followingModal}
+          onClose={() => {
+            setFollowersModal(false);
+            setFollowingModal(false);
+          }}
+        />
       </div>
-
-      <div className="pb-8">
-        <Separator />
-      </div>
-
-      <FeedUser author_id={profile.id.toString()} user={user} />
-
-      <FollowersModal
-        open={followersModal}
-        onClose={() => {
-          setFollowersModal(false);
-          setFollowingModal(false);
-        }}
-      />
-      <FollowingModal
-        open={followingModal}
-        onClose={() => {
-          setFollowersModal(false);
-          setFollowingModal(false);
-        }}
-      />
-    </div>
+    </>
   );
 }

@@ -593,6 +593,14 @@ export function FeedUser({
     }
   }, [isFetching, isFetchingNextPage, inView, fetchNextPage, hasNextPage]);
 
+  useEffect(() => {
+    window.addEventListener("refresh_feeds", () => refetch());
+
+    return () => {
+      window.removeEventListener("refresh_feeds", () => refetch());
+    };
+  }, [refetch]);
+
   return (
     <div className="text-md mx-auto max-w-3xl">
       {status === "pending" ? (

@@ -2,9 +2,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Images, ImagesSquare } from "@phosphor-icons/react";
+import { CircleNotch, Images, ImagesSquare } from "@phosphor-icons/react";
 import { useMediaQuery } from "@uidotdev/usehooks";
-import { LoaderPinwheelIcon, PlusIcon, X } from "lucide-react";
+import { PlusIcon, X } from "lucide-react";
 import { toast } from "sonner";
 import { useFilePicker } from "use-file-picker";
 import {
@@ -118,7 +118,10 @@ export function Composer() {
       </div>
       {open && (
         <div className="z-[99999] flex h-[100dvh] w-full items-center justify-center">
-          <div className="bg-black-800/60 backdrop fadein fixed inset-0 z-[99998] backdrop-blur-sm transition-all" />
+          <div
+            className="bg-black-800/60 backdrop fadein pointer-events-auto fixed inset-0 z-[99998] backdrop-blur-sm transition-all"
+            onClick={() => setOpen(false)}
+          />
 
           <div className="dark:bg-black-800 slideinfrombottom pointer-events-auto fixed z-[99999] flex h-[500px] max-h-[80dvh] min-h-[50dvh] w-full max-w-[800px] flex-col rounded-lg border border-neutral-300 bg-gray-100 pb-0 outline-none max-sm:top-0 max-sm:min-h-[100dvh] max-sm:max-w-[100vw] max-sm:rounded-none max-sm:border-none dark:border-slate-900">
             <div className="flex flex-row items-center justify-between gap-4 overflow-clip border-b border-neutral-300 py-1 dark:border-slate-900">
@@ -151,7 +154,7 @@ export function Composer() {
 
               {posting && (
                 <div className="pointer-events-auto absolute bottom-0 left-0 right-0 top-0 flex items-center justify-center">
-                  <LoaderPinwheelIcon className="size-20 animate-spin opacity-50" />
+                  <CircleNotch className="size-20 animate-spin opacity-50" />
                 </div>
               )}
 
@@ -333,7 +336,7 @@ export function ReplyCompose({
 
         {posting && (
           <div className="pointer-events-auto absolute bottom-0 left-0 right-0 top-0 flex items-center justify-center">
-            <LoaderPinwheelIcon className="size-20 animate-spin opacity-50" />
+            <CircleNotch className="size-20 animate-spin opacity-50" />
           </div>
         )}
 
@@ -549,7 +552,7 @@ export function ReplyComposeFloating({
 
               {posting && (
                 <div className="pointer-events-auto absolute bottom-0 left-0 right-0 top-0 flex items-center justify-center">
-                  <LoaderPinwheelIcon className="size-20 animate-spin opacity-50" />
+                  <CircleNotch className="size-20 animate-spin opacity-50" />
                 </div>
               )}
 
