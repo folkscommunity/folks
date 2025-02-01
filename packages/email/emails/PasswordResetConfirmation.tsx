@@ -133,14 +133,14 @@ export const VerifyEmail = (props: { name: string }) => {
         </Link>
         ,{" "}
         <Link
-          href="https://folkscommunity.com/about"
+          href="https://folkscommunity.com/manifesto"
           style={{
             color: "rgb(0, 0, 0)",
             textDecoration: "underline",
             fontFamily: "Courier, monospace"
           }}
         >
-          About
+          Manifesto
         </Link>
       </Text>
 

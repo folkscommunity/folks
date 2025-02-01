@@ -31,6 +31,11 @@ const nextConfig: NextConfig = {
         source: "/discord",
         destination: "https://discord.gg/BmWznBhHzk",
         permanent: false
+      },
+      {
+        source: "/about",
+        destination: "https://folkscommunity.com/manifesto",
+        permanent: false
       }
     ];
   }

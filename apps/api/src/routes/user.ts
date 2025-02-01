@@ -447,4 +447,40 @@ router.post("/unsubscribe", async (req, res) => {
   }
 });
 
+router.post("/unsubscribe/:email", async (req, res) => {
+  try {
+    const { email } = req.params;
+
+    const email_raw = Buffer.from(email, "base64").toString("utf-8");
+
+    const user = await prisma.user.findUnique({
+      where: {
+        email: email_raw
+      }
+    });
+
+    if (!user) {
+      return res.send("ok");
+    }
+
+    await prisma.user.update({
+      where: {
+        id: BigInt(user.id)
+      },
+      data: {
+        marketing_emails: false
+      }
+    });
+
+    res.send("ok");
+  } catch (e) {
+    console.error(e);
+
+    res.status(500).json({
+      error: "server_error",
+      message: "Something went wrong."
+    });
+  }
+});
+
 export default router;
