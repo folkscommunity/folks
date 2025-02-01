@@ -278,4 +278,40 @@ router.get("/metadata", async (req, res) => {
   }
 });
 
+router.post(
+  "/pin-highlighted",
+  authMiddleware,
+  async (req: RequestWithUser, res) => {
+    try {
+      const { id } = req.body;
+
+      const user = await prisma.user.findUnique({
+        where: {
+          id: BigInt(req.user.id)
+        }
+      });
+
+      if (!user || !user.super_admin) {
+        return res.status(401).json({
+          error: "unauthorized",
+          message: "Not authorized."
+        });
+      }
+
+      if (id && id !== null) {
+        await redis.set(`pinned_post:highlighted`, id);
+      } else {
+        await redis.del(`pinned_post:highlighted`);
+      }
+
+      res.setHeader("Content-Type", "application/json");
+      res.send(
+        JSONtoString({
+          ok: true
+        })
+      );
+    } catch (e) {}
+  }
+);
+
 export default router;

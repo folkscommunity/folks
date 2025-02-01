@@ -168,6 +168,31 @@ export function Post({ post, user }: { post: any; user: any }) {
       });
   }
 
+  function setPinnedPost(id: string | null) {
+    fetch("/api/feed/pin-highlighted", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        id: id
+      })
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.ok) {
+          window.dispatchEvent(new Event("refresh_feeds"));
+
+          if (id) {
+            toast.success("Post has been pinned.");
+          } else {
+            toast.success("Post has been unpinned.");
+          }
+        }
+      })
+      .catch((err) => {});
+  }
+
   useEffect(() => {
     setIsClient(true);
   }, []);
@@ -250,6 +275,29 @@ export function Post({ post, user }: { post: any; user: any }) {
                   </DropdownMenuItem>
                 )}
 
+                {user && user.super_admin && (
+                  <>
+                    <DropdownMenuSeparator className="bg-slate-100 dark:bg-slate-900" />
+                    <DropdownMenuItem
+                      className="dark:hover:bg-black-600 cursor-pointer hover:bg-slate-100"
+                      onClick={() => {
+                        setPinnedPost(lPost.id.toString());
+                      }}
+                    >
+                      Pin
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      className="dark:hover:bg-black-600 cursor-pointer hover:bg-slate-100"
+                      onClick={() => {
+                        setPinnedPost(null);
+                      }}
+                    >
+                      Unpin
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator className="bg-slate-100 dark:bg-slate-900" />
+                  </>
+                )}
+
                 {user &&
                   (user.super_admin ||
                     lPost.author.id.toString() === user.id.toString()) && (
@@ -275,7 +323,7 @@ export function Post({ post, user }: { post: any; user: any }) {
                             Show Embeds
                           </DropdownMenuItem>
                         )}
-                      <DropdownMenuSeparator />
+                      <DropdownMenuSeparator className="bg-slate-100 dark:bg-slate-900" />
 
                       <DropdownMenuItem
                         className="dark:hover:bg-black-600 cursor-pointer text-red-500 hover:bg-slate-100"

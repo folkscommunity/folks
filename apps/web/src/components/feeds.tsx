@@ -21,7 +21,15 @@ enum FeedType {
   EVERYTHING = "EVERYTHING"
 }
 
-export function Feeds({ is_authed, user }: { is_authed: boolean; user: any }) {
+export function Feeds({
+  is_authed,
+  user,
+  highlighted_pinned_post
+}: {
+  is_authed: boolean;
+  user: any;
+  highlighted_pinned_post: string | null;
+}) {
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -31,7 +39,11 @@ export function Feeds({ is_authed, user }: { is_authed: boolean; user: any }) {
   return isClient ? (
     <>
       {is_authed && <Composer />}
-      <FeedsClient is_authed={is_authed} user={user} />
+      <FeedsClient
+        is_authed={is_authed}
+        user={user}
+        highlighted_pinned_post={highlighted_pinned_post}
+      />
     </>
   ) : (
     <>
@@ -66,7 +78,15 @@ export function Feeds({ is_authed, user }: { is_authed: boolean; user: any }) {
   );
 }
 
-function FeedsClient({ is_authed, user }: { is_authed: boolean; user: any }) {
+function FeedsClient({
+  is_authed,
+  user,
+  highlighted_pinned_post
+}: {
+  is_authed: boolean;
+  user: any;
+  highlighted_pinned_post: string | null;
+}) {
   const [feed, setFeed] = useLocalStorage(
     "selected_feed",
     FeedType.HIGHLIGHTED
@@ -134,7 +154,11 @@ function FeedsClient({ is_authed, user }: { is_authed: boolean; user: any }) {
       </div>
 
       {feed === FeedType.HIGHLIGHTED && (
-        <FeedHighlighted is_authed={is_authed} user={user} />
+        <FeedHighlighted
+          is_authed={is_authed}
+          user={user}
+          highlighted_pinned_post={highlighted_pinned_post}
+        />
       )}
       {feed === FeedType.EVERYTHING && (
         <FeedEverything is_authed={is_authed} user={user} />
@@ -268,14 +292,16 @@ function FeedEverything({
 
 function FeedHighlighted({
   is_authed,
-  user
+  user,
+  highlighted_pinned_post
 }: {
   is_authed: boolean;
   user: any;
+  highlighted_pinned_post: string | null;
 }) {
   const { ref, inView } = useInView();
   const [timesAutoLoaded, setTimesAutoLoaded] = useState(0);
-  const pinned_post_feature_flag = useFeatureFlagPayload("pinned_post");
+  const [loadedPinnedPost, setLoadedPinnedPost] = useState(false);
 
   const fetchProjects = async ({
     pageParam
@@ -344,25 +370,33 @@ function FeedHighlighted({
         <p className="p-4">Error: {error.message}</p>
       ) : (
         <div>
-          {pinned_post_feature_flag && (
-            <PinnedPost id={pinned_post_feature_flag.toString()} user={user} />
+          {highlighted_pinned_post && (
+            <PinnedPost
+              id={highlighted_pinned_post.toString()}
+              user={user}
+              onLoaded={() => setLoadedPinnedPost(true)}
+            />
           )}
 
-          {data.pages.map(
-            (page, i) =>
-              page.feed &&
-              page.feed
-                .filter((post: any) => {
-                  if (pinned_post_feature_flag) {
-                    return post.id !== pinned_post_feature_flag;
-                  } else {
-                    return true;
-                  }
-                })
-                .map((post: any, i: any) => {
-                  return <Post user={user} post={post} key={post.id} />;
-                })
-          )}
+          {(highlighted_pinned_post ? loadedPinnedPost : true) &&
+            data.pages.map(
+              (page, i) =>
+                page.feed &&
+                page.feed
+                  .filter((post: any) => {
+                    if (highlighted_pinned_post) {
+                      return (
+                        post.id.toString() !==
+                        highlighted_pinned_post.toString()
+                      );
+                    } else {
+                      return true;
+                    }
+                  })
+                  .map((post: any, i: any) => {
+                    return <Post user={user} post={post} key={post.id} />;
+                  })
+            )}
 
           {!(data.pages[0].feed && data.pages[0].feed.length === 0) && (
             <div className="py-4">

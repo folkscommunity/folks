@@ -2,9 +2,14 @@ import dayjs from "dayjs";
 
 import { parsePostBody } from "@/lib/post-utils";
 
-export const current_release = "0.4.6";
+export const current_release = "0.4.7";
 
 const releases = [
+  {
+    version: "0.4.7",
+    date: "2025-02-01",
+    changes: ["Improved the pinned post feature."]
+  },
   {
     version: "0.4.6",
     date: "2025-02-01",

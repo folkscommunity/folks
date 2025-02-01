@@ -1,24 +1,41 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PushPin } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 
 import { Post } from "./post";
 
-export function PinnedPost({ id, user }: { id: any; user: any }) {
+export function PinnedPost({
+  id,
+  user,
+  onLoaded
+}: {
+  id: any;
+  user: any;
+  onLoaded: () => void;
+}) {
   const [post, setPost] = useState<any>();
 
-  fetch(`/api/post/${id}`, {
-    method: "GET"
-  })
-    .then((res) => res.json())
-    .then((res) => {
-      if (res.ok) {
-        setPost(res.post);
-      }
+  function fetchPost() {
+    fetch(`/api/post/${id}`, {
+      method: "GET"
     })
-    .catch((err) => {});
+      .then((res) => res.json())
+      .then((res) => {
+        if (res.ok) {
+          setPost(res.post);
+          onLoaded();
+        }
+      })
+      .catch((err) => {});
+  }
+
+  useEffect(() => {
+    if (!post) {
+      fetchPost();
+    }
+  }, [post]);
 
   return (
     <>
