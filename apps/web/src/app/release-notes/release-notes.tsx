@@ -216,7 +216,7 @@ export function ReleaseNotes() {
         <h2 className="pb-8">Release Notes</h2>
         <div className="flex flex-col gap-4">
           {releases.map((release, i) => (
-            <div key={i} className="flex flex-col">
+            <div key={i} className="flex flex-col" id={release.version}>
               <span className="font-bold opacity-75">
                 Release {release.version}
               </span>
