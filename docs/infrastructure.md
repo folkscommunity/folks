@@ -26,7 +26,7 @@ A thing that will need attention are the image and video processing pipelines, a
     {
       "Sid": "VisualEditor1",
       "Effect": "Allow",
-      "Action": ["ses:SendEmail", "ses:SendRawEmail"],
+      "Action": ["ses:SendEmail", "ses:SendRawEmail", "rekognition:*"],
       "Resource": "*"
     }
   ]

@@ -7,10 +7,9 @@
 </p>
 <p></p>
 
-Folks is a social media platform for product people.
+Folks is a community platform for product people.
 
-> [!CAUTION]
-> A lot of the codebase is still not production ready, it's still in the early stages of development.
+Check out the [manifest](https://folkscommunity.com/manifest) for more information about the project.
 
 This codebase is primarly built in TypeScript, the web app is built with Next.js and the API is built on top of Express. We use PostgreSQL for the database and Redis for caching.
 
@@ -25,16 +24,20 @@ Here's a guide on how to get started with a local development environment for Fo
 - PostgreSQL 17 (if you're using mac i recommend using [DBNgin](https://dbngin.com/))
 - Redis 7 (same as above, use [DBNgin](https://dbngin.com/))
 - AWS S3 bucket for static assets.
+- AWS SES for sending emails.
+- AWS Rekognition for image scanning.
 
 ## Setup
 
 1. Once you have cloned the repo and have the database setup, run `pnpm install` to install all the dependencies.
 
-2. Copy the `.env.example` file to `.env` and fill in the values (you need to fill in the AWS values you can find the Policy [here](https://github.com/folkscommunity/folks/blob/main/docs/infrastructure.md)).
+2. Generate Vapid keys for the PWA by running `pnpx web-push generate-vapid-keys`.
 
-3. Run `pnpm run dev` to start the development server.
+3. Copy the `.env.example` file to `.env` and fill in the values (you need to fill in the AWS values you can find the Policy [here](https://github.com/folkscommunity/folks/blob/main/docs/infrastructure.md)).
 
-4. Open [http://localhost:3000](http://localhost:3000) to view the app.
+4. Run `pnpm run dev` to start the development server.
+
+5. Open [http://localhost:3000](http://localhost:3000) to view the app.
 
 # Contributing
 
