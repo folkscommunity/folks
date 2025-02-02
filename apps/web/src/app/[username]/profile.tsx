@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Gear } from "@phosphor-icons/react";
 import { ExternalLinkIcon } from "lucide-react";
+import Link from "next/link";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/avatar";
 import { Composer } from "@/components/composer";
@@ -48,16 +50,32 @@ export default function Profile({
       {user && isUser && <Composer />}
       <div className="mx-auto w-full max-w-3xl flex-1">
         <div className="flex flex-col gap-2 py-2">
-          <div className="pb-2">
-            {isUser ? (
-              <ChangeAvatar user={user} />
-            ) : (
-              <Avatar className="size-[80px]">
-                <AvatarImage src={profile.avatar_url} />
-                <AvatarFallback className="text-3xl">
-                  {profile.username[0].toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
+          <div className="flex flex-row justify-between">
+            <div className="pb-2">
+              {isUser ? (
+                <ChangeAvatar user={user} />
+              ) : (
+                <Avatar className="size-[80px]">
+                  <AvatarImage src={profile.avatar_url} />
+                  <AvatarFallback className="text-3xl">
+                    {profile.username[0].toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+              )}
+            </div>
+
+            {isUser && (
+              <Link
+                href="/settings"
+                className="group mt-3 h-fit w-fit"
+                title="Edit Profile"
+              >
+                <Gear
+                  size="28px"
+                  weight="light"
+                  className="opacity-50 transition-all group-hover:rotate-[24deg] group-hover:opacity-80"
+                />
+              </Link>
             )}
           </div>
 

@@ -217,7 +217,7 @@ function FeedEverything({
       !isFetching &&
       !isFetchingNextPage &&
       hasNextPage &&
-      timesAutoLoaded <= 3
+      timesAutoLoaded <= 10
     ) {
       setTimesAutoLoaded(timesAutoLoaded + 1);
       fetchNextPage();
@@ -340,7 +340,7 @@ function FeedHighlighted({
       !isFetching &&
       !isFetchingNextPage &&
       hasNextPage &&
-      timesAutoLoaded <= 3
+      timesAutoLoaded <= 10
     ) {
       setTimesAutoLoaded(timesAutoLoaded + 1);
       fetchNextPage();
@@ -364,39 +364,41 @@ function FeedHighlighted({
 
   return (
     <div className="text-md mx-auto max-w-3xl">
-      {status === "pending" ? (
+      {status === "pending" || !data?.pages ? (
         <FeedSkeleton />
       ) : status === "error" ? (
         <p className="p-4">Error: {error.message}</p>
       ) : (
-        <div>
-          {highlighted_pinned_post && (
-            <PinnedPost
-              id={highlighted_pinned_post.toString()}
-              user={user}
-              onLoaded={() => setLoadedPinnedPost(true)}
-            />
-          )}
-
-          {(highlighted_pinned_post ? loadedPinnedPost : true) &&
-            data.pages.map(
-              (page, i) =>
-                page.feed &&
-                page.feed
-                  .filter((post: any) => {
-                    if (highlighted_pinned_post) {
-                      return (
-                        post.id.toString() !==
-                        highlighted_pinned_post.toString()
-                      );
-                    } else {
-                      return true;
-                    }
-                  })
-                  .map((post: any, i: any) => {
-                    return <Post user={user} post={post} key={post.id} />;
-                  })
+        <div className="flex min-h-[100vh] flex-1 flex-col">
+          <div className="flex flex-1 flex-col">
+            {highlighted_pinned_post && (
+              <PinnedPost
+                id={highlighted_pinned_post.toString()}
+                user={user}
+                onLoaded={() => setLoadedPinnedPost(true)}
+              />
             )}
+
+            {(highlighted_pinned_post ? loadedPinnedPost : true) &&
+              data.pages.map(
+                (page, i) =>
+                  page.feed &&
+                  page.feed
+                    .filter((post: any) => {
+                      if (highlighted_pinned_post) {
+                        return (
+                          post.id.toString() !==
+                          highlighted_pinned_post.toString()
+                        );
+                      } else {
+                        return true;
+                      }
+                    })
+                    .map((post: any, i: any) => {
+                      return <Post user={user} post={post} key={post.id} />;
+                    })
+              )}
+          </div>
 
           {!(data.pages[0].feed && data.pages[0].feed.length === 0) && (
             <div className="py-4">
@@ -474,7 +476,7 @@ function FeedFollowing({ is_authed, user }: { is_authed: boolean; user: any }) {
       !isFetching &&
       !isFetchingNextPage &&
       hasNextPage &&
-      timesAutoLoaded <= 3
+      timesAutoLoaded <= 10
     ) {
       setTimesAutoLoaded(timesAutoLoaded + 1);
       fetchNextPage();
