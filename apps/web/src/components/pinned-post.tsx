@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { PushPin } from "@phosphor-icons/react/dist/ssr";
+import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 
 import { Post } from "./post";
@@ -15,40 +16,29 @@ export function PinnedPost({
   user: any;
   onLoaded: () => void;
 }) {
-  const [post, setPost] = useState<any>();
-
-  function fetchPost() {
-    fetch(`/api/post/${id}`, {
-      method: "GET"
-    })
-      .then((res) => res.json())
-      .then((res) => {
-        if (res.ok) {
-          setPost(res.post);
-          onLoaded();
-        }
-      })
-      .catch((err) => {});
-  }
+  const { isPending, error, data, refetch } = useQuery({
+    queryKey: ["post_" + id],
+    queryFn: () => fetch(`/api/post/${id}`).then((res) => res.json())
+  });
 
   useEffect(() => {
-    if (!post) {
-      fetchPost();
+    if (data) {
+      onLoaded();
     }
-  }, [post]);
+  }, [data]);
 
   return (
     <>
-      {post && (
+      {!isPending && data && (
         <div>
           <Link
-            href={`/${post.author.username}/${post.id}`}
+            href={`/${data.post.author.username}/${data.post.id}`}
             className="flex w-fit items-center gap-[1ch] pb-2 pl-[54px] text-sm hover:underline"
           >
             <PushPin /> Pinned Post
           </Link>
 
-          <Post user={user} post={post} />
+          <Post user={user} post={data.post} />
         </div>
       )}
     </>
