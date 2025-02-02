@@ -26,6 +26,8 @@ builder:
   remote: ssh://root@folks-web1-ny
   args:
     SENTRY_AUTH_TOKEN: <%= %x(echo $SENTRY_AUTH_TOKEN).strip %>
+  cache:
+    type: registry
 
 env:
   secret:
