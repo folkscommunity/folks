@@ -504,6 +504,7 @@ function FeedFollowing({ is_authed, user }: { is_authed: boolean; user: any }) {
         <p className="p-4">Error: {error.message}</p>
       ) : (
         <div>
+          {data.pages.length === 0 && <FeedSkeleton />}
           {data.pages.map(
             (page, i) =>
               page.feed &&
