@@ -23,21 +23,21 @@ Here's a guide on how to get started with a local development environment for Fo
 - pnpm 9.15+
 - PostgreSQL 17 (if you're using mac i recommend using [DBNgin](https://dbngin.com/))
 - Redis 7 (same as above, use [DBNgin](https://dbngin.com/))
-- AWS S3 bucket for static assets.
-- AWS SES for sending emails.
-- AWS Rekognition for image scanning.
+- AWS S3 bucket for static assets. (Not required for development.)
+- AWS SES for sending emails. (Not required for development.)
+- AWS Rekognition for image scanning. (Not required for development.)
 
-## Setup
+## Basic Setup
 
-1. Once you have cloned the repo and have the database setup, run `pnpm install` to install all the dependencies.
+1. Turn on the PostgreSQL and Redis services (in DBNgin).
 
-2. Generate Vapid keys for the PWA by running `pnpx web-push generate-vapid-keys`.
+2. Run `scripts/setup` to setup the environment, and create a `.env` file.
 
-3. Copy the `.env.example` file to `.env` and fill in the values (you need to fill in the AWS values you can find the Policy [here](https://github.com/folkscommunity/folks/blob/main/docs/infrastructure.md)).
+3. Run `pnpm run dev` to start the development server.
 
-4. Run `pnpm run dev` to start the development server.
+4. Open [http://localhost:3000](http://localhost:3000) to view the app.
 
-5. Open [http://localhost:3000](http://localhost:3000) to view the app.
+(When you register a user the verify link will appear in the console.)
 
 # Contributing
 

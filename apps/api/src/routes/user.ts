@@ -198,6 +198,13 @@ router.post("/avatar", authMiddleware, async (req: RequestWithUser, res) => {
       });
     }
 
+    if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
+      return res.status(400).json({
+        error: "invalid_request",
+        message: "AWS credentials not set. Avatar uploads are disabled."
+      });
+    }
+
     const user = await prisma.user.findUnique({
       where: {
         id: BigInt(req.user.id)

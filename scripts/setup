@@ -1,0 +1,44 @@
+#!/bin/bash
+echo "\n- Starting setup...\n"
+
+HOMEBREW_NO_AUTO_UPDATE=1 brew install openssl pnpm jq nvm
+
+echo "- Installing Node.js..."
+nvm install
+nvm use
+pnpm i
+
+if [ -f .env ]; then
+    read -p "Do you want to overwrite .env file? [y/N] " answer
+    if [ "$answer" != "${answer#[Yy]}" ] ;then
+        echo "Overwriting .env file"
+        rm .env
+    else
+        echo "Aborting"
+        exit 1
+    fi
+fi
+
+echo "- Generation jwt secret..."
+
+JWT_KEY=$(openssl rand -hex 32)
+
+echo "- Generating VAPID keys..."
+VAPID_KEY=$(pnpx web-push generate-vapid-keys --json)
+VAPID_PUBLIC=$(echo $VAPID_KEY | jq -r '.publicKey')
+VAPID_PRIVATE=$(echo $VAPID_KEY | jq -r '.privateKey')
+
+echo "- Creating .env file..."
+
+touch .env
+
+echo "DATABASE_URL=\"postgresql://postgres@localhost:5432/folks?schema=public\"" >> .env
+echo "REDIS_URL=\"redis://localhost:6379\"" >> .env
+echo "JWT_SECRET=\"$JWT_KEY\"" >> .env
+echo "AWS_BUCKET=\"folks-static-development\"" >> .env
+echo "AWS_REGION=\"us-east-2\"" >> .env
+echo "NEXT_PUBLIC_VAPID_PUBLIC_KEY=\"$VAPID_PUBLIC\"" >> .env
+echo "VAPID_PRIVATE_KEY=\"$VAPID_PRIVATE\"" >> .env
+echo "DEV_URL=\"http://localhost:3000\"" >> .env
+
+echo "\nDone! ✅"

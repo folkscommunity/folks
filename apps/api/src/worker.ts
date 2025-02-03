@@ -133,6 +133,13 @@ export function workerThread(id: number) {
         return done();
       }
 
+      if (
+        !process.env.AWS_ACCESS_KEY_ID ||
+        !process.env.AWS_SECRET_ACCESS_KEY
+      ) {
+        return done();
+      }
+
       const attachment = await prisma.attachment.findUnique({
         where: {
           id: attachment_id

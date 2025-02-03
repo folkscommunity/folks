@@ -207,6 +207,16 @@ router.post("/", authMiddleware, async (req: RequestWithUser, res) => {
         });
       }
 
+      if (
+        !process.env.AWS_ACCESS_KEY_ID ||
+        !process.env.AWS_SECRET_ACCESS_KEY
+      ) {
+        return res.status(400).json({
+          error: "invalid_request",
+          message: "AWS credentials not set. Image uploads are disabled."
+        });
+      }
+
       let quality = 80;
 
       if (buffer.length < 2 * 1024 * 1024) {

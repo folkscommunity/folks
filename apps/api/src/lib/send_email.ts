@@ -64,7 +64,11 @@ export async function sendVerifyEmail(id: string) {
     }
   };
 
-  if (process.env.NODE_ENV === "production") {
+  if (
+    process.env.NODE_ENV === "production" &&
+    process.env.AWS_ACCESS_KEY_ID &&
+    process.env.AWS_SECRET_ACCESS_KEY
+  ) {
     await ses.sendEmail(params);
   } else {
     console.log("VERIFY EMAIL: ", user.email, url);
@@ -122,7 +126,11 @@ export async function sendInviteEmail(email: string) {
     }
   };
 
-  if (process.env.NODE_ENV === "production") {
+  if (
+    process.env.NODE_ENV === "production" &&
+    process.env.AWS_ACCESS_KEY_ID &&
+    process.env.AWS_SECRET_ACCESS_KEY
+  ) {
     await ses.sendEmail(params);
   } else {
     console.log("INVITE: ", email);
@@ -155,7 +163,11 @@ export async function sendPasswordResetRequest(
     }
   };
 
-  if (process.env.NODE_ENV === "production") {
+  if (
+    process.env.NODE_ENV === "production" &&
+    process.env.AWS_ACCESS_KEY_ID &&
+    process.env.AWS_SECRET_ACCESS_KEY
+  ) {
     await ses.sendEmail(params);
   } else {
     console.log("PASSWORD RESET: ", email, name, url);
@@ -187,7 +199,11 @@ export async function sendPasswordResetConfirmation(
     }
   };
 
-  if (process.env.NODE_ENV === "production") {
+  if (
+    process.env.NODE_ENV === "production" &&
+    process.env.AWS_ACCESS_KEY_ID &&
+    process.env.AWS_SECRET_ACCESS_KEY
+  ) {
     await ses.sendEmail(params);
   } else {
     console.log("PASSWORD RESET CONFIRM: ", name);
