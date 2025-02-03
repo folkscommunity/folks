@@ -76,3 +76,36 @@ jobs:
           VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
           REDIS_URL: ${{ secrets.REDIS_URL }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+
+      - name: Discord notification (success)
+        if: success()
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_DEPLOYMENT_WEBHOOK }}
+        uses: Ilshidur/action-discord@master
+        with:
+          args: "
+            ## New Deployment\n
+
+            ### Status\n
+            > **Success** ✅\n
+
+            ### Commit (${{github.sha}})\n
+            > https://github.com/${{ github.repository }}/commit/${{github.sha}}\n"
+
+      - name: Discord notification (failure)
+        if: failure()
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_DEPLOYMENT_WEBHOOK }}
+        uses: Ilshidur/action-discord@master
+        with:
+          args: "
+            ## New Deployment\n
+
+            ### Status\n
+            > **Failure** ❌\n
+
+            ### Commit (${{github.sha}})\n
+            > https://github.com/${{ github.repository }}/commit/${{github.sha}}\n
+
+            ### Failed Jobs\n
+            > https://github.com/folkscommunity/folks/actions/runs/${{github.run_id}}\n"
