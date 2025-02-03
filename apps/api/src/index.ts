@@ -1,11 +1,11 @@
 import { createServer } from "http";
-import * as Sentry from "@sentry/node";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import express from "express";
 import { Server, Socket } from "socket.io";
 import throng from "throng";
 
+import { Sentry } from "./instrument";
 import auth_router from "./routes/auth";
 import feed_router from "./routes/feed";
 import follow_router from "./routes/follow";
@@ -19,14 +19,6 @@ import { workerThread } from "./worker";
 
 dotenv.config({ path: "../../.env" });
 
-Sentry.init({
-  dsn: "https://1df3329db4bbf18f8187644d6598737e@o4508756308459520.ingest.us.sentry.io/45087563720949762",
-  enabled: process.env.NODE_ENV === "production",
-  environment:
-    process.env.NODE_ENV === "production" ? "production" : "development",
-  tracesSampleRate: 1.0
-});
-
 const app = express();
 const httpServer = createServer(app);
 
@@ -38,9 +30,8 @@ export const io = new Server(httpServer, {
 async function mainThread() {
   // API
   console.log("Main thread started.");
-  app.disable("x-powered-by");
 
-  Sentry.setupExpressErrorHandler(app);
+  app.disable("x-powered-by");
 
   app.use(
     express.json({
@@ -64,8 +55,17 @@ async function mainThread() {
   app.use("/api/notifications", notifications_router);
   app.use("/api/support", support_router);
 
-  app.get("/api/debug-sentry", async (req, res) => {
-    throw new Error("My first Sentry error!");
+  Sentry.setupExpressErrorHandler(app);
+
+  app.use(function onError(err, req, res, next) {
+    console.error(err);
+
+    res.statusCode = 500;
+
+    res.json({
+      error: "server_error",
+      error_trace: res.sentry
+    });
   });
 
   httpServer.listen(process.env.PORT || 3002, () => {

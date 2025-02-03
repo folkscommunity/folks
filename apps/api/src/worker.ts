@@ -6,6 +6,7 @@ import webpush from "web-push";
 
 import { NotificationEndpointType, prisma } from "@folks/db";
 
+import { Sentry } from "./instrument";
 import { rekognition } from "./lib/aws";
 import { posthog } from "./lib/posthog";
 import { sendDiscordNotification } from "./lib/send_discord_notification";
@@ -90,6 +91,14 @@ export function workerThread(id: number) {
 
       return done();
     } catch (e) {
+      Sentry.captureException(e, {
+        tags: {
+          job: "send_notification",
+          job_id: job.id,
+          data: job.data
+        }
+      });
+
       console.error(e);
     }
 
@@ -113,6 +122,14 @@ export function workerThread(id: number) {
 
       return done();
     } catch (e) {
+      Sentry.captureException(e, {
+        tags: {
+          job: "fetch_url_metadata",
+          job_id: job.id,
+          data: job.data
+        }
+      });
+
       console.error(e);
     }
 
@@ -223,6 +240,12 @@ export function workerThread(id: number) {
 
       return done();
     } catch (e) {
+      Sentry.captureException(e, {
+        tags: {
+          job: "scan_images",
+          job_id: job.id
+        }
+      });
       console.error(e);
     }
 
