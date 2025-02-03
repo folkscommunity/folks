@@ -64,7 +64,7 @@ async function mainThread() {
   app.use("/api/notifications", notifications_router);
   app.use("/api/support", support_router);
 
-  app.get("/debug-sentry", async (req, res) => {
+  app.get("/api/debug-sentry", async (req, res) => {
     throw new Error("My first Sentry error!");
   });
 
