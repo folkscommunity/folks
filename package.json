@@ -8,13 +8,16 @@
     "dev": "pnpm run db:generate; pnpm run db:push; dotenv -- pnpm run -F './apps/**' -F './packages/email' --parallel -r dev",
     "db:push": "dotenv -- pnpm run -F @folks/db db:push",
     "db:generate": "dotenv -- pnpm run -F @folks/db db:generate",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "checkformat": "prettier --check \"**/*.{ts,tsx,md}\"",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@ianvs/prettier-plugin-sort-imports": "^4.4.1",
     "@types/node": "^22.10.1",
     "dotenv": "^16.4.5",
     "dotenv-cli": "^7.4.2",
+    "husky": "^9.1.7",
     "prettier": "^3.3.2",
     "prettier-plugin-packagejson": "^2.5.8",
     "prettier-plugin-tailwindcss": "^0.6.10"
