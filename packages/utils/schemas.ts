@@ -16,9 +16,9 @@ export const usernameSchema = z
 
 export const displayNameSchema = z
   .string()
-  .regex(/^[^ ]+$/, "Display name must not start with a space.")
+  .regex(/^[^\s].*$/, "Display name must not start with a space.")
   .max(24, "Display name must be less than 24 characters.")
-  .min(2, "Display name must at least 2 characters.");
+  .min(2, "Display name must be at least 2 characters.");
 
 export const occupationSchema = z
   .string()
