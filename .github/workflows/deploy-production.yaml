@@ -6,7 +6,8 @@ on:
       - main
     paths-ignore:
       - "scripts/**"
-      # - ".github/**"
+      - ".github/**"
+      - "!.github/workflows/deploy-production.yaml"
       - ".gitignore"
       - "LICENSE"
       - "README.md"
@@ -60,7 +61,6 @@ jobs:
         run: kamal deploy
         env:
           DOCKER_BUILDKIT: 1
-          SENTRY_LOG_LEVEL: debug
           KAMAL_REGISTRY_PASSWORD: ${{ secrets.KAMAL_REGISTRY_PASSWORD }}
           KAMAL_REGISTRY_USERNAME: ${{ secrets.KAMAL_REGISTRY_USERNAME }}
           KAMAL_REGISTRY_SERVER: ${{ secrets.KAMAL_REGISTRY_SERVER }}
