@@ -20,10 +20,11 @@ import { workerThread } from "./worker";
 dotenv.config({ path: "../../.env" });
 
 Sentry.init({
-  dsn: "https://6cb146e612974367b3154993eef50af1@sentry.folkscommunity.com/2",
+  dsn: "https://1df3329db4bbf18f8187644d6598737e@o4508756308459520.ingest.us.sentry.io/45087563720949762",
   enabled: process.env.NODE_ENV === "production",
   environment:
-    process.env.NODE_ENV === "production" ? "production" : "development"
+    process.env.NODE_ENV === "production" ? "production" : "development",
+  tracesSampleRate: 1.0
 });
 
 const app = express();
@@ -38,6 +39,8 @@ async function mainThread() {
   // API
   console.log("Main thread started.");
   app.disable("x-powered-by");
+
+  Sentry.setupExpressErrorHandler(app);
 
   app.use(
     express.json({
@@ -60,6 +63,10 @@ async function mainThread() {
   app.use("/api/ribbon", ribbon_router);
   app.use("/api/notifications", notifications_router);
   app.use("/api/support", support_router);
+
+  app.get("/debug-sentry", async (req, res) => {
+    throw new Error("My first Sentry error!");
+  });
 
   httpServer.listen(process.env.PORT || 3002, () => {
     console.log("API started!");
