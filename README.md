@@ -9,7 +9,7 @@
 
 Folks is a community platform for product people.
 
-Check out the [manifest](https://folkscommunity.com/manifest) for more information about the project.
+Check out the [manifesto](https://folkscommunity.com/manifesto) for more information about the project.
 
 This codebase is primarly built in TypeScript, the web app is built with Next.js and the API is built on top of Express. We use PostgreSQL for the database and Redis for caching.
 
