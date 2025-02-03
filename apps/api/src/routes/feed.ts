@@ -87,9 +87,9 @@ router.get("/", async (req, res) => {
 
       where = {
         author_id: {
-          in: following.map((following) => following.target_id),
-          imported: false
+          in: following.map((following) => following.target_id)
         },
+        imported: false,
         deleted_at: null
       };
     } else if (type === "user") {

@@ -6,6 +6,14 @@ export const current_release = "0.4.9";
 
 const releases = [
   {
+    version: "0.4.10",
+    date: "2025-02-03",
+    changes: [
+      "Fixed a bug with the following feed.",
+      "Added a backend for importing posts from other platforms."
+    ]
+  },
+  {
     version: "0.4.9",
     date: "2025-02-02",
     changes: [
