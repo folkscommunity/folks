@@ -1,32 +1,32 @@
 {
-    "$schema": "http://json.schemastore.org/prettierrc",
-    "overrides": [
-        {
-            "files": ".nvmrc",
-            "options": {
-                "parser": "yaml"
-            }
-        }
-    ],
-    "useTabs": false,
-    "semi": true,
-    "trailingComma": "none",
-    "singleQuote": false,
-    "tabWidth": 2,
-    "importOrder": [
-        "<BUILTIN_MODULES>",
-        "^react$",
-        "<THIRD_PARTY_MODULES>",
-        "",
-        "^@folks/(.*)$",
-        "",
-        "^@/(.*)$",
-        "",
-        "^[.]"
-    ],
-    "plugins": [
-        "@ianvs/prettier-plugin-sort-imports",
-        "prettier-plugin-tailwindcss",
-        "prettier-plugin-packagejson"
-    ]
+  "$schema": "http://json.schemastore.org/prettierrc",
+  "overrides": [
+    {
+      "files": ".nvmrc",
+      "options": {
+        "parser": "yaml"
+      }
+    }
+  ],
+  "useTabs": false,
+  "semi": true,
+  "trailingComma": "none",
+  "singleQuote": false,
+  "tabWidth": 2,
+  "importOrder": [
+    "<BUILTIN_MODULES>",
+    "^react$",
+    "<THIRD_PARTY_MODULES>",
+    "",
+    "^@folks/(.*)$",
+    "",
+    "^@/(.*)$",
+    "",
+    "^[.]"
+  ],
+  "plugins": [
+    "@ianvs/prettier-plugin-sort-imports",
+    "prettier-plugin-tailwindcss",
+    "prettier-plugin-packagejson"
+  ]
 }
