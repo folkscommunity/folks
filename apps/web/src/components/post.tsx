@@ -242,6 +242,19 @@ export function Post({ post, user }: { post: any; user: any }) {
                 </span>
               </>
             )}
+            {lPost &&
+              lPost.flags &&
+              lPost.flags.filter((d: any) => d.imported).length > 0 && (
+                <>
+                  <span className="px-0.5 opacity-50">·</span>
+                  <span
+                    className="text-md opacity-50"
+                    title={new Date(lPost.created_at).toLocaleString()}
+                  >
+                    Imported Post
+                  </span>
+                </>
+              )}
           </div>
           <div>
             <DropdownMenu>

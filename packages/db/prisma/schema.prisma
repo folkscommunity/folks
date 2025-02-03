@@ -108,6 +108,7 @@ model Post {
 
   body        String
   attachments Attachment[] @relation("attachments")
+  imported    Boolean      @default(false)
 
   flags Json[]
 

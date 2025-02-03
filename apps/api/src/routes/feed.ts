@@ -56,7 +56,8 @@ router.get("/", async (req, res) => {
 
     if (type === "everything") {
       where = {
-        deleted_at: null
+        deleted_at: null,
+        imported: false
       };
     } else if (type === "highlighted") {
       where = {
@@ -86,7 +87,8 @@ router.get("/", async (req, res) => {
 
       where = {
         author_id: {
-          in: following.map((following) => following.target_id)
+          in: following.map((following) => following.target_id),
+          imported: false
         },
         deleted_at: null
       };

@@ -1253,4 +1253,193 @@ router.delete(
   }
 );
 
+//admin only
+router.post("/import", authMiddleware, async (req: RequestWithUser, res) => {
+  try {
+    const { body, files, hide_embeds, timestamp, user_id } = req.body;
+
+    const user = await prisma.user.findUnique({
+      where: {
+        id: BigInt(req.user.id),
+        super_admin: true
+      }
+    });
+
+    if (!user) {
+      return res.status(401).json({
+        error: "unauthorized"
+      });
+    }
+
+    if (user.suspended) {
+      return res.status(401).json({
+        error: "suspended",
+        message: "Your account is suspended."
+      });
+    }
+
+    const target_user = await prisma.user.findUnique({
+      where: {
+        id: BigInt(user_id)
+      }
+    });
+
+    if (!target_user) {
+      return res.status(400).json({
+        error: "invalid_request",
+        message: "User not found."
+      });
+    }
+
+    if (files && files.length > 1) {
+      return res.status(400).json({
+        error: "invalid_request",
+        message: "You can only upload one photo."
+      });
+    }
+
+    let flags: any[] = [
+      {
+        imported: true
+      }
+    ];
+
+    if (hide_embeds) {
+      flags = [...flags, { hide_embeds: true }];
+    }
+
+    if (files && files.length > 0) {
+      const file = files[0];
+
+      const file_type = file.content.split(";")[0].replace("data:", "");
+
+      if (
+        file_type !== "image/png" &&
+        file_type !== "image/jpeg" &&
+        file_type !== "image/jpg" &&
+        file_type !== "image/webp" &&
+        file_type !== "image/gif"
+      ) {
+        return res.status(400).json({
+          error: "invalid_request",
+          message: "Invalid file type."
+        });
+      }
+
+      const buffer = Buffer.from(
+        file.content.replace(/^data:image\/\w+;base64,/, ""),
+        "base64"
+      );
+
+      if (buffer.length > 50 * 1024 * 1024) {
+        return res.status(400).json({
+          error: "invalid_request",
+          message: "File size exceeds limit."
+        });
+      }
+
+      let quality = 80;
+
+      if (buffer.length < 2 * 1024 * 1024) {
+        quality = 100;
+      }
+
+      let img = await sharp(buffer, {
+        animated: true
+      }).rotate();
+
+      const img_metadata = await img.metadata();
+
+      if (
+        (img_metadata.width > 8000 || img_metadata.height > 8000) &&
+        file_type !== "image/gif"
+      ) {
+        return res.status(400).json({
+          error: "invalid_request",
+          message: "Image dimensions exceeds limit. (8000x8000 max)"
+        });
+      }
+
+      img = await img.webp({ quality: quality });
+
+      const transformed_image_buffer = await img.toBuffer();
+
+      const randomFileName = (randomUUID() + randomUUID()).replaceAll("-", "");
+
+      const file_key = `attachments/${randomFileName}.webp`;
+
+      const s3_file = await s3.send(
+        new PutObjectCommand({
+          Bucket: process.env.AWS_BUCKET!,
+          Key: file_key,
+          Body: transformed_image_buffer,
+          Metadata: {
+            "Uploaded-By-User": req.user.id.toString()
+          },
+          ContentType: "image/webp",
+          ACL: "public-read",
+          CacheControl: "max-age=2592000" // 30 days
+        })
+      );
+
+      if (s3_file.$metadata.httpStatusCode !== 200) {
+        console.error("Error uploading file to S3.", s3_file);
+
+        return res.status(400).json({
+          error: "invalid_request",
+          message: "Something went wrong."
+        });
+      }
+
+      const post = await prisma.post.create({
+        data: {
+          body,
+          author_id: target_user.id,
+          flags: flags,
+          created_at: timestamp ? new Date(timestamp) : new Date(),
+          imported: true,
+          attachments: {
+            create: {
+              type: "Image",
+              created_at: timestamp ? new Date(timestamp) : new Date(),
+              url: process.env.CDN_URL
+                ? `${process.env.CDN_URL}/${file_key}`
+                : `https://${process.env.AWS_BUCKET}.s3.amazonaws.com/${file_key}`,
+              width: img_metadata.width,
+              height: img_metadata.height
+            }
+          }
+        },
+        include: {
+          attachments: true
+        }
+      });
+
+      await generatePostMentions(post.id.toString(), body);
+    } else {
+      const post = await prisma.post.create({
+        data: {
+          body,
+          created_at: timestamp ? new Date(timestamp) : new Date(),
+          imported: true,
+          flags: flags,
+          author_id: target_user.id
+        }
+      });
+
+      await generatePostMentions(post.id.toString(), body);
+    }
+
+    res.setHeader("Content-Type", "application/json");
+    res.send(JSONtoString({ ok: true }));
+  } catch (e) {
+    console.error(e);
+
+    res.status(500).json({
+      error: "server_error",
+      message: "Something went wrong."
+    });
+  }
+});
+
 export default router;
