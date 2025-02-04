@@ -54,6 +54,7 @@ model User {
   mentions               PostMention[]          @relation("mentions")
   notification_endpoints NotificationEndpoint[] @relation("notification_endpoints")
   support_requests       SupportRequest[]       @relation("support_requests")
+  stickers               Sticker[]              @relation("stickers")
 
   @@index([id])
   @@index([username])
@@ -127,6 +128,7 @@ model Post {
   replies  Post[]        @relation("replies")
   likes    PostLike[]    @relation("likes")
   mentions PostMention[] @relation("mentions")
+  stickers Sticker[]     @relation("stickers")
 
   @@index([author_id])
   @@map("posts")
@@ -232,4 +234,42 @@ model SupportRequest {
   updated_at DateTime @updatedAt
 
   @@map("support_requests")
+}
+
+model AvailableSticker {
+  id   String @id @default(cuid())
+  name String
+
+  url String
+
+  restricted Boolean @default(false)
+
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+  placed_stickers Sticker[] @relation("stickers")
+
+  @@map("available_stickers")
+}
+
+model Sticker {
+  id String @id @default(cuid())
+
+  post_id BigInt
+  post    Post?  @relation(fields: [post_id], references: [id], name: "stickers", onDelete: Cascade)
+
+  posted_by_id BigInt
+  posted_by    User?  @relation(fields: [posted_by_id], references: [id], name: "stickers", onDelete: Cascade)
+
+  available_sticker_id String
+  available_sticker    AvailableSticker? @relation(fields: [available_sticker_id], references: [id], name: "stickers", onDelete: Cascade)
+
+  y     Int
+  x     Float
+  angle Int
+  side  String
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("stickers")
 }

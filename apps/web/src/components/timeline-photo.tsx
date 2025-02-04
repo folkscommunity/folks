@@ -34,6 +34,8 @@ export function TimelinePhoto({
         )}
       >
         <img
+          loading="lazy"
+          decoding="async"
           alt={alt}
           src={src}
           style={{

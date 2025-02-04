@@ -501,13 +501,21 @@ export function UrlEmbed({
     >
       {metadata.image && (horizontal || metadata.image?.image_square) && (
         <div className="border-black-200 dark:border-black-700 border-b">
-          <img src={metadata.image.url} alt={metadata.title} width="100%" />
+          <img
+            loading="lazy"
+            decoding="async"
+            src={metadata.image.url}
+            alt={metadata.title}
+            width="100%"
+          />
         </div>
       )}
       <div className="flex items-center gap-2 pr-3">
         {!(metadata.image && (horizontal || metadata.image?.image_square)) && (
           <div className="border-black-200 dark:border-black-700 flex aspect-square h-full min-h-[105px] min-w-[105px] flex-1 items-center justify-center border-r">
             <img
+              decoding="async"
+              loading="lazy"
               width="24px"
               height="24px"
               className="aspect-square rounded-md"

@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { ArrowDown, Heart } from "@phosphor-icons/react";
+import { Suspense, useEffect, useRef, useState } from "react";
+import { ArrowDown, Heart, SmileySticker } from "@phosphor-icons/react";
 import dayjs from "dayjs";
 import { EllipsisIcon } from "lucide-react";
 import Link from "next/link";
@@ -19,6 +19,7 @@ import {
 import { FeedUser } from "@/components/feeds";
 import { Post, UrlEmbed } from "@/components/post";
 import { Separator } from "@/components/separator";
+import { StickerController } from "@/components/stickers/sticker";
 import { TimelinePhoto } from "@/components/timeline-photo";
 import { parsePostBody } from "@/lib/post-utils";
 import { cn, dateRelativeTiny } from "@/lib/utils";
@@ -30,6 +31,7 @@ export function SinglePost({ user, post }: { user: any; post: any }) {
   const [likesModalOpen, setLikesModalOpen] = useState(false);
   const [replies, setReplies] = useState<any[]>([]);
   const [isClient, setIsClient] = useState(false);
+  const postContainerRef = useRef<HTMLDivElement>(null);
 
   function fetchPost() {
     fetch(`/api/post/${post.id}`, {
@@ -149,7 +151,7 @@ export function SinglePost({ user, post }: { user: any; post: any }) {
   }, []);
 
   return (
-    <div className="text-md mx-auto w-full max-w-3xl">
+    <div className="text-md mx-auto w-full max-w-3xl" ref={postContainerRef}>
       <div className="w-full pb-2">
         <div className="flex flex-row gap-4 pb-4">
           <div>
@@ -265,6 +267,16 @@ export function SinglePost({ user, post }: { user: any; post: any }) {
               }
             />
 
+            <SmileySticker
+              className={cn(
+                "size-6 cursor-pointer text-slate-700 hover:text-blue-500 max-sm:hidden"
+              )}
+              strokeWidth={1.5}
+              onClick={() => {
+                window.dispatchEvent(new Event("stickers.open_editor"));
+              }}
+            />
+
             <div>
               <DropdownMenu>
                 <DropdownMenuTrigger className="h-[20px] outline-none">
@@ -351,6 +363,15 @@ export function SinglePost({ user, post }: { user: any; post: any }) {
         open={likesModalOpen}
         onClose={() => setLikesModalOpen(false)}
       />
+
+      {isClient && (
+        <StickerController
+          user={user}
+          postContainerRef={postContainerRef}
+          post={lPost}
+          replies={replies}
+        />
+      )}
     </div>
   );
 }
