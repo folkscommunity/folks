@@ -12,6 +12,7 @@ import follow_router from "./routes/follow";
 import notifications_router from "./routes/notifications";
 import post_router from "./routes/post";
 import ribbon_router from "./routes/ribbon";
+import stickers_router from "./routes/stickers";
 import support_router from "./routes/support";
 import user_router from "./routes/user";
 import whitelist_router from "./routes/whitelist";
@@ -54,6 +55,7 @@ async function mainThread() {
   app.use("/api/ribbon", ribbon_router);
   app.use("/api/notifications", notifications_router);
   app.use("/api/support", support_router);
+  app.use("/api/stickers", stickers_router);
 
   Sentry.setupExpressErrorHandler(app);
 
