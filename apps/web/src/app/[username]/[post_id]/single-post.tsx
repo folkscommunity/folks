@@ -269,7 +269,7 @@ export function SinglePost({ user, post }: { user: any; post: any }) {
 
             <SmileySticker
               className={cn(
-                "size-6 cursor-pointer text-slate-700 hover:text-blue-500"
+                "size-6 cursor-pointer text-slate-700 hover:text-blue-500 max-sm:hidden"
               )}
               strokeWidth={1.5}
               onClick={() => {
