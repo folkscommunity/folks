@@ -64,8 +64,7 @@ export function PrivacyPolicy() {
             memory.
           </p>
           <p className="font-bold">
-            We use cookies for authentication, for internal analytics, and to
-            enable certain features such as authentication.
+            We use cookies for authentication, and for internal analytics.
           </p>
           <h3>Data Sale Policy</h3>
           <p>
