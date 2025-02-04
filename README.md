@@ -42,3 +42,9 @@ Here's a guide on how to get started with a local development environment for Fo
 # Contributing
 
 If you're interested in helping with the community effort to make Folks, let me know in the [Discord server](https://discord.gg/BmWznBhHzk), or shoot me an email [j@folkscommunity.com](mailto:j@folkscommunity.com).
+
+---
+
+## Acknowledgements
+
+**Thank you to [Sentry](https://sentry.io?utm_source=folks) for providing us with error reporting and monitoring.**

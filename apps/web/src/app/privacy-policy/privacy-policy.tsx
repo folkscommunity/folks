@@ -101,6 +101,7 @@ export function PrivacyPolicy() {
           <ul className="list-disc space-y-1 pl-6">
             <li>Cloudflare - reverse proxy & cdn</li>
             <li>AWS - attachment storage, cdn and email delivery</li>
+            <li>Sentry - error reporting</li>
             <li>PostHog (self hosted) - feature flagging, analytics</li>
             <li>Plausible (self hosted) - analytics</li>
           </ul>
