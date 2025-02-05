@@ -30,7 +30,6 @@ builder:
     type: registry
 
 env:
-  VERCEL_URL: folkscommunity.com
   secret:
     - VERCEL_URL
     - DATABASE_URL
