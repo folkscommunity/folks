@@ -464,10 +464,6 @@ function StickerEditor({
             outside of the red box to place the sticker.
           </p>
 
-          <p className="m-0 font-bold">
-            Remember stickers are in a beta, so expect bugs!
-          </p>
-
           <div className="pb-2 font-bold">Available Stickers:</div>
 
           <div className="flex-1 overflow-y-scroll">
