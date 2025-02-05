@@ -620,7 +620,6 @@ export function ReplyComposeFloating({
   );
 }
 
-// New: This composer is for the inline composer in the feed on the main page.
 export function InlineComposer() {
   const [text, setText] = useState("");
 
@@ -689,6 +688,10 @@ export function InlineComposer() {
 
           setOpen(false);
           onPost();
+
+          if (textareaRef.current) {
+            textareaRef.current.style.height = "auto";
+          }
         } else {
           setError(res.message || "An error occured.");
         }
@@ -706,7 +709,7 @@ export function InlineComposer() {
     <div className="w-full">
       <textarea
         ref={textareaRef}
-        className="w-full flex-1 resize-none border-0 bg-transparent px-4 py-1 pt-2 placeholder:text-neutral-700 focus:outline-none"
+        className="text-md max-h-[300px] w-full flex-1 resize-none border-0 bg-transparent px-4 py-1 pt-2 placeholder:text-neutral-700 focus:outline-none"
         placeholder="Write something..."
         name="body"
         maxLength={300}
@@ -714,8 +717,11 @@ export function InlineComposer() {
         disabled={posting}
         onChange={(e) => {
           setText(e.target.value);
-          e.target.style.height = "auto"; // Reset height
-          e.target.style.height = `${e.target.scrollHeight}px`; // Adjust height
+          e.target.style.height = "auto";
+          e.target.style.height =
+            e.target.scrollHeight < 300
+              ? `${e.target.scrollHeight}px`
+              : "300px";
         }}
         onFocus={() => setOpen(true)}
         style={{ overflow: "hidden" }}
@@ -775,8 +781,9 @@ export function InlineComposer() {
                   setText("");
                   setError("");
                   clear();
+
                   if (textareaRef.current) {
-                    textareaRef.current.style.height = "auto"; // Reset height
+                    textareaRef.current.style.height = "auto";
                   }
                 }}
               >
@@ -785,7 +792,9 @@ export function InlineComposer() {
               <button
                 disabled={!text || posting}
                 className="rounded-md bg-neutral-900 px-3 py-1 text-white disabled:bg-neutral-400 dark:bg-neutral-600 dark:disabled:bg-neutral-800"
-                onClick={() => createPost(text, filesContent)}
+                onClick={() => {
+                  createPost(text, filesContent);
+                }}
               >
                 Post
               </button>

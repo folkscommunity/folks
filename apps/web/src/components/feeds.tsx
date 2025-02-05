@@ -157,7 +157,6 @@ function FeedsClient({
       </div>
       {is_authed && (
         <div className="mb-4 w-full max-w-3xl flex-1 justify-center">
-          <Separator />
           <div className="flex w-full gap-2 pt-4">
             <Avatar className="size-[40px]">
               <AvatarImage src={user.avatar_url} />
@@ -165,7 +164,6 @@ function FeedsClient({
             </Avatar>
             <InlineComposer />
           </div>
-          <Separator />
         </div>
       )}
       {feed === FeedType.HIGHLIGHTED && (
