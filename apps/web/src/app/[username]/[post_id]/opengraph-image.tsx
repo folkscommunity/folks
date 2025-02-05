@@ -85,14 +85,16 @@ export default async function Image({
           fontFamily: "IBM Plex Mono",
           backgroundColor: "black",
           background:
-            "url(https://media-assets.folkscommunity.com/brand/og-bg-main.png)",
+            post.attachments && post.attachments.length > 0
+              ? "black"
+              : "url(https://media-assets.folkscommunity.com/brand/og-bg-main.png)",
           backgroundSize: "cover",
           backgroundRepeat: "no-repeat",
           padding: "50px",
           paddingBottom: "5px"
         }}
       >
-        {post.attachments.length > 0 && (
+        {post.attachments && post.attachments.length > 0 && (
           <div
             style={{
               position: "absolute",
