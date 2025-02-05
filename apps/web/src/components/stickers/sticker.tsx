@@ -254,7 +254,7 @@ function StickerEditor({
   }
 
   function handleMouseDown(e: any) {
-    if (mouseSide && !showBoundry) {
+    if (mouseSide && !showBoundry && selectedSticker) {
       setTopOffset(mouseY);
       setSideOffset(mousePercentX);
       setSide(mouseSide);
