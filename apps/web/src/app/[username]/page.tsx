@@ -18,7 +18,11 @@ export async function generateMetadata({
       username: username
     },
     select: {
-      display_name: true
+      display_name: true,
+      occupation: true,
+      location: true,
+      pronouns: true,
+      website: true
     }
   });
 
