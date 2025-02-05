@@ -38,7 +38,8 @@ export default async function Image({
 
   const post = await prisma.post.findUnique({
     where: {
-      id: BigInt(post_id)
+      id: BigInt(post_id),
+      deleted_at: null
     },
     include: {
       author: {
