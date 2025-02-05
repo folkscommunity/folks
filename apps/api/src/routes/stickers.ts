@@ -5,6 +5,7 @@ import { JSONtoString } from "@folks/utils";
 
 import { Sentry } from "@/instrument";
 import { authMiddleware, RequestWithUser } from "@/lib/auth_middleware";
+import { posthog } from "@/lib/posthog";
 
 const router = Router();
 
@@ -127,6 +128,20 @@ router.post("/", authMiddleware, async (req: RequestWithUser, res) => {
         }
       });
     }
+
+    await posthog.capture({
+      distinctId: user.id.toString(),
+      event: "stickers.add",
+      properties: {
+        post_id: post_id,
+        sticker_id: available_sticker.id,
+        sticker_url: available_sticker.url,
+        side: side,
+        x: x,
+        y: y,
+        angle: angle
+      }
+    });
 
     return res.json({ ok: true });
   } catch (e) {
@@ -292,6 +307,14 @@ router.delete("/:id", authMiddleware, async (req: RequestWithUser, res) => {
     await prisma.sticker.delete({
       where: {
         id: id
+      }
+    });
+
+    await posthog.capture({
+      distinctId: user.id.toString(),
+      event: "stickers.delete",
+      properties: {
+        sticker_id: id
       }
     });
 
