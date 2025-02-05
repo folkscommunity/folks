@@ -1,7 +1,5 @@
 "use client";
 
-/* eslint-disable @next/next/no-img-element */
-/* eslint-disable jsx-a11y/alt-text */
 import { SVGProps, useEffect, useState } from "react";
 
 export function StickersComing() {

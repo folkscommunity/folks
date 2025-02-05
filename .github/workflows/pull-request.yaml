@@ -1,0 +1,60 @@
+name: PR Tests
+
+on: [pull_request]
+
+jobs:
+  run-linters:
+    name: Run ESLint & Prettier
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v3
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 8
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: |
+          pnpm install
+
+      - name: Run ESLint
+        run: |
+          pnpm run lint
+
+      - name: Run Prettier
+        run: |
+          pnpm run checkformat
+
+  run-build:
+    name: Try to Build Folks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v3
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 8
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: |
+          pnpm install
+
+      - name: Test Build
+        run: |
+          pnpm run build
