@@ -2,9 +2,17 @@ import dayjs from "dayjs";
 
 import { parsePostBody } from "@/lib/post-utils";
 
-export const current_release = "0.5";
+export const current_release = "0.5.1";
 
 const releases = [
+  {
+    version: "0.5.1",
+    date: "2025-02-05",
+    changes: [
+      "Added dynamic og images.",
+      "Fixed metadata for profile and posts."
+    ]
+  },
   {
     version: "0.5",
     date: "2025-02-05",

@@ -4,8 +4,6 @@ import { useState } from "react";
 
 import { cn } from "@/lib/utils";
 
-/* eslint-disable @next/next/no-img-element */
-
 export function TimelinePhoto({
   src,
   width,
