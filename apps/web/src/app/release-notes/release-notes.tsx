@@ -2,9 +2,14 @@ import dayjs from "dayjs";
 
 import { parsePostBody } from "@/lib/post-utils";
 
-export const current_release = "0.5.1";
+export const current_release = "0.5.2";
 
 const releases = [
+  {
+    version: "0.5.2",
+    date: "2025-02-05",
+    changes: ["Created a new composer (@junaidanjum)"]
+  },
   {
     version: "0.5.1",
     date: "2025-02-05",
@@ -22,7 +27,7 @@ const releases = [
     version: "0.4.11",
     date: "2025-02-03",
     changes: [
-      "Fixed a bug with the registration form not allowing spaces in the username. @junaidanjum"
+      "Fixed a bug with the registration form not allowing spaces in the username. (@junaidanjum)"
     ]
   },
   {
