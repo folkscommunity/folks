@@ -10,10 +10,12 @@ import { useInView } from "react-intersection-observer";
 
 import { cn } from "@/lib/utils";
 
-import { Composer } from "./composer";
+import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
+import { InlineComposer } from "./composer";
 import { FeedSkeleton, PostSkeleton } from "./feed-skeleton";
 import { PinnedPost } from "./pinned-post";
 import { Post } from "./post";
+import { Separator } from "./separator";
 
 enum FeedType {
   HIGHLIGHTED = "HIGHLIGHTED",
@@ -38,7 +40,8 @@ export function Feeds({
 
   return isClient ? (
     <>
-      {is_authed && <Composer />}
+      {/* new: added inline composer in FeedsClient component
+       {is_authed && <Composer />} */}
       <FeedsClient
         is_authed={is_authed}
         user={user}
@@ -116,7 +119,7 @@ function FeedsClient({
 
   return (
     <div className="w-full max-w-3xl flex-1 justify-center">
-      <div className="flex justify-center pb-6">
+      <div className="flex justify-center pb-4">
         <div className="text-black-400 flex flex-row space-x-2 text-sm font-bold">
           <span
             className={cn(
@@ -152,7 +155,17 @@ function FeedsClient({
           )}
         </div>
       </div>
-
+      {is_authed && (
+        <div className="mb-4 w-full max-w-3xl flex-1 justify-center">
+          <div className="flex w-full gap-2 pt-4">
+            <Avatar className="size-[40px]">
+              <AvatarImage src={user.avatar_url} />
+              <AvatarFallback>{user.username[0].toUpperCase()}</AvatarFallback>
+            </Avatar>
+            <InlineComposer />
+          </div>
+        </div>
+      )}
       {feed === FeedType.HIGHLIGHTED && (
         <FeedHighlighted
           is_authed={is_authed}
