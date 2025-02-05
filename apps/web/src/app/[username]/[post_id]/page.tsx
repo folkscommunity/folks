@@ -1,3 +1,5 @@
+import { Metadata } from "next";
+
 import { prisma } from "@folks/db";
 
 import NotFound from "@/app/not-found";
@@ -11,14 +13,16 @@ export async function generateMetadata({
   params
 }: {
   params: Promise<{ post_id: string; username: string }>;
-}) {
+}): Promise<Metadata> {
   const post_id = (await params).post_id;
   const username = (await params).username;
 
   try {
     BigInt(post_id);
   } catch (e) {
-    return <NotFound />;
+    return {
+      title: "Not Found"
+    };
   }
 
   const post = await prisma.post.findUnique({
@@ -42,8 +46,17 @@ export async function generateMetadata({
 
   if (post?.body && post.author.display_name) {
     return {
-      title: `${post.author.display_name} on Folks – ${post.body.slice(0, 20)}`,
-      description: `@${post.author.username}: ${post.body}`
+      title: `${post.author.display_name} on Folks – ${post.body.slice(0, 100)}`,
+      description: `@${post.author.username}: ${post.body}`,
+      openGraph: {
+        title: `${post.author.display_name} on Folks – ${post.body.slice(0, 100)}`,
+        description: `@${post.author.username}: ${post.body}`
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: `${post.author.display_name} on Folks – ${post.body.slice(0, 100)}`,
+        description: `@${post.author.username}: ${post.body}`
+      }
     };
   }
 
