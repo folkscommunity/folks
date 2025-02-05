@@ -1,4 +1,4 @@
-name: Lint & Unit Test
+name: PR Tests
 
 on: [pull_request]
 
