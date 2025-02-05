@@ -15,6 +15,9 @@ FROM base AS build
 ARG SENTRY_AUTH_TOKEN
 ENV SENTRY_AUTH_TOKEN=$SENTRY_AUTH_TOKEN
 
+ARG VERCEL_URL
+ENV VERCEL_URL=$VERCEL_URL
+
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install
 RUN pnpm run build
 
