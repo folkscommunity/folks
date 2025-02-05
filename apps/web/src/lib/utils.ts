@@ -24,3 +24,9 @@ export function dateRelativeTiny(date: Date, ago?: boolean) {
 
   return date.toISOString().split("T")[0];
 }
+
+export function optimizedImageUrl(url: string, width: number, height: number) {
+  const url_as_base64 = Buffer.from(url).toString("base64");
+
+  return `https://imgproxy.folkscommunity.com/plain/${width && height ? `rs:fill:${width}:${height}:0/` : ""}${url_as_base64}.png`;
+}

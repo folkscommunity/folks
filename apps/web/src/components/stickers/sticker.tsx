@@ -5,7 +5,7 @@ import { toast } from "sonner";
 
 import { Label } from "@/components/label";
 import { Slider } from "@/components/slider";
-import { cn } from "@/lib/utils";
+import { cn, optimizedImageUrl } from "@/lib/utils";
 
 import { OImage } from "../image";
 
@@ -196,8 +196,6 @@ function StickerEditor({
   const [mouseY, setMouseY] = useState(0);
   const [mouseX, setMouseX] = useState(0);
 
-  const [mousePressed, setMousePressed] = useState(false);
-
   const [mouseSide, setMouseSide] = useState<StickerSide | false>();
 
   const [mousePercentX, setMousePercentX] = useState(0);
@@ -254,7 +252,7 @@ function StickerEditor({
   }
 
   function handleMouseDown(e: any) {
-    if (mouseSide && !showBoundry) {
+    if (mouseSide && !showBoundry && selectedSticker) {
       setTopOffset(mouseY);
       setSideOffset(mousePercentX);
       setSide(mouseSide);
@@ -388,13 +386,18 @@ function StickerEditor({
   return (
     <div
       style={{
-        height: availableHeight + 400
+        height: availableHeight + 400,
+        cursor: selectedSticker
+          ? `url("${optimizedImageUrl(selectedSticker.url, 80, 80)}") 40 40,
+    auto`
+          : "auto"
       }}
       className="pointer-events-auto absolute z-[99999] w-full bg-black/50 transition-opacity"
     >
       <div
         className="absolute z-[99999] opacity-20 transition-opacity"
         style={{
+          cursor: "default",
           top: "130px",
           left: postContainerLeftOffset - 10,
           width: containerWidth + 20,
@@ -409,6 +412,7 @@ function StickerEditor({
       <div
         className="absolute z-[99999] opacity-20 transition-opacity"
         style={{
+          cursor: "default",
           top: 0,
           left: 0,
           width: "100%",
@@ -423,6 +427,7 @@ function StickerEditor({
       <div
         className="absolute z-[99999] opacity-20 transition-opacity"
         style={{
+          cursor: "default",
           top: availableHeight + 90,
           left: 0,
           width: "100%",
@@ -434,7 +439,12 @@ function StickerEditor({
       />
 
       <div className="pointer-events-none absolute z-[99999] flex h-[100dvh] w-full flex-col items-center justify-center p-[70px]">
-        <div className="dark:bg-black-800/90 fadein pointer-events-auto flex h-[600px] w-full max-w-3xl flex-col gap-2 rounded-md border border-neutral-300 border-white/20 bg-white px-4 pb-2 pt-5 backdrop-blur-md dark:border-slate-900/80">
+        <div
+          className="dark:bg-black-800/90 fadein pointer-events-auto flex h-[600px] w-full max-w-3xl flex-col gap-2 rounded-md border border-neutral-300 border-white/20 bg-white px-4 pb-2 pt-5 backdrop-blur-md dark:border-slate-900/80"
+          style={{
+            cursor: "default"
+          }}
+        >
           <div className="flex items-center justify-between">
             <div className="flex-1" />
             <div className="flex min-w-fit flex-1 justify-center">
