@@ -1,3 +1,5 @@
+import { Metadata } from "next";
+
 import { prisma } from "@folks/db";
 
 import NotFound from "@/app/not-found";
@@ -10,7 +12,7 @@ export async function generateMetadata({
   params
 }: {
   params: Promise<{ username: string }>;
-}) {
+}): Promise<Metadata> {
   const username = (await params).username;
 
   const user = await prisma.user.findUnique({
@@ -26,8 +28,22 @@ export async function generateMetadata({
     }
   });
 
+  const bio = user
+    ? `${user.occupation ? `${user.occupation}` : ""}${user.location ? `, ${user.location}` : ""}${user.pronouns ? `, ${user.pronouns}` : ""}`
+    : undefined;
+
   return {
-    title: user ? `${user.display_name}` : "Folks"
+    title: user ? `${user.display_name}` : "Folks",
+    description: bio,
+    openGraph: {
+      title: user ? `${user.display_name}` : "Folks",
+      description: bio
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: user ? `${user.display_name}` : "Folks",
+      description: bio
+    }
   };
 }
 
