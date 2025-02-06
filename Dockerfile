@@ -23,8 +23,6 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --no-frozen-lockf
 # Build Stage
 FROM base AS build
 
-ENV NODE_ENV=production
-
 ARG SENTRY_AUTH_TOKEN
 ENV SENTRY_AUTH_TOKEN=$SENTRY_AUTH_TOKEN
 
@@ -32,7 +30,7 @@ ARG VERCEL_URL
 ENV VERCEL_URL=$VERCEL_URL
 
 # Copy API to Build Stage
-COPY ./apps/api/src /app/apps/api/
+COPY ./apps/api/src /app/apps/api/src
 COPY ./apps/api/tsconfig.json /app/apps/api/tsconfig.json
 COPY ./apps/api/eslint.config.mjs /app/apps/api/eslint.config.mjs
 
