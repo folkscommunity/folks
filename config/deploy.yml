@@ -11,10 +11,9 @@ proxy:
   host: folkscommunity.com
   app_port: 3000
   healthcheck:
-    interval: 5s
-    max_attempts: 5
+    interval: 5
     path: /api
-    timeout: 10
+    timeout: 3
 
 registry:
   server: <%= %x(echo $KAMAL_REGISTRY_SERVER).strip %>
