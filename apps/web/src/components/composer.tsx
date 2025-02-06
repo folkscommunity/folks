@@ -705,11 +705,11 @@ export function InlineComposer() {
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   return (
-    <div className="w-full">
+    <div className="min-h-[62px] w-full">
       <textarea
         ref={textareaRef}
         className="text-md max-h-[300px] w-full flex-1 resize-none border-0 bg-transparent px-4 py-1 pt-2 placeholder:text-neutral-700 focus:outline-none"
-        placeholder="Write something..."
+        placeholder="What's on your mind?"
         name="body"
         maxLength={300}
         value={text}

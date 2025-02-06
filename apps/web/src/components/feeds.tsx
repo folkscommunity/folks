@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocalStorage } from "@uidotdev/usehooks";
 // import { useIsClient, useLocalStorage } from "@uidotdev/usehooks";
 import dynamic from "next/dynamic";
@@ -21,6 +21,70 @@ enum FeedType {
   HIGHLIGHTED = "HIGHLIGHTED",
   FOLLOWING = "FOLLOWING",
   EVERYTHING = "EVERYTHING"
+}
+
+async function PreloadFeeds(queryClient: any, is_authed: boolean) {
+  const fetchEverything = async ({
+    pageParam
+  }: {
+    pageParam: number | undefined;
+  }) => {
+    if (pageParam === undefined) {
+      const res = await fetch("/api/feed?type=everything");
+      return res.json();
+    } else {
+      const res = await fetch("/api/feed?type=everything&cursor=" + pageParam);
+      return res.json();
+    }
+  };
+
+  const fetchHighlighted = async ({
+    pageParam
+  }: {
+    pageParam: number | undefined;
+  }) => {
+    if (pageParam === undefined) {
+      const res = await fetch("/api/feed?type=highlighted");
+      return res.json();
+    } else {
+      const res = await fetch("/api/feed?type=highlighted&cursor=" + pageParam);
+      return res.json();
+    }
+  };
+
+  const fetchFollowing = async ({
+    pageParam
+  }: {
+    pageParam: number | undefined;
+  }) => {
+    if (pageParam === undefined) {
+      const res = await fetch("/api/feed?type=following");
+      return res.json();
+    } else {
+      const res = await fetch("/api/feed?type=following&cursor=" + pageParam);
+      return res.json();
+    }
+  };
+
+  await queryClient.prefetchInfiniteQuery({
+    queryKey: ["feed_everything"],
+    queryFn: fetchEverything,
+    initialPageParam: undefined
+  });
+
+  await queryClient.prefetchInfiniteQuery({
+    queryKey: ["feed_highlighted"],
+    queryFn: fetchHighlighted,
+    initialPageParam: undefined
+  });
+
+  if (is_authed) {
+    await queryClient.prefetchInfiniteQuery({
+      queryKey: ["feed_following"],
+      queryFn: fetchFollowing,
+      initialPageParam: undefined
+    });
+  }
 }
 
 export function Feeds({
@@ -51,7 +115,7 @@ export function Feeds({
   ) : (
     <>
       <div className="w-full max-w-3xl flex-1 justify-center">
-        <div className="flex justify-center pb-6">
+        <div className="flex justify-center pb-4">
           <div className="text-black-400 flex flex-row space-x-2 text-sm font-bold">
             <span
               className={cn("hover:text-foreground cursor-pointer px-4 py-0.5")}
@@ -75,6 +139,16 @@ export function Feeds({
           </div>
         </div>
 
+        {is_authed && (
+          <div className="mb-[38px] mt-2 w-full max-w-3xl flex-1 justify-center opacity-50">
+            <div className="flex w-full gap-[16px] pt-2">
+              <div className="size-10 rounded-full bg-neutral-200 dark:bg-slate-800" />
+
+              <div className="mt-2 h-[21px] w-[50%] rounded-md bg-neutral-200 dark:bg-slate-800" />
+            </div>
+          </div>
+        )}
+
         <FeedSkeleton />
       </div>
     </>
@@ -94,6 +168,7 @@ function FeedsClient({
     "selected_feed",
     FeedType.HIGHLIGHTED
   );
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (
@@ -109,6 +184,10 @@ function FeedsClient({
     window.addEventListener("go_to_everything", () =>
       setFeed(FeedType.EVERYTHING)
     );
+
+    PreloadFeeds(queryClient, is_authed).then(() => {
+      return;
+    });
 
     return () => {
       window.removeEventListener("go_to_everything", () =>
@@ -193,7 +272,7 @@ function FeedEverything({
   const { ref, inView } = useInView();
   const [timesAutoLoaded, setTimesAutoLoaded] = useState(0);
 
-  const fetchProjects = async ({
+  const fetchEverything = async ({
     pageParam
   }: {
     pageParam: number | undefined;
@@ -218,8 +297,10 @@ function FeedEverything({
     status
   } = useInfiniteQuery({
     queryKey: ["feed_everything"],
-    queryFn: fetchProjects,
+    queryFn: fetchEverything,
     initialPageParam: undefined,
+    refetchInterval: 1000 * 60,
+    refetchIntervalInBackground: true,
     retryOnMount: true,
     getNextPageParam: (lastPage: any, pages: any[]) => lastPage.nextCursor
   });
@@ -316,7 +397,7 @@ function FeedHighlighted({
   const [timesAutoLoaded, setTimesAutoLoaded] = useState(0);
   const [loadedPinnedPost, setLoadedPinnedPost] = useState(false);
 
-  const fetchProjects = async ({
+  const fetchHighlighted = async ({
     pageParam
   }: {
     pageParam: number | undefined;
@@ -341,8 +422,10 @@ function FeedHighlighted({
     status
   } = useInfiniteQuery({
     queryKey: ["feed_highlighted"],
-    queryFn: fetchProjects,
+    queryFn: fetchHighlighted,
     initialPageParam: undefined,
+    refetchInterval: 1000 * 60,
+    refetchIntervalInBackground: true,
     retryOnMount: true,
     getNextPageParam: (lastPage: any, pages: any[]) => lastPage.nextCursor
   });
@@ -452,7 +535,7 @@ function FeedFollowing({ is_authed, user }: { is_authed: boolean; user: any }) {
   const { ref, inView } = useInView();
   const [timesAutoLoaded, setTimesAutoLoaded] = useState(0);
 
-  const fetchProjects = async ({
+  const fetchFollowing = async ({
     pageParam
   }: {
     pageParam: number | undefined;
@@ -477,8 +560,10 @@ function FeedFollowing({ is_authed, user }: { is_authed: boolean; user: any }) {
     status
   } = useInfiniteQuery({
     queryKey: ["feed_following"],
-    queryFn: fetchProjects,
+    queryFn: fetchFollowing,
     initialPageParam: undefined,
+    refetchInterval: 1000 * 60,
+    refetchIntervalInBackground: true,
     retryOnMount: true,
     getNextPageParam: (lastPage: any, pages: any[]) => lastPage.nextCursor
   });
@@ -570,7 +655,7 @@ export function FeedUser({
 }) {
   const { ref, inView } = useInView();
 
-  const fetchProjects = async ({
+  const fetchUserFeed = async ({
     pageParam
   }: {
     pageParam: number | undefined;
@@ -597,8 +682,10 @@ export function FeedUser({
     status
   } = useInfiniteQuery({
     queryKey: ["feed_user_" + author_id],
-    queryFn: fetchProjects,
+    queryFn: fetchUserFeed,
     initialPageParam: undefined,
+    refetchInterval: 1000 * 60,
+    refetchIntervalInBackground: true,
     retryOnMount: true,
     getNextPageParam: (lastPage: any, pages: any[]) => lastPage.nextCursor
   });
