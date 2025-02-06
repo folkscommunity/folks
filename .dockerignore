@@ -1,2 +1,46 @@
+# Dependencies
 node_modules
+.pnpm-store
+
+# Environment files
 .env*
+!.env.example
+
+# Development files
+.git
+.gitignore
+.github
+.husky
+.vscode
+*.log
+.DS_Store
+README.md
+docs
+*.md
+.prettierrc*
+.prettier*
+.eslintrc*
+.editorconfig
+pnpm-lock.yaml
+
+# Build outputs
+.next
+build
+dist
+coverage
+
+# Test files
+**/*.test.*
+**/*.spec.*
+jest.config.*
+
+# Debug files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Cache directories
+.cache
+.npm
+.eslintcache
