@@ -1,5 +1,5 @@
 import { createHash, randomUUID } from "crypto";
-import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { DeleteObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import argon2 from "argon2";
 import { Router } from "express";
 import sharp from "sharp";
@@ -15,9 +15,9 @@ const router = Router();
 
 router.patch("/", authMiddleware, async (req: RequestWithUser, res) => {
   try {
-    const { name, location, occupation, website, pronouns } = req.body;
+    const { display_name, location, occupation, website, pronouns } = req.body;
 
-    if (!name && !location && !occupation && !website && !pronouns) {
+    if (!display_name && !location && !occupation && !website && !pronouns) {
       return res.status(400).json({
         error: "invalid_request",
         msg: "You must provide at least one field."
@@ -43,9 +43,9 @@ router.patch("/", authMiddleware, async (req: RequestWithUser, res) => {
       });
     }
 
-    if (name) {
+    if (display_name) {
       try {
-        await schemas.displayNameSchema.parseAsync(name);
+        await schemas.displayNameSchema.parseAsync(display_name);
       } catch (err) {
         return res.status(400).json({
           error: "invalid_request",
@@ -103,7 +103,7 @@ router.patch("/", authMiddleware, async (req: RequestWithUser, res) => {
         id: BigInt(req.user.id)
       },
       data: {
-        display_name: name,
+        display_name: display_name,
         location: location,
         occupation: occupation,
         website: website,
@@ -266,7 +266,9 @@ router.post("/avatar", authMiddleware, async (req: RequestWithUser, res) => {
 
     const transformed_image_buffer = await img.toBuffer();
 
-    const file_key = `avatars/${createHash("sha256").update(user.id.toString()).digest("hex")}.webp`;
+    const file_key = `avatars/${createHash("sha256")
+      .update(user.id.toString() + "-" + new Date().getTime())
+      .digest("hex")}.webp`;
 
     const s3_file = await s3.send(
       new PutObjectCommand({
@@ -290,6 +292,16 @@ router.post("/avatar", authMiddleware, async (req: RequestWithUser, res) => {
         message: "Something went wrong."
       });
     }
+    const original_avatar_url = user.avatar_url;
+    const original_file_key = original_avatar_url
+      .replace("https://", "")
+      .replace("http://", "")
+      .split("?")[0]
+      .split("/");
+
+    console.log(original_avatar_url);
+    console.log(original_file_key);
+    console.log(original_file_key[1] + "/" + original_file_key[2]);
 
     await prisma.user.update({
       where: {
@@ -298,9 +310,16 @@ router.post("/avatar", authMiddleware, async (req: RequestWithUser, res) => {
       data: {
         avatar_url: process.env.CDN_URL
           ? `${process.env.CDN_URL}/${file_key}`
-          : `https://${process.env.AWS_BUCKET}.s3.amazonaws.com/${file_key}?${new Date().getTime()}`
+          : `https://${process.env.AWS_BUCKET}.s3.amazonaws.com/${file_key}`
       }
     });
+
+    await s3.send(
+      new DeleteObjectCommand({
+        Bucket: process.env.AWS_BUCKET!,
+        Key: original_file_key[1] + "/" + original_file_key[2]
+      })
+    );
 
     await posthog.capture({
       distinctId: user.id.toString(),

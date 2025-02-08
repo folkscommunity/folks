@@ -2,9 +2,17 @@ import dayjs from "dayjs";
 
 import { parsePostBody } from "@/lib/post-utils";
 
-export const current_release = "0.5.4";
+export const current_release = "0.5.5";
 
 const releases = [
+  {
+    version: "0.5.5",
+    date: "2025-02-08",
+    changes: [
+      "Fixed a bug with the avatar cache.",
+      "Fixed a bug with the name update. (Thanks to @jule for finding both)"
+    ]
+  },
   {
     version: "0.5.4",
     date: "2025-02-06",
