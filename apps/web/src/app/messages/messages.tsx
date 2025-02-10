@@ -71,20 +71,26 @@ export function Messages({ user }: { user: any }) {
 
       <div className="flex flex-1 flex-col gap-1">
         {channels && channels.length > 0
-          ? channels.map((channel, i) => (
-              <Channel
-                key={i}
-                channel={{
-                  id: channel.id,
-                  name: channel.name,
-                  avatar_url: channel.avatar_url,
-                  last_read_at: channel.last_read_at,
-                  last_message_at_date: channel.last_message_at_date,
-                  last_message_at: channel.last_message_at,
-                  last_message_body: channel.last_message_body
-                }}
-              />
-            ))
+          ? channels
+              .sort(
+                (a, b) =>
+                  new Date(b.last_message_at_date || new Date()).getTime() -
+                  new Date(a.last_message_at_date || new Date()).getTime()
+              )
+              .map((channel, i) => (
+                <Channel
+                  key={i}
+                  channel={{
+                    id: channel.id,
+                    name: channel.name,
+                    avatar_url: channel.avatar_url,
+                    last_read_at: channel.last_read_at,
+                    last_message_at_date: channel.last_message_at_date,
+                    last_message_at: channel.last_message_at,
+                    last_message_body: channel.last_message_body
+                  }}
+                />
+              ))
           : !loading && (
               <div className="fadein flex flex-1 flex-col items-center justify-center">
                 <div className="text-center">
@@ -227,7 +233,7 @@ function NewChatModal({
                   }}
                   placeholder="Search User"
                   autoFocus
-                  className="dark:border-black-700 border-black-300 w-full rounded-none border-b bg-transparent px-2 py-1.5 placeholder:text-neutral-400 focus:outline-none dark:placeholder:text-neutral-600"
+                  className="dark:border-black-700 border-black-300 text-md w-full rounded-none border-b bg-transparent px-2 py-1.5 placeholder:text-neutral-400 focus:outline-none dark:placeholder:text-neutral-600"
                   maxLength={20}
                 />
               </div>
