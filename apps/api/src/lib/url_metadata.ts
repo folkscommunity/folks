@@ -93,17 +93,31 @@ export async function getURLMetadata(url: string): Promise<URLMetadata> {
 
   let image_resolution: Resolution | undefined;
 
-  const image_url =
-    metadata.open_graph?.images[0].url.match(/https?:\/\/[^\s)]+/)[0];
+  let image_url = metadata.open_graph?.images[0].url;
 
-  if (
-    metadata?.open_graph?.images &&
-    metadata.open_graph.images.length > 0 &&
-    metadata.open_graph.images[0].url &&
-    (!metadata.open_graph.images[0].width ||
-      !metadata.open_graph.images[0].height)
-  ) {
-    image_resolution = await getImageResolution(image_url);
+  try {
+    if (
+      metadata?.open_graph?.images &&
+      metadata.open_graph.images.length > 0 &&
+      metadata.open_graph.images[0].url &&
+      (!metadata.open_graph.images[0].width ||
+        !metadata.open_graph.images[0].height)
+    ) {
+      image_resolution = await getImageResolution(image_url);
+    }
+  } catch (e) {
+    if (
+      metadata?.open_graph?.images &&
+      metadata.open_graph.images.length > 0 &&
+      metadata.open_graph.images[0].url &&
+      (!metadata.open_graph.images[0].width ||
+        !metadata.open_graph.images[0].height)
+    ) {
+      image_url = metadata.open_graph?.images[0].url
+        .match(/!\[[^\]]*\]\((https?:\/\/[^\s)]+)\)/)[0]
+        .match(/https?:\/\/[^\s)]+/)[0];
+      image_resolution = await getImageResolution(image_url);
+    }
   }
 
   const final_object: URLMetadata = {
