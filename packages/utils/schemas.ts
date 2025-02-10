@@ -60,3 +60,8 @@ export const supportRequestBodySchema = z
   .string()
   .min(5, "Must be more than 5 characters.")
   .max(1000, "Must be less than 1000 characters.");
+
+export const chatMessageSchema = z
+  .string()
+  .min(1, "A message must be at least 1 character.")
+  .max(2000, "A chat message must be at most 2000 characters.");

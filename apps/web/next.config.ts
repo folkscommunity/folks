@@ -21,6 +21,10 @@ const nextConfig: NextConfig = {
       {
         source: "/js/s.js",
         destination: "https://p.lum.is/js/script.outbound-links.js"
+      },
+      {
+        source: "/ws/:path*",
+        destination: "http://localhost:3002/ws/:path*"
       }
     ];
   },

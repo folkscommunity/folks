@@ -105,7 +105,7 @@ export function HorizonalRibbon({
   return (
     <div
       className={cn(
-        "dark:border-black-700 left-0 top-0 z-[99] flex h-10 w-full cursor-default items-center justify-center border-[#00050C] bg-black text-[14px] font-medium text-slate-300",
+        "dark:border-black-700 left-0 top-0 z-[99] flex h-8 w-full cursor-default items-center justify-center border-[#00050C] bg-black text-[14px] font-medium text-slate-300",
         fixed && "fixed",
         top ? "border-b" : "border-t"
       )}

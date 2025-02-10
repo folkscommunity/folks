@@ -5,7 +5,7 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "@prisma/client": "5.16.1"
+    "@prisma/client": "6.3.1"
   },
   "scripts": {
     "dev": "pnpm run db:generate",
@@ -15,7 +15,7 @@
   },
   "devDependencies": {
     "@types/node": "^20.14.10",
-    "prisma": "5.16.1",
+    "prisma": "6.3.1",
     "tslib": "^2.6.3"
   }
 }

@@ -93,6 +93,9 @@ export async function getURLMetadata(url: string): Promise<URLMetadata> {
 
   let image_resolution: Resolution | undefined;
 
+  const image_url =
+    metadata.open_graph?.images[0].url.match(/https?:\/\/[^\s)]+/)[0];
+
   if (
     metadata?.open_graph?.images &&
     metadata.open_graph.images.length > 0 &&
@@ -100,9 +103,7 @@ export async function getURLMetadata(url: string): Promise<URLMetadata> {
     (!metadata.open_graph.images[0].width ||
       !metadata.open_graph.images[0].height)
   ) {
-    image_resolution = await getImageResolution(
-      metadata.open_graph.images[0].url
-    );
+    image_resolution = await getImageResolution(image_url);
   }
 
   const final_object: URLMetadata = {
@@ -114,7 +115,7 @@ export async function getURLMetadata(url: string): Promise<URLMetadata> {
       metadata?.open_graph?.description || metadata.description || url,
     image: metadata?.open_graph?.images
       ? {
-          url: imageProxy(metadata.open_graph.images[0].url),
+          url: imageProxy(image_url),
           width: metadata.open_graph.images[0].width || image_resolution?.width,
           height:
             metadata.open_graph.images[0].height || image_resolution?.height,

@@ -24,6 +24,7 @@ webpush.setVapidDetails(
 const forbidden_labels = ["Explicit Nudity", "Visually Disturbing"];
 
 export async function sendWebPushNotification(
+  id: any,
   endpoint: any,
   title: string,
   body: string,
@@ -45,6 +46,26 @@ export async function sendWebPushNotification(
       })
     );
   } catch (e) {
+    console.log(e.body);
+
+    try {
+      if (e.body.includes("unsubscribed")) {
+        await prisma.notificationEndpoint.delete({
+          where: {
+            id: id
+          }
+        });
+      }
+
+      const parsed = JSON.parse(e.body);
+      if (parsed.reason === "Unregistered") {
+        await prisma.notificationEndpoint.delete({
+          where: {
+            id: id
+          }
+        });
+      }
+    } catch (e) {}
     console.error(e);
   }
 }
@@ -86,7 +107,13 @@ export function workerThread(id: number) {
       );
 
       for await (const endpoint of web_push_endpoints) {
-        await sendWebPushNotification(endpoint.endpoint, title, body, url);
+        await sendWebPushNotification(
+          endpoint.id,
+          endpoint.endpoint,
+          title,
+          body,
+          url
+        );
       }
 
       return done();

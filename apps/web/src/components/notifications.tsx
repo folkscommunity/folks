@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Bell } from "@phosphor-icons/react";
 import Link from "next/link";
 import { usePostHog } from "posthog-js/react";
 
@@ -93,7 +94,7 @@ export function NotificationMessage({
   }
 }
 
-export function Notifications({ user }: { user: any }) {
+export function Notifications({ user, small }: { user: any; small?: boolean }) {
   const dropDownRef = useRef<any>(null);
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -151,15 +152,24 @@ export function Notifications({ user }: { user: any }) {
   return (
     <div className="relative" ref={dropDownRef}>
       <div className="group cursor-pointer" onClick={() => setShow(!show)}>
-        <span className={cn("group-hover:underline", show && "underline")}>
-          Notifications [{!loading ? count || "0" : "·"}]
+        <span className={cn("select-none")}>
+          <span className={cn("group-hover:underline", show && "underline")}>
+            {small ? (
+              <Bell className="mb-0.5 inline px-0" weight="fill" />
+            ) : (
+              "Notifications"
+            )}{" "}
+            <span className={cn("group-hover:underline", show && "underline")}>
+              [{!loading ? count || "0" : "·"}]
+            </span>
+          </span>
+          <span className="pl-2 text-[10px] !no-underline">▼</span>
         </span>{" "}
-        <span className="text-[10px]">▼</span>
       </div>
 
       <div
         className={cn(
-          "absolute left-0 z-40 mt-1 origin-top-left text-sm max-sm:ml-[-60%]",
+          "absolute left-0 z-40 mt-1 origin-top-left text-sm max-sm:ml-[-350%]",
           !show && "hidden"
         )}
       >

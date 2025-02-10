@@ -10,6 +10,7 @@ proxy:
   ssl: true
   host: folkscommunity.com
   app_port: 3000
+  forward_headers: true
   healthcheck:
     interval: 5
     path: /api
