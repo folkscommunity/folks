@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearchPostgres"]
 }
 
 datasource db {
@@ -20,6 +21,8 @@ model User {
   location   String? // max 32 chars
   pronouns   String? // max 12 chars
   website    String? // max 128 chars
+
+  last_ping DateTime?
 
   avatar_url String?
 
@@ -46,15 +49,17 @@ model User {
 
   marketing_emails Boolean @default(true)
 
-  following              Following[]            @relation("following")
-  followers              Following[]            @relation("followers")
-  posts                  Post[]                 @relation("posts")
-  liked_posts            PostLike[]             @relation("likes")
-  ribbons                Ribbon[]               @relation("ribbons")
-  mentions               PostMention[]          @relation("mentions")
-  notification_endpoints NotificationEndpoint[] @relation("notification_endpoints")
-  support_requests       SupportRequest[]       @relation("support_requests")
-  stickers               Sticker[]              @relation("stickers")
+  following                  Following[]            @relation("following")
+  followers                  Following[]            @relation("followers")
+  posts                      Post[]                 @relation("posts")
+  liked_posts                PostLike[]             @relation("likes")
+  ribbons                    Ribbon[]               @relation("ribbons")
+  mentions                   PostMention[]          @relation("mentions")
+  notification_endpoints     NotificationEndpoint[] @relation("notification_endpoints")
+  support_requests           SupportRequest[]       @relation("support_requests")
+  stickers                   Sticker[]              @relation("stickers")
+  message_channel_membership MessageChannelMember[] @relation("message_channel_member")
+  messages                   Message[]              @relation("user_message")
 
   @@index([id])
   @@index([username])
@@ -272,4 +277,61 @@ model Sticker {
   updated_at DateTime @updatedAt
 
   @@map("stickers")
+}
+
+model MessageChannel {
+  id   String  @id @default(uuid())
+  name String?
+
+  members MessageChannelMember[]
+
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  messages   Message[]
+
+  @@map("message_channels")
+}
+
+model MessageChannelMember {
+  id String @id @default(uuid())
+
+  user_id BigInt
+  user    User   @relation(fields: [user_id], references: [id], name: "message_channel_member", onDelete: Cascade)
+
+  channel_id   String
+  channel      MessageChannel @relation(fields: [channel_id], references: [id], onDelete: Cascade)
+  last_read_at DateTime?
+
+  muted Boolean @default(false)
+
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  messages   Message[]
+
+  @@unique([channel_id, user_id])
+  @@map("message_channel_members")
+}
+
+model Message {
+  id BigInt @id @default(autoincrement())
+
+  channel_id String
+  channel    MessageChannel @relation(fields: [channel_id], references: [id], onDelete: Cascade)
+
+  channel_member_id String
+  channel_member    MessageChannelMember @relation(fields: [channel_member_id], references: [id], onDelete: Cascade)
+
+  user_id BigInt
+  user    User   @relation(fields: [user_id], references: [id], name: "user_message", onDelete: Cascade)
+
+  content   String
+  edited_at DateTime?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([channel_id])
+  @@index([channel_member_id])
+  @@index([user_id])
+  @@map("messages")
 }

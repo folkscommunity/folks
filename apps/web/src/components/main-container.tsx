@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { current_release } from "@/app/release-notes/release-notes";
 import { ServerSession } from "@/lib/server-session";
+import { cn } from "@/lib/utils";
 
 import { AccountDropdown } from "./account-dropdown";
 import { CreateRibbonModal } from "./create-ribbon-modal";
@@ -16,22 +17,45 @@ import { VerificationEmailAlert } from "./verification-email";
 
 export async function MainContainer({
   children,
-  hideAbout
+  hideAbout,
+  hideFooter,
+  hideTopSeparator,
+  hideTopRibbon,
+  hideBottomRibbon,
+  wide
 }: {
   children: React.ReactNode;
   hideAbout?: boolean;
+  hideFooter?: boolean;
+  hideTopSeparator?: boolean;
+  hideTopRibbon?: boolean;
+  hideBottomRibbon?: boolean;
+  wide?: boolean;
 }) {
   const user = await ServerSession();
 
   return (
-    <div className="mx-auto flex flex-col pt-10">
-      <HorizonalRibbon fixed={true} top={true} />
+    <div className={cn("mx-auto flex flex-col", !hideTopRibbon && "pt-[32px]")}>
+      {!hideTopRibbon && <HorizonalRibbon fixed={true} top={true} />}
 
-      <div className="dark:bg-black-900 flex min-h-[calc(100dvh-80px)] w-full flex-col items-center bg-white px-20 pt-4 transition-all max-sm:px-4">
-        <header className="mx-auto flex w-full max-w-3xl flex-col items-start gap-4 py-4">
+      <div
+        className={cn(
+          "dark:bg-black-900 flex w-full flex-col items-center bg-white transition-all max-sm:px-4",
+          wide ? "px-4" : "px-20"
+        )}
+        style={{
+          paddingTop: hideTopRibbon ? 8 : 16,
+          minHeight: `calc(100dvh - ${(hideBottomRibbon ? 0 : 32) + (hideTopRibbon ? 0 : 32)}px)`
+        }}
+      >
+        <header
+          className={cn(
+            "mx-auto flex w-full max-w-3xl select-none flex-col items-start gap-4 py-1"
+          )}
+        >
           <div className="flex w-full flex-row items-center justify-between gap-4 max-sm:flex-col">
             {user && (
-              <div className="text-md flex flex-1 flex-row gap-2 pt-2">
+              <div className="text-md flex flex-1 flex-row gap-2 pt-2 max-sm:hidden">
                 <Notifications user={user} />
               </div>
             )}
@@ -40,8 +64,8 @@ export async function MainContainer({
               <Image
                 src="/images/logo.svg"
                 alt="Folks Logo"
-                width={100}
-                height={32.21}
+                width={80}
+                height={80 * 0.3221}
                 className="dark:invert"
               />
             </Link>
@@ -51,6 +75,15 @@ export async function MainContainer({
                 <>
                   <Link href="/">Posts</Link>
                   <span>·</span>
+
+                  <Link href="/messages">DMs</Link>
+                  <span>·</span>
+
+                  <div className="text-md hidden gap-2 max-sm:flex">
+                    <Notifications user={user} small={true} />
+                    <span>·</span>
+                  </div>
+
                   <AccountDropdown user={user} />
                 </>
               )}
@@ -78,74 +111,76 @@ export async function MainContainer({
 
           {user && <PushNotificationManager />}
 
-          <Separator />
+          {!hideTopSeparator && <Separator />}
         </header>
 
         {children}
 
-        <footer className="mx-auto flex w-full max-w-3xl flex-col gap-8 py-8 max-md:gap-2">
-          <Separator />
-          <div className="flex gap-2 max-md:flex-col max-md:items-center max-md:gap-1">
-            <Link
-              href="/manifesto"
-              className="underline opacity-70 hover:opacity-100"
-            >
-              Manifesto
-            </Link>
-            <span className="max-md:hidden">·</span>
-            <Link
-              href="/privacy-policy"
-              className="underline opacity-70 hover:opacity-100"
-            >
-              Privacy Policy
-            </Link>
-            <span className="max-md:hidden">·</span>
-            <Link
-              href="/guidelines"
-              className="underline opacity-70 hover:opacity-100"
-            >
-              Community Guidelines
-            </Link>
-            <span className="max-md:hidden">·</span>
-            <Link
-              href="/support"
-              className="underline opacity-70 hover:opacity-100"
-            >
-              Support
-            </Link>
-            <span className="max-md:hidden">·</span>
-            <Link
-              href="/discord"
-              className="underline opacity-70 hover:opacity-100"
-            >
-              Discord
-            </Link>
-          </div>
-          <Separator />
-          <div className="flex flex-row gap-2 max-md:flex-col max-md:items-center">
-            <Link href="/release-notes" className="underline">
-              Release v{current_release}
-            </Link>
-            <span className="max-md:hidden">·</span>
-            <div className="max-md:text-center">
-              Folks is open source,{" "}
+        {!hideFooter && (
+          <footer className="mx-auto flex w-full max-w-3xl flex-col gap-8 py-8 max-md:gap-2">
+            <Separator />
+            <div className="flex gap-2 max-md:flex-col max-md:items-center max-md:gap-1">
               <Link
-                href="https://github.com/folkscommunity/folks"
-                target="_blank"
+                href="/manifesto"
                 className="underline opacity-70 hover:opacity-100"
               >
-                click here
-              </Link>{" "}
-              for the repository.
+                Manifesto
+              </Link>
+              <span className="max-md:hidden">·</span>
+              <Link
+                href="/privacy-policy"
+                className="underline opacity-70 hover:opacity-100"
+              >
+                Privacy Policy
+              </Link>
+              <span className="max-md:hidden">·</span>
+              <Link
+                href="/guidelines"
+                className="underline opacity-70 hover:opacity-100"
+              >
+                Community Guidelines
+              </Link>
+              <span className="max-md:hidden">·</span>
+              <Link
+                href="/support"
+                className="underline opacity-70 hover:opacity-100"
+              >
+                Support
+              </Link>
+              <span className="max-md:hidden">·</span>
+              <Link
+                href="/discord"
+                className="underline opacity-70 hover:opacity-100"
+              >
+                Discord
+              </Link>
             </div>
-          </div>
-        </footer>
+            <Separator />
+            <div className="flex flex-row gap-2 max-md:flex-col max-md:items-center">
+              <Link href="/release-notes" className="underline">
+                Release v{current_release}
+              </Link>
+              <span className="max-md:hidden">·</span>
+              <div className="max-md:text-center">
+                Folks is open source,{" "}
+                <Link
+                  href="https://github.com/folkscommunity/folks"
+                  target="_blank"
+                  className="underline opacity-70 hover:opacity-100"
+                >
+                  click here
+                </Link>{" "}
+                for the repository.
+              </div>
+            </div>
+          </footer>
+        )}
       </div>
 
       <CreateRibbonModal />
       <StickersComing />
 
-      <HorizonalRibbon />
+      {!hideBottomRibbon && <HorizonalRibbon />}
     </div>
   );
 }

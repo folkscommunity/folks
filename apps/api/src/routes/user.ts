@@ -299,10 +299,6 @@ router.post("/avatar", authMiddleware, async (req: RequestWithUser, res) => {
       .split("?")[0]
       .split("/");
 
-    console.log(original_avatar_url);
-    console.log(original_file_key);
-    console.log(original_file_key[1] + "/" + original_file_key[2]);
-
     await prisma.user.update({
       where: {
         id: BigInt(req.user.id)
@@ -505,6 +501,80 @@ router.post("/unsubscribe/:email", async (req, res) => {
     res.status(500).json({
       error: "server_error",
       message: "Something went wrong."
+    });
+  }
+});
+
+// search users
+router.get("/search", authMiddleware, async (req: RequestWithUser, res) => {
+  try {
+    const { q } = req.query;
+
+    if (!q) {
+      res.status(400).json({
+        error: "missing_query"
+      });
+      return;
+    }
+
+    const query_string = q.toString();
+
+    if (query_string.length < 2 || query_string.length > 30) {
+      res.status(400).json({
+        error: "invalid_query"
+      });
+      return;
+    }
+
+    const user = await prisma.user.findUnique({
+      where: {
+        id: BigInt(req.user.id)
+      }
+    });
+
+    if (!user) {
+      res.status(403).json({
+        error: "forbidden"
+      });
+      return;
+    }
+
+    const users = await prisma.user.findMany({
+      where: {
+        OR: [
+          {
+            display_name: {
+              contains: query_string,
+              mode: "insensitive"
+            }
+          },
+          {
+            username: {
+              contains: query_string,
+              mode: "insensitive"
+            }
+          }
+        ]
+      },
+      take: 5,
+      select: {
+        id: true,
+        username: true,
+        display_name: true,
+        avatar_url: true
+      }
+    });
+
+    res.setHeader("Content-Type", "application/json");
+    res.send(
+      JSONtoString({
+        ok: true,
+        data: users
+      })
+    );
+  } catch (e) {
+    res.status(500).json({
+      error: "server_error"
     });
   }
 });
