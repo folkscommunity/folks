@@ -268,7 +268,7 @@ export function MessagesChannel({
                     message.user.id === page.data[i + 1].user.id &&
                     new Date(message.created_at).getTime() -
                       new Date(page.data[i + 1].created_at).getTime() <
-                      10000
+                      120000
                   }
                   key={message.id}
                   message={message}

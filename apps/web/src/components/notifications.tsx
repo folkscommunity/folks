@@ -169,7 +169,7 @@ export function Notifications({ user, small }: { user: any; small?: boolean }) {
 
       <div
         className={cn(
-          "absolute left-0 z-40 mt-1 origin-top-left text-sm max-sm:ml-[-350%]",
+          "absolute left-0 z-40 mt-1 origin-top-left text-sm max-sm:ml-[-230%]",
           !show && "hidden"
         )}
       >
