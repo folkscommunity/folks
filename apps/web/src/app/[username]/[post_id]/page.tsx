@@ -241,11 +241,13 @@ export default async function Page({
               likes: reply._count.likes
             }
           })),
-          likes: post.likes.map((like) => ({
-            id: like.id.toString(),
-            user_id: like.user_id.toString(),
-            post_id: like.post_id.toString()
-          })),
+          likes: post.likes
+            ? post.likes.map((like) => ({
+                id: like.id.toString(),
+                user_id: like.user_id.toString(),
+                post_id: like.post_id.toString()
+              }))
+            : [],
           count: {
             replies: post._count.replies,
             likes: post._count.likes
