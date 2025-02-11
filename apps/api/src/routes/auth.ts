@@ -200,7 +200,7 @@ router.post("/register", async (req, res) => {
     res.cookie("folks_sid", token, {
       httpOnly: true,
       maxAge: 1000 * 60 * 60 * 24 * 180,
-      sameSite: "lax",
+      sameSite: "strict",
       domain:
         process.env.NODE_ENV === "production"
           ? "folkscommunity.com"
@@ -309,7 +309,7 @@ router.post("/login", async (req, res) => {
     res.cookie("folks_sid", token, {
       httpOnly: true,
       maxAge: 1000 * 60 * 60 * 24 * 180,
-      sameSite: "lax",
+      sameSite: "strict",
       domain:
         process.env.NODE_ENV === "production"
           ? "folkscommunity.com"
