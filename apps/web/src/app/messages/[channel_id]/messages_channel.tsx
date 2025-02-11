@@ -343,7 +343,7 @@ function Message({
         {!small && (
           <Avatar className="size-[30px]">
             <AvatarImage src={message.user.avatar_url} />
-            <AvatarFallback className="text-lg">
+            <AvatarFallback className="text-sm">
               {message.user.display_name[0].toUpperCase()}
             </AvatarFallback>
           </Avatar>
