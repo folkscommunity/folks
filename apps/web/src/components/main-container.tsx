@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { AccountDropdown } from "./account-dropdown";
 import { CreateRibbonModal } from "./create-ribbon-modal";
 import { FolksAboutTop } from "./folks-about-top";
+import { NavDMsLink } from "./nav-dms-link";
 import { Notifications } from "./notifications";
 import { PushNotificationManager } from "./push-manager";
 import { HorizonalRibbon } from "./ribbon";
@@ -76,7 +77,8 @@ export async function MainContainer({
                   <Link href="/">Posts</Link>
                   <span>·</span>
 
-                  <Link href="/messages">DMs</Link>
+                  <NavDMsLink />
+
                   <span>·</span>
 
                   <div className="text-md hidden gap-2 max-sm:flex">

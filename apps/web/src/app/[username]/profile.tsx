@@ -82,7 +82,29 @@ export default function Profile({
           <div className="flex flex-row justify-between gap-4">
             <h1 className="font-black">{profile.display_name}</h1>
 
-            {!isUser && <FollowButton target_id={profile.id.toString()} />}
+            <div className="flex flex-row justify-between gap-2">
+              {!isUser && user && (
+                <Link
+                  href={`/api/messages/channel/${profile.username}`}
+                  prefetch={false}
+                >
+                  <button className="w-[120px] border border-gray-400 px-3 py-1 hover:bg-gray-500/20">
+                    Message
+                  </button>
+                </Link>
+              )}
+              {!isUser && user && (
+                <FollowButton target_id={profile.id.toString()} />
+              )}
+
+              {!user && (
+                <Link href="/register">
+                  <button className="w-[120px] border border-gray-400 px-3 py-1 hover:bg-gray-500/20">
+                    Follow
+                  </button>
+                </Link>
+              )}
+            </div>
           </div>
 
           <p>

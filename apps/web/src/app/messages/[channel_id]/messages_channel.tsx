@@ -194,7 +194,7 @@ export function MessagesChannel({
   }, [mutedState]);
 
   return (
-    <div className="text-md flex w-full max-w-3xl flex-1 flex-col pb-4 pt-3">
+    <div className="text-md flex w-full max-w-3xl flex-1 flex-col pb-4 pt-3 max-sm:pb-8">
       <div className="dark:border-black-700 flex items-center justify-between border-l border-r border-t px-3 py-2">
         <div className="flex items-center gap-3">
           <Avatar className="size-[40px]">

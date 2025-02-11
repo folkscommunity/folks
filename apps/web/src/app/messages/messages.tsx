@@ -141,17 +141,22 @@ function Channel({
       </Avatar>
 
       <div className="w-full">
-        <div className="flex justify-between gap-2">
-          <div className="font-bold">
-            {channel.name}
-            {!read && channel.last_message_body ? " (Unread)" : ""}
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-[0.5ch] font-bold">
+            <span>{channel.name}</span>
+            {!read && channel.last_message_body ? (
+              <div className="inline-block size-[7px] rounded-full bg-blue-500" />
+            ) : (
+              ""
+            )}
           </div>
           <div className="opacity-50">{channel.last_message_at}</div>
         </div>
         <div
-          className="h-[22px] opacity-50"
+          className="h-[22px]"
           style={{
-            fontWeight: !read && channel.last_message_body ? "bold" : "normal"
+            fontWeight: !read && channel.last_message_body ? "bold" : "normal",
+            opacity: !read && channel.last_message_body ? "0.8" : "0.5"
           }}
         >
           {channel.last_message_body || ""}

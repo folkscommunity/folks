@@ -269,7 +269,7 @@ router.post(
       });
 
       if (existing) {
-        return res.status(400).json({ error: "already_registered" });
+        return res.status(200).json({ error: "already_registered" });
       }
 
       await prisma.notificationEndpoint.create({

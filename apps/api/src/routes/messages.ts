@@ -5,7 +5,7 @@ import { JSONtoString } from "@folks/utils";
 
 import { authMiddleware, RequestWithUser } from "@/lib/auth_middleware";
 import { sendNotification } from "@/lib/notification_utils";
-import { sendToChannel, sendToUser } from "@/lib/socket";
+import { sendToChannel } from "@/lib/socket";
 
 const router = Router();
 
@@ -65,11 +65,19 @@ router.get("/channels", authMiddleware, async (req: RequestWithUser, res) => {
       }
     });
 
+    const filtered_channels = channels.filter((c) => {
+      if (c.messages.length === 0) {
+        return false;
+      } else {
+        return true;
+      }
+    });
+
     res.setHeader("Content-Type", "application/json");
     res.send(
       JSONtoString({
         ok: true,
-        data: channels
+        data: filtered_channels
       })
     );
   } catch (e) {
@@ -184,6 +192,93 @@ router.post("/channel", authMiddleware, async (req: RequestWithUser, res) => {
     });
   }
 });
+
+router.get(
+  "/channel/:username",
+  authMiddleware,
+  async (req: RequestWithUser, res) => {
+    try {
+      const { username } = req.params;
+
+      const user = await prisma.user.findUnique({
+        where: {
+          id: BigInt(req.user.id)
+        }
+      });
+
+      if (!user) {
+        res.redirect(302, "/messages");
+        return;
+      }
+
+      if (!username) {
+        res.redirect(302, "/messages");
+        return;
+      }
+
+      if (username.toString() === user.username) {
+        res.redirect(302, "/messages");
+        return;
+      }
+
+      const target_user = await prisma.user.findUnique({
+        where: {
+          username: username.toString()
+        }
+      });
+
+      if (!target_user) {
+        res.redirect(302, "/messages");
+        return;
+      }
+
+      const channels_with_both_users = await prisma.messageChannel.findMany({
+        where: {
+          AND: [
+            {
+              members: {
+                some: {
+                  user_id: user.id
+                }
+              }
+            },
+            {
+              members: {
+                some: {
+                  user_id: target_user.id
+                }
+              }
+            }
+          ]
+        }
+      });
+
+      if (channels_with_both_users.length > 0) {
+        res.redirect(302, `/messages/${channels_with_both_users[0].id}`);
+        return;
+      }
+
+      const new_channel = await prisma.messageChannel.create({
+        data: {
+          members: {
+            create: [
+              {
+                user_id: BigInt(user.id)
+              },
+              {
+                user_id: BigInt(target_user.id)
+              }
+            ]
+          }
+        }
+      });
+
+      res.redirect(302, `/messages/${new_channel.id}`);
+    } catch (e) {
+      res.redirect(302, "/messages");
+    }
+  }
+);
 
 router.get(
   "/channel/:channel_id",
@@ -426,6 +521,16 @@ router.post("/message", authMiddleware, async (req: RequestWithUser, res) => {
       }
     );
 
+    await sendToChannel(
+      `message_channel:${channel.id.toString()}`,
+      "messages",
+      {
+        channel_id: channel_id,
+        from: user.id.toString(),
+        content: message
+      }
+    );
+
     const other_members = await prisma.messageChannelMember.findMany({
       where: {
         channel_id: channel_id,
@@ -591,5 +696,75 @@ router.post("/read", authMiddleware, async (req: RequestWithUser, res) => {
     });
   }
 });
+
+router.get(
+  "/unread-count",
+  authMiddleware,
+  async (req: RequestWithUser, res) => {
+    try {
+      const user = await prisma.user.findUnique({
+        where: {
+          id: BigInt(req.user.id)
+        }
+      });
+
+      if (!user) {
+        res.status(403).json({
+          error: "forbidden"
+        });
+        return;
+      }
+
+      const channels = await prisma.messageChannel.findMany({
+        where: {
+          members: {
+            some: {
+              user_id: user.id
+            }
+          }
+        },
+        include: {
+          messages: {
+            orderBy: {
+              created_at: "desc"
+            },
+            take: 1
+          },
+          members: {
+            where: {
+              user_id: user.id
+            }
+          }
+        }
+      });
+
+      const unread_channels = channels.filter((c) => {
+        const last_message = c.messages[0];
+        const member_last_read_at = c.members[0].last_read_at;
+
+        return (
+          last_message &&
+          member_last_read_at &&
+          new Date(member_last_read_at).getTime() <
+            new Date(last_message.created_at).getTime()
+        );
+      });
+
+      res.setHeader("Content-Type", "application/json");
+      res.send(
+        JSONtoString({
+          ok: true,
+          data: {
+            unread_channels: unread_channels?.length || 0
+          }
+        })
+      );
+    } catch (e) {
+      res.status(500).json({
+        error: "server_error"
+      });
+    }
+  }
+);
 
 export default router;
