@@ -292,12 +292,17 @@ router.post("/avatar", authMiddleware, async (req: RequestWithUser, res) => {
         message: "Something went wrong."
       });
     }
+
+    let original_file_key;
+
     const original_avatar_url = user.avatar_url;
-    const original_file_key = original_avatar_url
-      .replace("https://", "")
-      .replace("http://", "")
-      .split("?")[0]
-      .split("/");
+    if (original_avatar_url) {
+      original_file_key = original_avatar_url
+        .replace("https://", "")
+        .replace("http://", "")
+        .split("?")[0]
+        .split("/");
+    }
 
     await prisma.user.update({
       where: {
@@ -310,12 +315,14 @@ router.post("/avatar", authMiddleware, async (req: RequestWithUser, res) => {
       }
     });
 
-    await s3.send(
-      new DeleteObjectCommand({
-        Bucket: process.env.AWS_BUCKET!,
-        Key: original_file_key[1] + "/" + original_file_key[2]
-      })
-    );
+    if (original_avatar_url) {
+      await s3.send(
+        new DeleteObjectCommand({
+          Bucket: process.env.AWS_BUCKET!,
+          Key: original_file_key[1] + "/" + original_file_key[2]
+        })
+      );
+    }
 
     await posthog.capture({
       distinctId: user.id.toString(),
