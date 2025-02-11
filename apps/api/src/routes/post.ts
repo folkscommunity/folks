@@ -585,10 +585,10 @@ router.get("/:id", async (req: RequestWithUser, res) => {
             id: reply.id.toString(),
             author: {
               ...reply.author,
-              id: reply.author.id.toString()
+              id: reply.author?.id?.toString()
             },
             reply_to: {
-              id: reply.reply_to?.id.toString(),
+              id: reply.reply_to?.id?.toString(),
               author: reply.reply_to?.author
             },
             count: {
@@ -596,11 +596,14 @@ router.get("/:id", async (req: RequestWithUser, res) => {
               likes: reply._count.likes.toString()
             }
           })),
-          likes: post.likes.map((like) => ({
-            id: like.id.toString(),
-            user_id: like.user_id.toString(),
-            post_id: like.post_id.toString()
-          })),
+          likes:
+            (post.likes &&
+              post.likes.map((like) => ({
+                id: like.id.toString(),
+                user_id: like.user_id.toString(),
+                post_id: like.post_id.toString()
+              }))) ||
+            [],
           count: {
             replies: post._count.replies.toString(),
             likes: post._count.likes.toString()
