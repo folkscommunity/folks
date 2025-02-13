@@ -2,7 +2,6 @@
 
 import { useContext, useEffect, useRef, useState } from "react";
 import { useLocalStorage } from "@uidotdev/usehooks";
-import sanitizeHtml from "sanitize-html";
 
 import { cn } from "@/lib/utils";
 
@@ -70,12 +69,14 @@ function Marquee(props: {
 
 export function HorizonalRibbon({
   fixed,
-  top
+  top,
+  ribbonString
 }: {
   fixed?: boolean;
   top?: boolean;
+  ribbonString?: string;
 }) {
-  const [ribbonString, setRibbonString] = useState("");
+  const [clientRibbonString, setClientRibbonString] = useState(ribbonString);
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -87,7 +88,7 @@ export function HorizonalRibbon({
       .then((res) => res.json())
       .then((res) => {
         if (res.ok) {
-          setRibbonString(res.ribbon);
+          setClientRibbonString(res.ribbon);
         }
       })
       .catch((err) => {});
@@ -110,7 +111,9 @@ export function HorizonalRibbon({
         top ? "border-b" : "border-t"
       )}
     >
-      {isClient && <Marquee content={ribbonString} />}
+      {isClient && (clientRibbonString || ribbonString) && (
+        <Marquee content={clientRibbonString || ribbonString || ""} />
+      )}
     </div>
   );
 }

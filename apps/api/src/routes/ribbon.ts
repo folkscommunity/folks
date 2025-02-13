@@ -59,7 +59,7 @@ router.get("/", async (req, res) => {
 
     const ribbon_string = `${users.length} People · ${posts.length} Posts · ${ribbon_messages.length} Ribbon Messages · ${ribbon_messages_string} · `;
 
-    await redis.set("cache:ribbon", ribbon_string, "EX", 60 * 5);
+    await redis.set("cache:ribbon", ribbon_string, "EX", 60 * 30);
 
     res.setHeader("Content-Type", "application/json");
     res.send(

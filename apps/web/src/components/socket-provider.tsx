@@ -54,13 +54,6 @@ export function SocketProvider({ children }: { children: any }) {
 
   return (
     <SocketContext.Provider value={{ socket: socket, isConnected: connected }}>
-      <div className="fixed bottom-2 left-2">
-        {connected ? (
-          <div className="size-2 rounded-full bg-green-500 opacity-0" />
-        ) : (
-          <div className="size-2 rounded-full bg-red-500 opacity-20" />
-        )}
-      </div>
       {children}
     </SocketContext.Provider>
   );

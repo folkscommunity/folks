@@ -227,21 +227,43 @@ export function SinglePost({ user, post }: { user: any; post: any }) {
         </div>
 
         <div className="text-black-500 pb-2 pt-4 text-sm">
-          <span
-            className="cursor-pointer hover:underline"
-            onClick={() => setLikesModalOpen(true)}
-          >
-            {lPost.count.likes > 0 &&
-              `${lPost.count.likes} ${lPost.count.likes > 1 ? "Likes" : "Like"}`}
-          </span>
-          {lPost.count.replies &&
-          lPost.count.replies > 0 &&
-          lPost.count.likes &&
-          lPost.count.likes > 0
-            ? ", "
+          {lPost.count.likes > 0 ||
+          lPost.count.replies > 0 ||
+          lPost.count.stickers > 0
+            ? [
+                lPost.count.likes > 0 && (
+                  <span
+                    className="cursor-pointer hover:underline"
+                    onClick={() => setLikesModalOpen(true)}
+                  >
+                    {lPost.count.likes}
+                    {lPost.count.likes > 1 ? " Likes" : " Like"}
+                  </span>
+                ),
+                lPost.count.replies > 0 && (
+                  <span>
+                    {lPost.count.replies}
+                    {lPost.count.replies > 1 ? " Replies" : " Reply"}
+                  </span>
+                ),
+                lPost.count.stickers > 0 && (
+                  <span>
+                    {lPost.count.stickers}
+                    {lPost.count.stickers > 1 ? " Stickers" : " Sticker"}
+                  </span>
+                )
+              ]
+                .filter(Boolean)
+                .map((item, i) => (
+                  <div key={i} className="inline">
+                    {item}
+                  </div>
+                ))
+                .reduce((prev, curr, i) => {
+                  if (i === 0) return prev;
+                  return [prev, ", ", curr] as any as React.ReactElement;
+                })
             : ""}
-          {lPost.count.replies > 0 &&
-            `${lPost.count.replies} ${lPost.count.replies > 1 ? "Replies" : "Reply"}`}
         </div>
 
         {user && <Separator className="h-[12px]" />}

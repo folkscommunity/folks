@@ -12,6 +12,7 @@ import { useInView } from "react-intersection-observer";
 import { toast } from "sonner";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/avatar";
+import { FolksAvatar } from "@/components/folks-avatar";
 import { Separator } from "@/components/separator";
 import { useSocket } from "@/components/socket-provider";
 import { parsePostBody } from "@/lib/post-utils";
@@ -195,14 +196,12 @@ export function MessagesChannel({
 
   return (
     <div className="text-md flex w-full max-w-3xl flex-1 flex-col pb-4 pt-3 max-sm:pb-8">
-      <div className="dark:border-black-700 flex items-center justify-between border-l border-r border-t px-3 py-2">
+      <div className="dark:border-black-700 max-w-3xl:boder-r-0 max-w-3xl:boder-l-0 flex items-center justify-between border-l border-r border-t px-3 py-2">
         <div className="flex items-center gap-3">
-          <Avatar className="size-[40px]">
-            <AvatarImage src={channel.members[0].user.avatar_url} />
-            <AvatarFallback className="text-xl">
-              {channel.members[0].user.display_name[0].toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
+          <FolksAvatar
+            src={channel.members[0].user.avatar_url}
+            name={channel.members[0].user.display_name}
+          />
           <div>
             <h3>{channel.name || channel.members[0].user.display_name}</h3>
             <span className="text-sm opacity-50">
@@ -341,12 +340,12 @@ function Message({
     >
       <div className="min-w-[30px] pt-1">
         {!small && (
-          <Avatar className="size-[30px]">
-            <AvatarImage src={message.user.avatar_url} />
-            <AvatarFallback className="text-sm">
-              {message.user.display_name[0].toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
+          <FolksAvatar
+            src={message.user.avatar_url}
+            name={message.user.username}
+            size={30}
+            className="!text-sm"
+          />
         )}
       </div>
       <div className="flex w-full flex-col gap-0.5">

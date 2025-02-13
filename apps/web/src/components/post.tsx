@@ -2,14 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { ChatCircle, Heart } from "@phosphor-icons/react";
-import {
-  EllipsisVerticalIcon,
-  MessageCircle,
-  SmileIcon,
-  SmilePlusIcon,
-  StickerIcon
-} from "lucide-react";
-import Image from "next/image";
+import { EllipsisVerticalIcon, SmileIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useFeatureFlagPayload } from "posthog-js/react";
@@ -27,6 +20,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "./dropdown-menu";
+import { FolksAvatar } from "./folks-avatar";
 import { TimelinePhoto } from "./timeline-photo";
 
 interface URLMetadata {
@@ -213,12 +207,10 @@ export function Post({ post, user }: { post: any; user: any }) {
     >
       <div>
         <Link href={`/${lPost.author.username}`} className="hover:no-underline">
-          <Avatar>
-            <AvatarImage src={lPost.author.avatar_url} />
-            <AvatarFallback>
-              {lPost.author.username[0].toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
+          <FolksAvatar
+            src={lPost.author.avatar_url}
+            name={lPost.author.username}
+          />
         </Link>
       </div>
       <div className="flex max-w-full flex-1 flex-col gap-1">

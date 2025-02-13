@@ -514,7 +514,8 @@ router.get("/:id", async (req: RequestWithUser, res) => {
                     deleted_at: null
                   }
                 },
-                likes: true
+                likes: true,
+                stickers: true
               }
             }
           }
@@ -546,7 +547,8 @@ router.get("/:id", async (req: RequestWithUser, res) => {
                 deleted_at: null
               }
             },
-            likes: true
+            likes: true,
+            stickers: true
           }
         }
       }
@@ -593,7 +595,8 @@ router.get("/:id", async (req: RequestWithUser, res) => {
             },
             count: {
               replies: reply._count.replies.toString(),
-              likes: reply._count.likes.toString()
+              likes: reply._count.likes.toString(),
+              stickers: reply._count.stickers.toString()
             }
           })),
           likes:
@@ -606,7 +609,8 @@ router.get("/:id", async (req: RequestWithUser, res) => {
             [],
           count: {
             replies: post._count.replies.toString(),
-            likes: post._count.likes.toString()
+            likes: post._count.likes.toString(),
+            stickers: post._count.stickers.toString()
           },
           urls: await getURLFromText(post.body)
         }
@@ -680,7 +684,8 @@ async function getReplies(
               deleted_at: null
             }
           },
-          likes: true
+          likes: true,
+          stickers: true
         }
       },
       flags: true
@@ -722,7 +727,8 @@ async function getReplies(
         depth: depth,
         count: {
           replies: reply._count.replies,
-          likes: reply._count.likes
+          likes: reply._count.likes,
+          stickers: reply._count.stickers
         },
         urls: await getURLFromText(reply.body)
       };

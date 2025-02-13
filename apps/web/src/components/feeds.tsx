@@ -3,19 +3,16 @@
 import { useEffect, useState } from "react";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocalStorage } from "@uidotdev/usehooks";
-// import { useIsClient, useLocalStorage } from "@uidotdev/usehooks";
-import dynamic from "next/dynamic";
-import { useFeatureFlagPayload } from "posthog-js/react";
 import { useInView } from "react-intersection-observer";
 
 import { cn } from "@/lib/utils";
 
 import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
 import { InlineComposer } from "./composer";
-import { FeedSkeleton, PostSkeleton } from "./feed-skeleton";
+import { FeedSkeleton } from "./feed-skeleton";
+import { FolksAvatar } from "./folks-avatar";
 import { PinnedPost } from "./pinned-post";
 import { Post } from "./post";
-import { Separator } from "./separator";
 
 enum FeedType {
   HIGHLIGHTED = "HIGHLIGHTED",
@@ -103,15 +100,11 @@ export function Feeds({
   }, []);
 
   return isClient ? (
-    <>
-      {/* new: added inline composer in FeedsClient component
-       {is_authed && <Composer />} */}
-      <FeedsClient
-        is_authed={is_authed}
-        user={user}
-        highlighted_pinned_post={highlighted_pinned_post}
-      />
-    </>
+    <FeedsClient
+      is_authed={is_authed}
+      user={user}
+      highlighted_pinned_post={highlighted_pinned_post}
+    />
   ) : (
     <>
       <div className="w-full max-w-3xl flex-1 justify-center">
@@ -142,9 +135,9 @@ export function Feeds({
         {is_authed && (
           <div className="mb-[38px] mt-2 w-full max-w-3xl flex-1 justify-center opacity-50">
             <div className="flex w-full gap-[16px] pt-2">
-              <div className="size-10 rounded-full bg-neutral-200 dark:bg-slate-800" />
+              <div className="size-10 animate-pulse rounded-full bg-neutral-200 dark:bg-slate-800" />
 
-              <div className="mt-2 h-[21px] w-[50%] rounded-md bg-neutral-200 dark:bg-slate-800" />
+              <div className="mt-2 h-[21px] w-[50%] animate-pulse rounded-md bg-neutral-200 dark:bg-slate-800" />
             </div>
           </div>
         )}
@@ -237,10 +230,7 @@ function FeedsClient({
       {is_authed && (
         <div className="mb-4 w-full max-w-3xl flex-1 justify-center">
           <div className="flex w-full gap-2 pt-4">
-            <Avatar className="size-[40px]">
-              <AvatarImage src={user.avatar_url} />
-              <AvatarFallback>{user.username[0].toUpperCase()}</AvatarFallback>
-            </Avatar>
+            <FolksAvatar src={user.avatar_url} name={user.username} />
             <InlineComposer />
           </div>
         </div>
@@ -340,7 +330,7 @@ function FeedEverything({
       ) : status === "error" ? (
         <p className="p-4">Error: {error.message}</p>
       ) : (
-        <div>
+        <div className={cn(data.pages?.length === 0 && "fadein")}>
           {data.pages.map(
             (page, i) =>
               page.feed &&
@@ -466,7 +456,12 @@ function FeedHighlighted({
         <p className="p-4">Error: {error.message}</p>
       ) : (
         <div className="flex min-h-[100vh] flex-1 flex-col">
-          <div className="flex flex-1 flex-col">
+          <div
+            className={cn(
+              "flex flex-1 flex-col",
+              data.pages?.length === 0 && "fadein"
+            )}
+          >
             {highlighted_pinned_post && (
               <PinnedPost
                 id={highlighted_pinned_post.toString()}
@@ -603,7 +598,7 @@ function FeedFollowing({ is_authed, user }: { is_authed: boolean; user: any }) {
       ) : status === "error" ? (
         <p className="p-4">Error: {error.message}</p>
       ) : (
-        <div>
+        <div className={cn(data.pages?.length === 0 && "fadein")}>
           {data.pages.length === 0 && <FeedSkeleton />}
           {data.pages.map(
             (page, i) =>
@@ -707,11 +702,11 @@ export function FeedUser({
   return (
     <div className="text-md mx-auto max-w-3xl">
       {status === "pending" ? (
-        <p className="p-4">Loading...</p>
+        <FeedSkeleton />
       ) : status === "error" ? (
         <p className="p-4">Error: {error.message}</p>
       ) : (
-        <div>
+        <div className={cn(data.pages?.length === 0 && "fadein")}>
           {data.pages.map((page, i) =>
             page.feed.map((post: any, i: any) => {
               return <Post user={user} post={post} key={post.id} />;

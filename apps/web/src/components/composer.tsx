@@ -705,7 +705,7 @@ export function InlineComposer() {
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   return (
-    <div className="min-h-[62px] w-full">
+    <div className="fadein min-h-[62px] w-full">
       <textarea
         ref={textareaRef}
         className="text-md max-h-[300px] w-full flex-1 resize-none border-0 bg-transparent px-4 py-1 pt-2 placeholder:text-neutral-700 focus:outline-none"

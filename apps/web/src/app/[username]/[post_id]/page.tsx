@@ -161,7 +161,8 @@ export default async function Page({
                   deleted_at: null
                 }
               },
-              likes: true
+              likes: true,
+              stickers: true
             }
           },
           flags: true
@@ -194,7 +195,8 @@ export default async function Page({
               deleted_at: null
             }
           },
-          likes: true
+          likes: true,
+          stickers: true
         }
       },
       flags: true
@@ -238,7 +240,8 @@ export default async function Page({
             },
             count: {
               replies: reply._count.replies,
-              likes: reply._count.likes
+              likes: reply._count.likes,
+              stickers: reply._count.stickers
             }
           })),
           likes: post.likes
@@ -250,7 +253,8 @@ export default async function Page({
             : [],
           count: {
             replies: post._count.replies,
-            likes: post._count.likes
+            likes: post._count.likes,
+            stickers: post._count.stickers
           },
           urls: await getURLFromText(post.body)
         }}

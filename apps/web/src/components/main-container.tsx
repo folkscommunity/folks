@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { current_release } from "@/app/release-notes/release-notes";
+import { ServerRibbon } from "@/lib/server-ribbon";
 import { ServerSession } from "@/lib/server-session";
 import { cn } from "@/lib/utils";
 
@@ -34,15 +35,18 @@ export async function MainContainer({
   wide?: boolean;
 }) {
   const user = await ServerSession();
+  const ribbon = await ServerRibbon();
 
   return (
     <div className={cn("mx-auto flex flex-col", !hideTopRibbon && "pt-[32px]")}>
-      {!hideTopRibbon && <HorizonalRibbon fixed={true} top={true} />}
+      {!hideTopRibbon && (
+        <HorizonalRibbon fixed={true} top={true} ribbonString={ribbon} />
+      )}
 
       <div
         className={cn(
-          "dark:bg-black-900 flex w-full flex-col items-center bg-white transition-all max-sm:px-4",
-          wide ? "px-4" : "px-20"
+          "dark:bg-black-900 flex w-full flex-col items-center bg-white transition-all",
+          !wide && "px-4"
         )}
         style={{
           paddingTop: hideTopRibbon ? 8 : 16,
@@ -182,7 +186,7 @@ export async function MainContainer({
       <CreateRibbonModal />
       <StickersComing />
 
-      {!hideBottomRibbon && <HorizonalRibbon />}
+      {!hideBottomRibbon && <HorizonalRibbon ribbonString={ribbon} />}
     </div>
   );
 }
