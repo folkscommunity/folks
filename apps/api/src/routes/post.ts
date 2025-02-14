@@ -230,7 +230,8 @@ router.post("/", authMiddleware, async (req: RequestWithUser, res) => {
       const img_metadata = await img.metadata();
 
       if (
-        (img_metadata.width > 8000 || img_metadata.pageHeight > 8000) &&
+        (img_metadata.width > 8000 ||
+          (img_metadata.pageHeight || img_metadata.height) > 8000) &&
         file_type !== "image/gif"
       ) {
         return res.status(400).json({
@@ -283,7 +284,7 @@ router.post("/", authMiddleware, async (req: RequestWithUser, res) => {
                 ? `${process.env.CDN_URL}/${file_key}`
                 : `https://${process.env.AWS_BUCKET}.s3.amazonaws.com/${file_key}`,
               width: img_metadata.width,
-              height: img_metadata.pageHeight
+              height: img_metadata.pageHeight || img_metadata.height
             }
           }
         },
@@ -1370,7 +1371,8 @@ router.post("/import", authMiddleware, async (req: RequestWithUser, res) => {
       const img_metadata = await img.metadata();
 
       if (
-        (img_metadata.width > 8000 || img_metadata.pageHeight > 8000) &&
+        (img_metadata.width > 8000 ||
+          (img_metadata.pageHeight || img_metadata.height) > 8000) &&
         file_type !== "image/gif"
       ) {
         return res.status(400).json({
@@ -1425,7 +1427,7 @@ router.post("/import", authMiddleware, async (req: RequestWithUser, res) => {
                 ? `${process.env.CDN_URL}/${file_key}`
                 : `https://${process.env.AWS_BUCKET}.s3.amazonaws.com/${file_key}`,
               width: img_metadata.width,
-              height: img_metadata.pageHeight
+              height: img_metadata.pageHeight || img_metadata.height
             }
           }
         },
