@@ -16,7 +16,7 @@ const router = Router();
 
 router.get("/", async (req, res) => {
   try {
-    const { cursor, type, user } = req.query;
+    const { cursor, type, user, replies } = req.query;
     let { limit }: any = req.query;
 
     if (
@@ -109,11 +109,18 @@ router.get("/", async (req, res) => {
         });
       }
 
-      where = {
-        author_id: BigInt(user.toString()),
-        reply_to_id: null,
-        deleted_at: null
-      };
+      if (replies === "true") {
+        where = {
+          author_id: BigInt(user.toString()),
+          deleted_at: null
+        };
+      } else {
+        where = {
+          author_id: BigInt(user.toString()),
+          reply_to_id: null,
+          deleted_at: null
+        };
+      }
     }
 
     const feed = await prisma.post.findMany({
@@ -315,5 +322,83 @@ router.post(
     } catch (e) {}
   }
 );
+
+router.get("/gallery/:user_id", async (req, res) => {
+  try {
+    const { user_id } = req.params;
+
+    const user = await prisma.user.findUnique({
+      where: {
+        id: BigInt(user_id)
+      }
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        error: "not_found"
+      });
+    }
+
+    const posts = await prisma.attachment.findMany({
+      where: {
+        post: {
+          author_id: BigInt(user_id),
+          deleted_at: null
+        }
+      },
+      orderBy: {
+        created_at: "desc"
+      },
+      select: {
+        id: true,
+        created_at: true,
+        url: true,
+        type: true,
+        height: true,
+        width: true,
+        post: {
+          select: {
+            id: true,
+            body: true,
+            author: {
+              select: {
+                id: true,
+                username: true,
+                display_name: true,
+                avatar_url: true
+              }
+            },
+            flags: true,
+            _count: {
+              select: {
+                replies: true,
+                likes: true,
+                stickers: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    if (posts.length === 0) {
+      return res.status(404).json({
+        error: "not_found"
+      });
+    }
+
+    res.setHeader("Content-Type", "application/json");
+    res.send(
+      JSONtoString({
+        ok: true,
+        posts: posts
+      })
+    );
+  } catch (e) {
+    res.status(500).json({
+      error: "server_error"
+    });
+  }
+});
 
 export default router;

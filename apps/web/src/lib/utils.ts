@@ -32,8 +32,10 @@ export function optimizedImageUrl(
 ) {
   const url_as_base64 = Buffer.from(url).toString("base64");
 
-  if (!width || !height) {
+  if (!width && !height) {
     return `https://imgproxy.folkscommunity.com/plain/${url_as_base64}.png`;
+  } else if (width && !height) {
+    return `https://imgproxy.folkscommunity.com/plain/w:${width}/${url_as_base64}.webp`;
   } else {
     return `https://imgproxy.folkscommunity.com/plain/${width && height ? `rs:fill:${width}:${height}:0/` : ""}${url_as_base64}.png`;
   }

@@ -643,10 +643,12 @@ function FeedFollowing({ is_authed, user }: { is_authed: boolean; user: any }) {
 
 export function FeedUser({
   author_id,
-  user
+  user,
+  replies
 }: {
   author_id: string;
   user: any;
+  replies?: boolean;
 }) {
   const { ref, inView } = useInView();
 
@@ -656,11 +658,14 @@ export function FeedUser({
     pageParam: number | undefined;
   }) => {
     if (pageParam === undefined) {
-      const res = await fetch(`/api/feed?type=user&user=${author_id}`);
+      const res = await fetch(
+        `/api/feed?type=user&user=${author_id}&replies=${replies || false}`
+      );
       return res.json();
     } else {
       const res = await fetch(
-        `/api/feed?type=user&user=${author_id}&cursor=` + pageParam
+        `/api/feed?type=user&user=${author_id}&replies=${replies || false}&cursor=` +
+          pageParam
       );
       return res.json();
     }
@@ -676,7 +681,9 @@ export function FeedUser({
     isFetchingNextPage,
     status
   } = useInfiniteQuery({
-    queryKey: ["feed_user_" + author_id],
+    queryKey: replies
+      ? ["feed_user_replies_" + author_id]
+      : ["feed_user_" + author_id],
     queryFn: fetchUserFeed,
     initialPageParam: undefined,
     refetchInterval: 1000 * 60,

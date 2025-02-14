@@ -8,7 +8,9 @@ import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/avatar";
 import { Composer } from "@/components/composer";
 import { FeedUser } from "@/components/feeds";
+import { ProfileGallery } from "@/components/profile-gallery";
 import { Separator } from "@/components/separator";
+import { cn } from "@/lib/utils";
 
 import { ChangeAvatar } from "../settings/change-avatar";
 import { FollowButton } from "./follow-button";
@@ -33,6 +35,12 @@ export interface Profile {
   };
 }
 
+enum Tabs {
+  POSTS = "posts",
+  REPLIES = "replies",
+  GALLERY = "gallery"
+}
+
 export default function Profile({
   profile,
   user,
@@ -44,6 +52,7 @@ export default function Profile({
 }) {
   const [followingModal, setFollowingModal] = useState(false);
   const [followersModal, setFollowersModal] = useState(false);
+  const [tab, setTab] = useState<Tabs>(Tabs.POSTS);
 
   return (
     <>
@@ -149,11 +158,61 @@ export default function Profile({
           )}
         </div>
 
-        <div className="pb-8">
+        <div className="pb-2">
           <Separator />
         </div>
 
-        <FeedUser author_id={profile.id.toString()} user={user} />
+        <div className="flex w-full justify-center pb-4">
+          <div className="text-black-400 flex flex-row space-x-2 text-sm font-bold">
+            <span
+              className={cn(
+                "hover:text-foreground cursor-pointer px-4 py-0.5",
+                tab === Tabs.POSTS &&
+                  "hover:bg-black-800 text-foreground hover:text-background rounded-3xl bg-black text-white dark:bg-white dark:text-black dark:hover:bg-slate-200"
+              )}
+              onClick={() => setTab(Tabs.POSTS)}
+            >
+              Posts
+            </span>
+
+            <span
+              className={cn(
+                "hover:text-foreground cursor-pointer px-4 py-0.5",
+                tab === Tabs.REPLIES &&
+                  "hover:bg-black-800 text-foreground hover:text-background rounded-3xl bg-black text-white dark:bg-white dark:text-black dark:hover:bg-slate-200"
+              )}
+              onClick={() => setTab(Tabs.REPLIES)}
+            >
+              Replies
+            </span>
+
+            <span
+              className={cn(
+                "hover:text-foreground cursor-pointer px-4 py-0.5",
+                tab === Tabs.GALLERY &&
+                  "hover:bg-black-800 text-foreground hover:text-background rounded-3xl bg-black text-white dark:bg-white dark:text-black dark:hover:bg-slate-200"
+              )}
+              onClick={() => setTab(Tabs.GALLERY)}
+            >
+              Gallery
+            </span>
+          </div>
+        </div>
+        {tab === Tabs.POSTS && (
+          <FeedUser author_id={profile.id.toString()} user={user} />
+        )}
+
+        {tab === Tabs.REPLIES && (
+          <FeedUser
+            author_id={profile.id.toString()}
+            user={user}
+            replies={true}
+          />
+        )}
+
+        {tab === Tabs.GALLERY && (
+          <ProfileGallery profile={profile} user={user} />
+        )}
 
         <FollowersModal
           open={followersModal}
