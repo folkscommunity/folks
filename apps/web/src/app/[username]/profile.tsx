@@ -134,7 +134,7 @@ export default function Profile({
           )}
 
           {!isUser && (
-            <div className="-mt-3 flex flex-row gap-2">
+            <div className="flex flex-row gap-2">
               {!isUser && user && (
                 <Link
                   href={`/api/messages/channel/${profile.username}`}
