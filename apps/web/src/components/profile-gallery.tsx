@@ -10,13 +10,6 @@ import Masonry from "react-smart-masonry";
 import { cn, optimizedImageUrl } from "@/lib/utils";
 
 export function ProfileGallery({ profile, user }: { profile: any; user: any }) {
-  const { ref, inView } = useInView();
-  const size = useWindowSize();
-  const [columns3, setColumns3] = useState<any[][]>([[], [], []]);
-  const [columns2, setColumns2] = useState<any[][]>([[], []]);
-
-  const [columnCount, setColumnCount] = useState(2);
-
   const fetchUserGallery = async () => {
     const res = await fetch(`/api/feed/gallery/${profile.id}`);
     return res.json();
@@ -120,7 +113,7 @@ function Image({
     >
       <Link href={`/${username}/${post_id}`}>
         <img
-          src={optimizedImageUrl(src, 250)}
+          src={src}
           className="h-auto w-full"
           alt={alt}
           onLoad={() => {
