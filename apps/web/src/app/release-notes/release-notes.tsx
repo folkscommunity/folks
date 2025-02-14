@@ -2,9 +2,17 @@ import dayjs from "dayjs";
 
 import { parsePostBody } from "@/lib/post-utils";
 
-export const current_release = "0.6.1";
+export const current_release = "0.6.2";
 
 const releases = [
+  {
+    version: "0.6.2",
+    date: "2025-02-14",
+    changes: [
+      "Added replies & gallery tabs to profile.",
+      "Fixed gif height issues."
+    ]
+  },
   {
     version: "0.6.1",
     date: "2025-02-13",
