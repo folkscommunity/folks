@@ -8,7 +8,7 @@ import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/avatar";
 import { Composer } from "@/components/composer";
 import { FeedUser } from "@/components/feeds";
-import { ProfileGallery } from "@/components/profile-gallery";
+import { ProfileMedia } from "@/components/profile-media";
 import { Separator } from "@/components/separator";
 import { cn } from "@/lib/utils";
 
@@ -38,7 +38,7 @@ export interface Profile {
 enum Tabs {
   POSTS = "posts",
   REPLIES = "replies",
-  GALLERY = "gallery"
+  MEDIA = "media"
 }
 
 export default function Profile({
@@ -192,12 +192,12 @@ export default function Profile({
             <span
               className={cn(
                 "hover:text-foreground cursor-pointer px-4 py-0.5",
-                tab === Tabs.GALLERY &&
+                tab === Tabs.MEDIA &&
                   "hover:bg-black-800 text-foreground hover:text-background rounded-3xl bg-black text-white dark:bg-white dark:text-black dark:hover:bg-slate-200"
               )}
-              onClick={() => setTab(Tabs.GALLERY)}
+              onClick={() => setTab(Tabs.MEDIA)}
             >
-              Gallery
+              Media
             </span>
           </div>
         </div>
@@ -213,9 +213,7 @@ export default function Profile({
           />
         )}
 
-        {tab === Tabs.GALLERY && (
-          <ProfileGallery profile={profile} user={user} />
-        )}
+        {tab === Tabs.MEDIA && <ProfileMedia profile={profile} user={user} />}
 
         <FollowersModal
           open={followersModal}

@@ -9,7 +9,7 @@ const releases = [
     version: "0.6.2",
     date: "2025-02-14",
     changes: [
-      "Added replies & gallery tabs to profile.",
+      "Added replies & media tabs to profile.",
       "Fixed gif height issues."
     ]
   },

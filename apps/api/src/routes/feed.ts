@@ -323,7 +323,7 @@ router.post(
   }
 );
 
-router.get("/gallery/:user_id", async (req, res) => {
+router.get("/media/:user_id", async (req, res) => {
   try {
     const { user_id } = req.params;
 

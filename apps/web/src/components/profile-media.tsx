@@ -2,22 +2,20 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useWindowSize } from "@uidotdev/usehooks";
 import Link from "next/link";
-import { useInView } from "react-intersection-observer";
 import Masonry from "react-smart-masonry";
 
-import { cn, optimizedImageUrl } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
-export function ProfileGallery({ profile, user }: { profile: any; user: any }) {
-  const fetchUserGallery = async () => {
-    const res = await fetch(`/api/feed/gallery/${profile.id}`);
+export function ProfileMedia({ profile, user }: { profile: any; user: any }) {
+  const fetchUserMedia = async () => {
+    const res = await fetch(`/api/feed/media/${profile.id}`);
     return res.json();
   };
 
   const { data, error, refetch, isFetching, status } = useQuery({
-    queryKey: ["user_gallery_" + profile.id],
-    queryFn: fetchUserGallery,
+    queryKey: ["user_media_" + profile.id],
+    queryFn: fetchUserMedia,
     refetchInterval: 1000 * 60,
     refetchIntervalInBackground: true,
     retryOnMount: true
