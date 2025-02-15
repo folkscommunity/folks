@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Gear } from "@phosphor-icons/react";
+import { ChatCircle, Gear } from "@phosphor-icons/react";
 import { ExternalLinkIcon } from "lucide-react";
 import Link from "next/link";
 
@@ -73,6 +73,33 @@ export default function Profile({
               )}
             </div>
 
+            {!isUser && (
+              <div className="flex flex-row items-end gap-2 pb-3">
+                {!isUser && user && (
+                  <Link
+                    href={`/api/messages/channel/${profile.username}`}
+                    prefetch={false}
+                  >
+                    <button className="h-[34px] w-[120px] border border-gray-400 px-3 py-1 hover:bg-gray-500/20">
+                      Message
+                    </button>
+                  </Link>
+                )}
+
+                {!isUser && user && (
+                  <FollowButton target_id={profile.id.toString()} />
+                )}
+
+                {!user && (
+                  <Link href="/register">
+                    <button className="h-[34px] w-[120px] border border-gray-400 px-3 py-1 hover:bg-gray-500/20">
+                      Follow
+                    </button>
+                  </Link>
+                )}
+              </div>
+            )}
+
             {isUser && (
               <Link
                 href="/settings"
@@ -130,33 +157,6 @@ export default function Profile({
               >
                 {profile.count.followers} followers
               </button>
-            </div>
-          )}
-
-          {!isUser && (
-            <div className="flex flex-row gap-2">
-              {!isUser && user && (
-                <FollowButton target_id={profile.id.toString()} />
-              )}
-
-              {!user && (
-                <Link href="/register">
-                  <button className="w-[120px] border border-gray-400 px-3 py-1 hover:bg-gray-500/20">
-                    Follow
-                  </button>
-                </Link>
-              )}
-
-              {!isUser && user && (
-                <Link
-                  href={`/api/messages/channel/${profile.username}`}
-                  prefetch={false}
-                >
-                  <button className="w-[120px] border border-gray-400 px-3 py-1 hover:bg-gray-500/20">
-                    Message
-                  </button>
-                </Link>
-              )}
             </div>
           )}
         </div>

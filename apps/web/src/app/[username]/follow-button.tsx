@@ -62,7 +62,7 @@ export function FollowButton({ target_id }: { target_id: string }) {
 
   return (
     <button
-      className="w-[120px] border border-gray-400 px-3 py-1 hover:bg-gray-500/20"
+      className="h-[34px] w-[120px] border border-gray-400 px-3 py-1 hover:bg-gray-500/20"
       onClick={following ? unfollow : follow}
     >
       {loading ? "..." : <>{following ? "Unfollow" : "Follow"}</>}
