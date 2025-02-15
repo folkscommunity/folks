@@ -136,16 +136,6 @@ export default function Profile({
           {!isUser && (
             <div className="flex flex-row gap-2">
               {!isUser && user && (
-                <Link
-                  href={`/api/messages/channel/${profile.username}`}
-                  prefetch={false}
-                >
-                  <button className="w-[120px] border border-gray-400 px-3 py-1 hover:bg-gray-500/20">
-                    Message
-                  </button>
-                </Link>
-              )}
-              {!isUser && user && (
                 <FollowButton target_id={profile.id.toString()} />
               )}
 
@@ -153,6 +143,17 @@ export default function Profile({
                 <Link href="/register">
                   <button className="w-[120px] border border-gray-400 px-3 py-1 hover:bg-gray-500/20">
                     Follow
+                  </button>
+                </Link>
+              )}
+
+              {!isUser && user && (
+                <Link
+                  href={`/api/messages/channel/${profile.username}`}
+                  prefetch={false}
+                >
+                  <button className="w-[120px] border border-gray-400 px-3 py-1 hover:bg-gray-500/20">
+                    Message
                   </button>
                 </Link>
               )}
