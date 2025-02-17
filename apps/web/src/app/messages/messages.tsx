@@ -133,27 +133,30 @@ function Channel({
   return (
     <Link
       href={"/messages/" + channel.id}
-      className="hover:bg-black-100/50 dark:hover:bg-black-700/25 fadein flex flex-row items-center gap-3 rounded-md p-2 hover:no-underline"
+      className="hover:bg-black-100/50 dark:hover:bg-black-700/25 fadein flex w-full flex-row items-center gap-3 rounded-md p-2 hover:no-underline"
     >
       <Avatar>
         <AvatarImage src={channel.avatar_url} />
         <AvatarFallback>{channel.name[0].toUpperCase()}</AvatarFallback>
       </Avatar>
 
-      <div className="w-full">
+      <div className="flex w-full min-w-0 flex-col overflow-clip">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-[0.5ch] font-bold">
-            <span>{channel.name}</span>
+            <span className="truncate">{channel.name}</span>
             {!read && channel.last_message_body ? (
               <div className="inline-block size-[7px] rounded-full bg-blue-500" />
             ) : (
               ""
             )}
           </div>
-          <div className="opacity-50">{channel.last_message_at}</div>
+          <div className="flex-shrink-0 opacity-50">
+            {channel.last_message_at}
+          </div>
         </div>
+
         <div
-          className="h-[22px]"
+          className="truncate"
           style={{
             fontWeight: !read && channel.last_message_body ? "bold" : "normal",
             opacity: !read && channel.last_message_body ? "0.8" : "0.5"
