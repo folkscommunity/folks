@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 "use client";
 
 import { useState } from "react";
@@ -9,6 +10,7 @@ import { z } from "zod";
 
 import { schemas } from "@folks/utils";
 
+// @ts-ignore
 const LoginSchema = z.object({
   email: schemas.emailSchema,
   password: z.string()

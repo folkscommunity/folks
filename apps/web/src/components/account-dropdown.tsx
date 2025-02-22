@@ -74,6 +74,13 @@ export function AccountDropdown({ user }: { user: any }) {
 
           <div className="text-black-600 px-4 text-sm">· · ·</div>
 
+          <Link
+            href="/articles"
+            className="font-base text-foreground cursor-pointer px-4 py-1 hover:text-slate-500 hover:underline"
+          >
+            Articles
+          </Link>
+
           <div
             onClick={() => {
               window.dispatchEvent(new Event("ribbon_create_open"));

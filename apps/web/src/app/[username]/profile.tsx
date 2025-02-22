@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { ChatCircle, Gear } from "@phosphor-icons/react";
+import { useQuery } from "@tanstack/react-query";
+import dayjs from "dayjs";
 import { ExternalLinkIcon } from "lucide-react";
 import Link from "next/link";
 
@@ -32,13 +34,64 @@ export interface Profile {
   count: {
     following?: number;
     followers?: number;
+    articles: number;
   };
 }
 
 enum Tabs {
   POSTS = "posts",
   REPLIES = "replies",
-  MEDIA = "media"
+  MEDIA = "media",
+  ARTICLES = "articles"
+}
+
+function Articles({ profile }: { profile: Profile }) {
+  const { data, isLoading } = useQuery({
+    queryKey: ["articles-profile-feed-" + profile.id],
+    queryFn: async () => {
+      const articles = await fetch(`/api/articles/user-feed/${profile.id}`, {
+        method: "GET"
+      })
+        .then((res) => res.json())
+        .then((res) => {
+          if (res.ok) {
+            return res.articles;
+          }
+        })
+        .catch((err) => {});
+
+      return articles;
+    }
+  });
+
+  return (
+    <div className="flex w-full max-w-3xl flex-1 flex-col gap-3 pt-2">
+      {!isLoading &&
+        data &&
+        data.length > 0 &&
+        data.map((article: any) => (
+          <Link
+            href={`/${profile.username}/${article.slug}`}
+            className="group hover:no-underline"
+            key={article.id}
+          >
+            <div className="flex justify-between gap-2">
+              <div
+                className="text-md text-serif break-words group-hover:underline"
+                style={{
+                  wordBreak: "break-word"
+                }}
+              >
+                {article.title}
+              </div>
+              <div className="text-md flex flex-col items-end text-nowrap opacity-80">
+                <span>{dayjs(article.published).format("MMM D, YYYY")}</span>
+              </div>
+            </div>
+          </Link>
+        ))}
+    </div>
+  );
 }
 
 export default function Profile({
@@ -178,6 +231,19 @@ export default function Profile({
               Posts
             </span>
 
+            {profile.count.articles > 0 && (
+              <span
+                className={cn(
+                  "hover:text-foreground cursor-pointer px-4 py-0.5",
+                  tab === Tabs.ARTICLES &&
+                    "hover:bg-black-800 text-foreground hover:text-background rounded-3xl bg-black text-white dark:bg-white dark:text-black dark:hover:bg-slate-200"
+                )}
+                onClick={() => setTab(Tabs.ARTICLES)}
+              >
+                Articles
+              </span>
+            )}
+
             <span
               className={cn(
                 "hover:text-foreground cursor-pointer px-4 py-0.5",
@@ -214,6 +280,7 @@ export default function Profile({
         )}
 
         {tab === Tabs.MEDIA && <ProfileMedia profile={profile} user={user} />}
+        {tab === Tabs.ARTICLES && <Articles profile={profile} />}
 
         <FollowersModal
           open={followersModal}

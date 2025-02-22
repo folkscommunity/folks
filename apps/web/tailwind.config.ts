@@ -1,16 +1,29 @@
-import lineClamp from "@tailwindcss/line-clamp";
 import type { Config } from "tailwindcss";
 
 export default {
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/app/**/*.{js,ts,jsx,tsx,mdx}"
+    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+    "../../packages/editor/components/**/*.{js,ts,jsx,tsx,mdx}",
+    "../../packages/editor/extensions/**/*.{js,ts,jsx,tsx,mdx}",
+    "../../packages/editor/hooks/**/*.{js,ts,jsx,tsx,mdx}",
+    "../../packages/editor/lib/**/*.{js,ts,jsx,tsx,mdx}"
   ],
   theme: {
     fontFamily: {
-      sans: ["var(--font-geist-sans)", "sans-serif"],
+      sans: [
+        "Inter",
+        "--apple-system",
+        "BlinkMacSystemFont",
+        "Segoe UI",
+        "Roboto",
+        "Helvetica",
+        "Arial",
+        "sans-serif"
+      ],
       mono: ["var(--font-ibm-plex-mono)", "monospace"],
+      serif: ["Zodiak", "serif"],
       ansi: ["Courier New", "monospace"]
     },
     fontSize: {
@@ -29,16 +42,16 @@ export default {
       "6xl": "60px",
       "7xl": "72px"
     },
-    lineHeight: {
-      DEFAULT: "24px",
-      ansi: "12px",
-      ansiLg: "24px"
-    },
-    letterSpacing: {
-      DEFAULT: "-.42px",
-      ansiLg: "-1px"
-    },
     extend: {
+      lineHeight: {
+        DEFAULT: "24px",
+        ansi: "12px",
+        ansiLg: "24px"
+      },
+      letterSpacing: {
+        DEFAULT: "-.42px",
+        ansiLg: "-1px"
+      },
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
@@ -68,6 +81,5 @@ export default {
       }
     }
   },
-  safelist: ["text-sky-600"],
-  plugins: [lineClamp]
+  safelist: ["text-sky-600", "ProseMirror"]
 } satisfies Config;

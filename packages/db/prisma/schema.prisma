@@ -60,6 +60,7 @@ model User {
   stickers                   Sticker[]              @relation("stickers")
   message_channel_membership MessageChannelMember[] @relation("message_channel_member")
   messages                   Message[]              @relation("user_message")
+  articles                   Article[]              @relation("user_article")
 
   @@index([id])
   @@index([username])
@@ -334,4 +335,55 @@ model Message {
   @@index([channel_member_id])
   @@index([user_id])
   @@map("messages")
+}
+
+model Article {
+  id BigInt @id @unique @default(autoincrement())
+
+  slug String
+
+  title     String
+  body      String?
+  html_body String?
+  tags      String[]
+
+  published    Boolean   @default(false)
+  published_at DateTime?
+
+  deleted_at DateTime?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  author_id BigInt
+  author    User   @relation(fields: [author_id], references: [id], name: "user_article", onDelete: Cascade)
+
+  attachments ArticleAttachment[]
+
+  @@index([id])
+  @@index([slug])
+  @@map("articles")
+}
+
+enum ArticleAttachmentType {
+  Image
+  Video
+}
+
+model ArticleAttachment {
+  id String @id @unique @default(uuid())
+
+  article_id BigInt
+  article    Article @relation(fields: [article_id], references: [id])
+
+  url      String
+  metadata Json?
+
+  type ArticleAttachmentType
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([article_id])
+  @@map("article_attachments")
 }

@@ -26,13 +26,167 @@ function calculateWidth(
 export default async function Image({
   params
 }: {
-  params: Promise<{ post_id: string }>;
+  params: Promise<{ username: string; post_id: string }>;
 }) {
   const post_id = (await params).post_id;
+  const username = (await params).username;
 
   try {
     BigInt(post_id);
   } catch (e) {
+    const article = await prisma.article.findFirst({
+      where: {
+        slug: post_id,
+        author: {
+          username: username
+        },
+        deleted_at: null,
+        published: true,
+        NOT: {
+          body: null,
+          html_body: null,
+          published_at: null
+        }
+      },
+      include: {
+        author: {
+          select: {
+            id: true,
+            username: true,
+            display_name: true,
+            avatar_url: true
+          }
+        },
+        attachments: true
+      }
+    });
+
+    if (article) {
+      const user = article.author;
+
+      const IBMPlexMonoRegularData = await readFile(
+        join(process.cwd(), "public/fonts/IBMPlexMono-Regular.ttf")
+      );
+
+      const IBMPlexMonoBoldData = await readFile(
+        join(process.cwd(), "public/fonts/IBMPlexMono-Bold.ttf")
+      );
+
+      const LibreData = await readFile(
+        join(process.cwd(), "public/fonts/LibreBaskerville-Regular.ttf")
+      );
+
+      const avatar = optimizedImageUrl(
+        article.author.avatar_url || "",
+        200,
+        200
+      );
+
+      return new ImageResponse(
+        (
+          <div
+            style={{
+              fontSize: 48,
+              color: "white",
+              width: "1200px",
+              height: "675px",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              fontWeight: 900,
+              fontFamily: "IBM Plex Mono",
+              backgroundColor: "black",
+              backgroundSize: "cover",
+              backgroundRepeat: "no-repeat",
+              padding: "50px",
+              paddingBottom: "5px"
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 5,
+                width: "100%"
+              }}
+            >
+              {user.avatar_url && (
+                <img
+                  height="90"
+                  style={{
+                    borderRadius: 90
+                  }}
+                  src={avatar}
+                />
+              )}
+
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  padding: "0 10px"
+                }}
+              >
+                <div>{user?.display_name}</div>
+                <div
+                  style={{
+                    fontSize: 24,
+                    color: "#aaaaaa"
+                  }}
+                >
+                  {"@" + user?.username}
+                </div>
+              </div>
+
+              <div style={{ flex: 1 }} />
+
+              <img
+                height="50"
+                src="https://media-assets.folkscommunity.com/brand/logo-white.png"
+              />
+            </div>
+
+            <div style={{ flex: 1 }} />
+
+            <div
+              style={{
+                fontFamily: "Libre Baskerville",
+                fontSize: 64
+              }}
+            >
+              {article.title}
+            </div>
+
+            <div style={{ flex: 1, paddingBottom: "100px" }} />
+          </div>
+        ),
+        {
+          ...size,
+          fonts: [
+            {
+              name: "IBM Plex Mono",
+              data: IBMPlexMonoRegularData,
+              style: "normal",
+              weight: 400
+            },
+            {
+              name: "IBM Plex Mono",
+              data: IBMPlexMonoBoldData,
+              style: "normal",
+              weight: 700
+            },
+            {
+              name: "Libre Baskerville",
+              data: LibreData,
+              style: "normal",
+              weight: 400
+            }
+          ]
+        }
+      );
+    }
+
     return new Response("Not found", { status: 404 });
   }
 
