@@ -160,14 +160,14 @@ export function EditArticle({
           <div>
             {published ? (
               <button
-                className="rounded-md border border-slate-900 px-3 py-1 text-white dark:border-slate-700"
+                className="rounded-md border border-slate-900 px-3 py-1 dark:border-slate-700"
                 onClick={unpublishArticle}
               >
                 Unpublish
               </button>
             ) : (
               <button
-                className="rounded-md border border-slate-900 px-3 py-1 text-white dark:border-slate-700"
+                className="rounded-md border border-slate-900 px-3 py-1 dark:border-slate-700"
                 onClick={publishArticle}
               >
                 Publish

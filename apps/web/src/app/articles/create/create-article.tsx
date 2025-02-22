@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Head from "next/head";
 import { useRouter } from "next/navigation";
 
 import { Label } from "@/components/label";
@@ -64,7 +63,7 @@ export function CreateArticle({ user }: { user: any }) {
           Select a title for your article, and press Create to open the editor.
         </p>
       </div>
-      <div className="mt-8">
+      <div className="mt-2">
         <div>
           <Label htmlFor="title" className="text-md">
             Title:
