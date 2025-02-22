@@ -123,7 +123,7 @@ export async function MainContainer({
         {children}
 
         {!hideFooter && (
-          <footer className="mx-auto flex w-full max-w-3xl flex-col gap-8 py-8 max-md:gap-2">
+          <footer className="mx-auto flex w-full max-w-3xl flex-col gap-8 py-8 pt-4 max-md:gap-2">
             <Separator />
             <div className="flex gap-2 max-md:flex-col max-md:items-center max-md:gap-1">
               <Link

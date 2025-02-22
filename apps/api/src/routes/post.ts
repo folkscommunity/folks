@@ -1047,7 +1047,7 @@ router.delete("/:id", authMiddleware, async (req: RequestWithUser, res) => {
     }
 
     // We're going to keep the post for 24 hours, and then delete it along with the likes, and the attachments.
-    // TODO: Add the cron job to delete the post after 24 hours.
+
     await prisma.post.updateMany({
       where: {
         id: BigInt(id)

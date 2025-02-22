@@ -1,12 +1,15 @@
 import { Metadata } from "next";
+import sanitizeHtml from "sanitize-html";
 
 import { prisma } from "@folks/db";
 
 import NotFound from "@/app/not-found";
 import { MainContainer } from "@/components/main-container";
+import { parseArticleHTML } from "@/lib/prosemirror-parser";
 import { ServerSession } from "@/lib/server-session";
 import { getURLFromText } from "@/lib/url-metadata";
 
+import { Article } from "./article";
 import { SinglePost } from "./single-post";
 
 export async function generateMetadata({
@@ -20,6 +23,53 @@ export async function generateMetadata({
   try {
     BigInt(post_id);
   } catch (e) {
+    const article = await prisma.article.findFirst({
+      where: {
+        slug: post_id,
+        author: {
+          username: username
+        },
+        deleted_at: null,
+        published: true,
+        NOT: {
+          body: null,
+          html_body: null,
+          published_at: null
+        }
+      },
+      include: {
+        author: {
+          select: {
+            id: true,
+            username: true,
+            display_name: true,
+            avatar_url: true
+          }
+        }
+      }
+    });
+
+    if (article) {
+      return {
+        title: `${article.title}`,
+        authors: [
+          {
+            name: article.author.display_name,
+            url: `https://folkscommunity.com/${article.author.username}`
+          }
+        ],
+        openGraph: {
+          title: `${article.title}`,
+          type: "article",
+          url: `https://folkscommunity.com/${article.author.username}/${article.slug}`
+        },
+        twitter: {
+          card: "summary_large_image",
+          title: `${article.title}`
+        }
+      };
+    }
+
     return {
       title: "Not Found"
     };
@@ -80,6 +130,45 @@ export default async function Page({
   try {
     BigInt(post_id);
   } catch (e) {
+    const article = await prisma.article.findFirst({
+      where: {
+        slug: post_id,
+        author: {
+          username: username
+        },
+        deleted_at: null,
+        published: true,
+        NOT: {
+          body: null,
+          html_body: null,
+          published_at: null
+        }
+      },
+      include: {
+        author: {
+          select: {
+            id: true,
+            username: true,
+            display_name: true,
+            avatar_url: true
+          }
+        }
+      }
+    });
+
+    if (article) {
+      return (
+        <MainContainer>
+          <Article
+            title={article.title}
+            author={article.author}
+            published_at={article.published_at}
+            body={parseArticleHTML(article.html_body!)}
+          />
+        </MainContainer>
+      );
+    }
+
     return <NotFound />;
   }
 

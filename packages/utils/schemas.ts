@@ -65,3 +65,18 @@ export const chatMessageSchema = z
   .string()
   .min(1, "A message must be at least 1 character.")
   .max(2000, "A chat message must be at most 2000 characters.");
+
+export const articleSlugSchema = z
+  .string()
+  .regex(
+    /^[a-z0-9-]+$/,
+    "Article slug must only contain lower case letters, numbers and dashes."
+  )
+  .regex(/^[a-z]/, "Article slug must contain at least one letter.")
+  .max(62, "Article slug must be at most 62 characters.")
+  .min(3, "Article slug must be at least 3 characters.");
+
+export const articleTitleSchema = z
+  .string()
+  .max(80, "Article title must be at most 80 characters.")
+  .min(3, "Article title must be at least 3 characters.");

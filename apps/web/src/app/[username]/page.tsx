@@ -75,8 +75,9 @@ export default async function Page({
       updated_at: true,
       _count: {
         select: {
-          following: true,
-          followers: true
+          following: user && user.username === username ? true : false,
+          followers: user && user.username === username ? true : false,
+          articles: true
         }
       }
     }
@@ -110,7 +111,8 @@ export default async function Page({
           updated_at: selectedUser.updated_at,
           count: {
             following: selectedUser._count.following || undefined,
-            followers: selectedUser._count.followers || undefined
+            followers: selectedUser._count.followers || undefined,
+            articles: selectedUser._count.articles ?? 0
           }
         }}
         user={user}

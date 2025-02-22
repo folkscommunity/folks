@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
-import { Geist, IBM_Plex_Mono } from "next/font/google";
+import { IBM_Plex_Mono, Inter } from "next/font/google";
 
 import "./globals.css";
 
 import { ContextProviders } from "@/components/context-providers";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"]
 });
 
@@ -307,7 +307,7 @@ export default function RootLayout({
           src="/js/s.js"
         ></script>
       </head>
-      <body className={`${geistSans.variable} ${mono.variable} antialiased`}>
+      <body className={`${inter.variable} ${mono.variable} antialiased`}>
         <ContextProviders>{children}</ContextProviders>
       </body>
     </html>

@@ -10,6 +10,7 @@ import { prisma } from "@folks/db";
 
 import { Sentry } from "./instrument";
 import { redis, redis_sub } from "./lib/redis";
+import articles_router from "./routes/articles";
 import auth_router from "./routes/auth";
 import feed_router from "./routes/feed";
 import follow_router from "./routes/follow";
@@ -84,6 +85,7 @@ async function mainThread() {
   app.use("/api/support", support_router);
   app.use("/api/stickers", stickers_router);
   app.use("/api/messages", messages_router);
+  app.use("/api/articles", articles_router);
 
   io.use(async (socket: SocketWithUser | any, next) => {
     try {
