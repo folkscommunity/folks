@@ -93,8 +93,10 @@ export const useTextmenuCommands = (editor: Editor) => {
   const onSetFontSize = useCallback(
     (fontSize: string) => {
       if (!fontSize || fontSize.length === 0) {
+        // @ts-ignore
         return editor.chain().focus().unsetFontSize().run();
       }
+      // @ts-ignore
       return editor.chain().focus().setFontSize(fontSize).run();
     },
     [editor]
