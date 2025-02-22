@@ -50,8 +50,17 @@ export async function generateMetadata({
     });
 
     if (article) {
+      const description = sanitizeHtml(article.html_body!, {
+        disallowedTagsMode: "discard",
+        allowedTags: []
+      })
+        .replaceAll("\n", "")
+        .replaceAll(".", ". ")
+        .slice(0, 300);
+
       return {
         title: `${article.title}`,
+        description: description,
         authors: [
           {
             name: article.author.display_name,
@@ -61,11 +70,13 @@ export async function generateMetadata({
         openGraph: {
           title: `${article.title}`,
           type: "article",
+          description: description,
           url: `https://folkscommunity.com/${article.author.username}/${article.slug}`
         },
         twitter: {
           card: "summary_large_image",
-          title: `${article.title}`
+          title: `${article.title}`,
+          description: description
         }
       };
     }
