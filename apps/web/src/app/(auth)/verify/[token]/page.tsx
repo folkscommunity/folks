@@ -10,7 +10,7 @@ export default async function Page({
   const token = (await params).token;
 
   return (
-    <MainContainer>
+    <MainContainer hideAbout={true}>
       <VerifyPage token={token} />
     </MainContainer>
   );

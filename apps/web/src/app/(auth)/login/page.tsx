@@ -18,7 +18,7 @@ export default async function Page() {
   }
 
   return (
-    <MainContainer>
+    <MainContainer hideAbout={true}>
       <Login />
     </MainContainer>
   );

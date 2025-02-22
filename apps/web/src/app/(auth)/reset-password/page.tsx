@@ -6,7 +6,7 @@ import ResetPasswordRequest from "./reset-password-request";
 
 export default async function Page() {
   return (
-    <MainContainer>
+    <MainContainer hideAbout={true}>
       <ResetPasswordRequest />
     </MainContainer>
   );

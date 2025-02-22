@@ -32,7 +32,11 @@ export function FolksAboutTop() {
       doing so.
       <br />
       <br />
-      Check out the{" "}
+      Click{" "}
+      <Link href="/register" className="font-bold hover:underline">
+        here
+      </Link>{" "}
+      here to join, or check out the{" "}
       <Link href="/manifesto" className="font-bold hover:underline">
         /manifesto
       </Link>{" "}

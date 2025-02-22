@@ -14,7 +14,7 @@ export default async function Page() {
   const email = user ? user.email : null;
 
   return (
-    <MainContainer>
+    <MainContainer hideAbout={true}>
       <Support email={email} />
     </MainContainer>
   );

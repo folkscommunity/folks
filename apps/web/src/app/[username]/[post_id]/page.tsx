@@ -169,7 +169,7 @@ export default async function Page({
 
     if (article) {
       return (
-        <MainContainer>
+        <MainContainer hideAbout={true}>
           <Article
             title={article.title}
             author={article.author}
