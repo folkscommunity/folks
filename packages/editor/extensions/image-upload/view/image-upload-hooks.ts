@@ -21,10 +21,6 @@ export const useUploader = ({
     async (file: File) => {
       setLoading(true);
       try {
-        const url =
-          "https://cdn.rokita.me/blog/creating-a-radio-station/og.jpg";
-        console.log("new file being uploaded", window.editor_article_id);
-
         const base64 = await fileToBase64(file);
 
         await fetch("/api/articles/attachment", {

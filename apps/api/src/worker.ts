@@ -46,8 +46,6 @@ export async function sendWebPushNotification(
       })
     );
   } catch (e) {
-    console.log(e.body);
-
     try {
       if (e.body.includes("unsubscribed")) {
         await prisma.notificationEndpoint.delete({
