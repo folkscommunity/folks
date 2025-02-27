@@ -17,7 +17,7 @@ const mono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Folks",
+  title: "Folks — a place for creative people",
   metadataBase: new URL("https://folkscommunity.com"),
   description:
     "Folks is a place for creative people (designers, engineers, founders, painters, carpenters, and anyone else who crafts something) to share their creations and thoughts with each other and feel comfortable doing so.",
