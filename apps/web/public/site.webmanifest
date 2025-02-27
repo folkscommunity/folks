@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/web-manifest-combined.json",
   "name": "Folks",
   "short_name": "Folks",
-  "description": "A community for product people.",
+  "description": "A community for creative people.",
   "start_url": "/",
   "icons": [
     {

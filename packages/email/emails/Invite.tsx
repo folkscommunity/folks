@@ -41,7 +41,8 @@ export const Invite = (props: { url: string }) => {
         >
           Hello!
         </span>{" "}
-        You have been invited to join Folks, a community for product people. The
+        You have been invited to join Folks, a community for creative people.
+        The
         <br />
         you can go ahead and register with this email address.
       </Text>

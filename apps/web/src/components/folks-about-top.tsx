@@ -13,7 +13,7 @@ export function FolksAboutTop() {
         className="cursor-pointer font-bold hover:underline"
         onClick={() => setExpand(!expand)}
       >
-        product people
+        creative people
       </span>{" "}
       {expand && (
         <span className="opacity-80">

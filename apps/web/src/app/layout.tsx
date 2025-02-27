@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   title: "Folks",
   metadataBase: new URL("https://folkscommunity.com"),
   description:
-    "Folks is a place for product people (designers, engineers, founders, painters, carpenters, and anyone else who crafts something) to share their creations and thoughts with each other and feel comfortable doing so.",
+    "Folks is a place for creative people (designers, engineers, founders, painters, carpenters, and anyone else who crafts something) to share their creations and thoughts with each other and feel comfortable doing so.",
   openGraph: {
     type: "website",
     locale: "en_US",
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Folks",
-    description: "A place for product people.",
+    description: "A place for creative people.",
     images: [
       {
         url: "https://folkscommunity.com/images/og.jpg",

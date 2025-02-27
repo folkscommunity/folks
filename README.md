@@ -7,7 +7,7 @@
 </p>
 <p></p>
 
-Folks is a community platform for product people.
+Folks is a community platform for creative people.
 
 Check out the [manifesto](https://folkscommunity.com/manifesto) for more information about the project.
 

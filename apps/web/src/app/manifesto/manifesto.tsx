@@ -9,7 +9,7 @@ export function Manifesto() {
         <h2 className="pb-8">Manifesto</h2>
 
         <p>
-          Folks is a place for <strong>product people</strong>{" "}
+          Folks is a place for <strong>creative people</strong>{" "}
           <span className="opacity-80">
             (designers, engineers, founders, painters, carpenters, architects,
             lighting designers and anyone else who creates something)
@@ -36,12 +36,6 @@ export function Manifesto() {
           In the future, Folks will be registered as a non-profit organization
           to ensure that the platform remains sustainable and is not driven by
           the pursuit of higher profit.
-        </p>
-        <p>
-          ( P.S. I've been asked a couple of times of how can people support
-          this platform financially, in the future I'll setup a merchendise
-          store with some goodies, so you can get something nice in return for
-          your support. )
         </p>
         <strong>Contributing Code</strong>
         <p className="pt-4">
