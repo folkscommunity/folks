@@ -60,7 +60,7 @@ async function mainThread() {
 
   app.use(
     express.json({
-      limit: "50mb"
+      limit: "80mb"
     })
   );
 

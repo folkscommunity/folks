@@ -11,6 +11,7 @@ import sharp from "sharp";
 import { prisma } from "@folks/db";
 import { JSONtoString, schemas } from "@folks/utils";
 
+import { Sentry } from "@/instrument";
 import { authMiddleware, RequestWithUser } from "@/lib/auth_middleware";
 import { s3 } from "@/lib/aws";
 import { sendNotification } from "@/lib/notification_utils";
@@ -415,6 +416,7 @@ router.post("/", authMiddleware, async (req: RequestWithUser, res) => {
     res.send(JSONtoString({ ok: true }));
   } catch (e) {
     console.error(e);
+    Sentry.captureException(e);
 
     res.status(500).json({
       error: "server_error",
