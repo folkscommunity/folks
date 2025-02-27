@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     url: "https://folkscommunity.com",
     images: [
       {
-        url: "https://folkscommunity.com/images/og.jpg",
+        url: "https://folkscommunity.com/images/og.jpg?2702202501",
         width: 1200,
         height: 675,
         alt: "Folks"
