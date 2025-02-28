@@ -99,6 +99,8 @@ export async function MainContainer({
                   <Link href="/login">Login</Link>
                   <span>·</span>
                   <Link href="/register">Register</Link>
+                  <span>·</span>
+                  <Link href="/support">Support</Link>
                 </>
               )}
             </div>
