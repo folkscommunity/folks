@@ -7,7 +7,7 @@ import NotFound from "../not-found";
 import { Notifications } from "./notifications";
 
 export const metadata: Metadata = {
-  title: "Folks - Notifications"
+  title: "Folks –Notifications"
 };
 
 export default async function Page() {

@@ -45,7 +45,9 @@ export function Articles({ articles }: { articles: any[] }) {
             </div>
           ))}
 
-        {!articles && <div>You haven't written any articles yet.</div>}
+        {(!articles || articles.length === 0) && (
+          <div>You haven't written any articles yet.</div>
+        )}
       </div>
     </div>
   );

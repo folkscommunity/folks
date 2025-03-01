@@ -130,7 +130,7 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #131313;
+    --background: #00050c;
     --foreground: #ededed;
   }
 }
@@ -151,6 +151,8 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  max-width: 100dvw;
+  overflow-x: hidden;
 }
 
 a:hover {
@@ -952,5 +954,27 @@ p {
 
   div[data-type="horizontalRule"] {
     @apply !cursor-default !bg-transparent;
+  }
+}
+
+.bottom-mobile-nav {
+  height: 63px;
+  padding-bottom: 5px;
+}
+
+.mobile-nav-menu {
+  height: calc(100dvh - 63px);
+  bottom: 63px;
+}
+
+@media (display-mode: standalone) {
+  .bottom-mobile-nav {
+    height: 83px !important;
+    padding-bottom: 28px !important;
+  }
+
+  .mobile-nav-menu {
+    height: calc(100dvh - 83px);
+    bottom: 83px;
   }
 }

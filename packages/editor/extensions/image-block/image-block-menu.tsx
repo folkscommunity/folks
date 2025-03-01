@@ -7,6 +7,7 @@ import {
 } from "@phosphor-icons/react";
 import { BubbleMenu as BaseBubbleMenu, useEditorState } from "@tiptap/react";
 import { Instance, sticky } from "tippy.js";
+import { v4 } from "uuid";
 
 import { MenuProps } from "../../components/menus/types";
 import { Toolbar } from "../../components/ui/toolbar";
@@ -84,7 +85,7 @@ export const ImageBlockMenu = ({
   return (
     <BaseBubbleMenu
       editor={editor}
-      pluginKey={`imageBlockMenu-${crypto.randomUUID()}`}
+      pluginKey={`imageBlockMenu-${v4()}`}
       shouldShow={shouldShow}
       updateDelay={0}
       tippyOptions={{

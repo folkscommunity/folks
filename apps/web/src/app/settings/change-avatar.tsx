@@ -10,7 +10,7 @@ import {
   ImageDimensionsValidator
 } from "use-file-picker/validators";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/avatar";
+import { FolksAvatar } from "@/components/folks-avatar";
 
 export function ChangeAvatar({ user }: { user: any }) {
   const [avatar, setAvatar] = useState(user.avatar_url);
@@ -86,12 +86,8 @@ export function ChangeAvatar({ user }: { user: any }) {
       className="group my-4 size-[80px] cursor-pointer rounded-full"
       title="Click to change your avatar."
     >
-      <Avatar className="size-[80px]">
-        <AvatarImage src={avatar} />
-        <AvatarFallback className="text-3xl">
-          {user.username[0].toUpperCase()}
-        </AvatarFallback>
-      </Avatar>
+      <FolksAvatar src={avatar} name={user.username} size={80} />
+
       <div className="bg-black-900/70 absolute mt-[-80px] flex size-[80px] items-center justify-center rounded-full opacity-0 transition-opacity duration-200 group-hover:opacity-100">
         <span className="text-center font-bold leading-[16px] text-white">
           Change Avatar

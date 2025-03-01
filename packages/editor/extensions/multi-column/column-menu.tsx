@@ -8,6 +8,7 @@ import {
 } from "@phosphor-icons/react";
 import { BubbleMenu as BaseBubbleMenu, useEditorState } from "@tiptap/react";
 import { sticky } from "tippy.js";
+import { v4 } from "uuid";
 
 import { ColumnLayout } from ".";
 import { MenuProps } from "../../components/menus/types";
@@ -64,7 +65,7 @@ export const ColumnsMenu = ({ editor, appendTo }: MenuProps) => {
   return (
     <BaseBubbleMenu
       editor={editor}
-      pluginKey={`columnsMenu-${crypto.randomUUID()}`}
+      pluginKey={`columnsMenu-${v4()}`}
       shouldShow={shouldShow}
       updateDelay={0}
       tippyOptions={{

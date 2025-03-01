@@ -7,7 +7,7 @@ import { ServerSession } from "@/lib/server-session";
 import { Register } from "./register";
 
 export const metadata: Metadata = {
-  title: "Folks - Register"
+  title: "Folks –Register"
 };
 
 export default async function Page() {

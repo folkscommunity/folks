@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/avatar";
+import { FolksAvatar } from "@/components/folks-avatar";
 
 export function Users({ users }: { users: any[] }) {
   return (
@@ -22,12 +22,7 @@ export function Users({ users }: { users: any[] }) {
               <div key={i} className="flex w-full flex-row gap-[1ch] py-1">
                 <div className="flex flex-row gap-4">
                   <div className="h-10 w-10 rounded-full pt-1">
-                    <Avatar>
-                      <AvatarImage src={user.avatar_url} />
-                      <AvatarFallback>
-                        {user.username[0].toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
+                    <FolksAvatar src={user.avatar_url} name={user.username} />
                   </div>
                   <div className="flex flex-col">
                     <a className="w-fit font-bold" href={`/${user.username}`}>

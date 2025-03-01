@@ -1,15 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { ChatCircle, Gear } from "@phosphor-icons/react";
+import { useState } from "react";
+import { Gear } from "@phosphor-icons/react";
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { ExternalLinkIcon } from "lucide-react";
 import Link from "next/link";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/avatar";
-import { Composer } from "@/components/composer";
 import { FeedUser } from "@/components/feeds";
+import { FolksAvatar } from "@/components/folks-avatar";
 import { ProfileMedia } from "@/components/profile-media";
 import { Separator } from "@/components/separator";
 import { cn } from "@/lib/utils";
@@ -109,7 +108,6 @@ export default function Profile({
 
   return (
     <>
-      {user && isUser && <Composer />}
       <div className="mx-auto w-full max-w-3xl flex-1">
         <div className="flex flex-col gap-2 py-2">
           <div className="flex flex-row justify-between">
@@ -117,12 +115,11 @@ export default function Profile({
               {isUser ? (
                 <ChangeAvatar user={user} />
               ) : (
-                <Avatar className="size-[80px]">
-                  <AvatarImage src={profile.avatar_url} />
-                  <AvatarFallback className="text-3xl">
-                    {profile.username[0].toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
+                <FolksAvatar
+                  src={profile.avatar_url || ""}
+                  name={profile.username}
+                  size={80}
+                />
               )}
             </div>
 

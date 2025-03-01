@@ -11,7 +11,6 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { useInView } from "react-intersection-observer";
 import { toast } from "sonner";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/avatar";
 import { FolksAvatar } from "@/components/folks-avatar";
 import { Separator } from "@/components/separator";
 import { useSocket } from "@/components/socket-provider";
@@ -195,7 +194,7 @@ export function MessagesChannel({
   }, [mutedState]);
 
   return (
-    <div className="text-md flex w-full max-w-3xl flex-1 flex-col pb-4 pt-3 max-sm:pb-8">
+    <div className="text-md flex w-full max-w-3xl flex-1 flex-col pb-4 pt-3 max-sm:pb-6">
       <div className="dark:border-black-700 max-w-3xl:boder-r-0 max-w-3xl:boder-l-0 flex items-center justify-between border-l border-r border-t px-3 py-2">
         <div className="flex items-center gap-3">
           <FolksAvatar
