@@ -109,7 +109,7 @@ export const TextMenu = ({
   }, [lastContent]);
 
   return (
-    <div className="pointer-events-none fixed bottom-0 left-0 right-0 z-[99999] flex items-center justify-center p-2">
+    <div className="pointer-events-none fixed bottom-0 left-0 right-0 z-[99999] flex items-center justify-center p-2 max-sm:bottom-[50px]">
       <div className="flex flex-col items-center gap-1">
         {!isSaved && (
           <div

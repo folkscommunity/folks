@@ -57,7 +57,19 @@ export const restricted_usernames = [
   "app",
   "apps",
   "api",
-  "health"
+  "health",
+  "suggestions",
+  "feedback",
+  "feedbacks",
+  "suggestions",
+  "bug-report",
+  "bug-reports",
+  "bugs",
+  "roadmap",
+  "pages",
+  "page",
+  "docs",
+  "blog"
 ];
 
 export { schemas, notification_types };

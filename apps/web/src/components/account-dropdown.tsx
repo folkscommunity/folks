@@ -40,6 +40,7 @@ export function AccountDropdown({ user }: { user: any }) {
 
   function logout() {
     posthog.reset();
+    posthog.capture("logout");
     window.location.href = "/api/auth/logout";
   }
 
@@ -73,13 +74,6 @@ export function AccountDropdown({ user }: { user: any }) {
           </Link>
 
           <div className="text-black-600 px-4 text-sm">· · ·</div>
-
-          <Link
-            href="/articles"
-            className="font-base text-foreground cursor-pointer px-4 py-1 hover:text-slate-500 hover:underline"
-          >
-            Articles
-          </Link>
 
           <div
             onClick={() => {

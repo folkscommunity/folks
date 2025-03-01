@@ -7,7 +7,6 @@ import { useInView } from "react-intersection-observer";
 
 import { cn } from "@/lib/utils";
 
-import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
 import { InlineComposer } from "./composer";
 import { FeedSkeleton } from "./feed-skeleton";
 import { FolksAvatar } from "./folks-avatar";

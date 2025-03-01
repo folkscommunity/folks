@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/avatar";
+import { FolksAvatar } from "@/components/folks-avatar";
 import { dateRelativeTiny } from "@/lib/utils";
 
 export function Messages({ user }: { user: any }) {
@@ -135,10 +135,7 @@ function Channel({
       href={"/messages/" + channel.id}
       className="hover:bg-black-100/50 dark:hover:bg-black-700/25 fadein flex w-full flex-row items-center gap-3 rounded-md p-2 hover:no-underline"
     >
-      <Avatar>
-        <AvatarImage src={channel.avatar_url} />
-        <AvatarFallback>{channel.name[0].toUpperCase()}</AvatarFallback>
-      </Avatar>
+      <FolksAvatar src={channel.avatar_url} name={channel.name} />
 
       <div className="flex w-full min-w-0 flex-col overflow-clip">
         <div className="flex items-center justify-between gap-2">
@@ -255,12 +252,10 @@ function NewChatModal({
                         onClick={() => chatChannel(user.id)}
                       >
                         <div>
-                          <Avatar className="size-[40px]">
-                            <AvatarImage src={user.avatar_url} />
-                            <AvatarFallback>
-                              {user.username[0].toUpperCase()}
-                            </AvatarFallback>
-                          </Avatar>
+                          <FolksAvatar
+                            src={user.avatar_url}
+                            name={user.username}
+                          />
                         </div>
                         <div>
                           <div className="font-bold">{user.display_name}</div>

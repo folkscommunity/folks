@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/avatar";
+import { FolksAvatar } from "@/components/folks-avatar";
 
 export function LikesModal({
   post,
@@ -53,12 +53,11 @@ export function LikesModal({
                     href={`/${like.user.username}`}
                     className="hover:no-underline"
                   >
-                    <Avatar className="size-[50px]">
-                      <AvatarImage src={like.user.avatar_url} />
-                      <AvatarFallback>
-                        {like.user.username[0].toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
+                    <FolksAvatar
+                      src={like.user.avatar_url}
+                      name={like.user.username}
+                      size={50}
+                    />
                   </Link>
                 </div>
 

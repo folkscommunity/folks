@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { AccountDropdown } from "./account-dropdown";
 import { CreateRibbonModal } from "./create-ribbon-modal";
 import { FolksAboutTop } from "./folks-about-top";
+import { MobileNavigation } from "./mobile-navigation";
 import { NavDMsLink } from "./nav-dms-link";
 import { Notifications } from "./notifications";
 import { PushNotificationManager } from "./push-manager";
@@ -40,12 +41,17 @@ export async function MainContainer({
   return (
     <div className={cn("mx-auto flex flex-col", !hideTopRibbon && "pt-[32px]")}>
       {!hideTopRibbon && (
-        <HorizonalRibbon fixed={true} top={true} ribbonString={ribbon} />
+        <HorizonalRibbon
+          fixed={true}
+          top={true}
+          ribbonString={ribbon}
+          user={user}
+        />
       )}
 
       <div
         className={cn(
-          "dark:bg-black-900 flex w-full flex-col items-center bg-white transition-all",
+          "dark:bg-black-900 flex w-full flex-col items-center gap-2 bg-white transition-all max-sm:pb-[60px]",
           !wide && "px-4"
         )}
         style={{
@@ -55,16 +61,11 @@ export async function MainContainer({
       >
         <header
           className={cn(
-            "mx-auto flex w-full max-w-3xl select-none flex-col items-start gap-4 py-1"
+            "mx-auto flex w-full max-w-3xl select-none flex-col items-start gap-2 py-1 max-sm:pb-2",
+            wide && "px-4"
           )}
         >
-          <div className="flex w-full flex-row items-center justify-between gap-4 max-sm:flex-col">
-            {user && (
-              <div className="text-md flex flex-1 flex-row gap-2 pt-2 max-sm:hidden">
-                <Notifications user={user} />
-              </div>
-            )}
-
+          <div className="flex w-full flex-row items-center justify-center gap-2 max-sm:flex-col">
             <Link href="/">
               <Image
                 src="/images/logo.svg"
@@ -75,35 +76,32 @@ export async function MainContainer({
               />
             </Link>
 
-            <div className="text-md flex flex-1 flex-row justify-end gap-2 pt-2">
-              {user && (
-                <>
-                  <Link href="/">Posts</Link>
-                  <span>·</span>
+            {user && (
+              <div className="text-md flex flex-1 flex-row justify-end gap-2 pt-2 max-sm:hidden">
+                <Link href="/">Posts</Link>
+                <span>·</span>
+                <Link href="/articles">Articles</Link>
+                <span>·</span>
 
-                  <NavDMsLink />
+                <NavDMsLink />
 
-                  <span>·</span>
+                <span>·</span>
 
-                  <div className="text-md hidden gap-2 max-sm:flex">
-                    <Notifications user={user} small={true} />
-                    <span>·</span>
-                  </div>
+                <Notifications user={user} small={true} />
+                <span>·</span>
+                <AccountDropdown user={user} />
+              </div>
+            )}
 
-                  <AccountDropdown user={user} />
-                </>
-              )}
-
-              {!user && (
-                <>
-                  <Link href="/login">Login</Link>
-                  <span>·</span>
-                  <Link href="/register">Register</Link>
-                  <span>·</span>
-                  <Link href="/support">Support</Link>
-                </>
-              )}
-            </div>
+            {!user && (
+              <div className="text-md flex flex-1 flex-row justify-end gap-2 pt-4">
+                <Link href="/login">Login</Link>
+                <span>·</span>
+                <Link href="/register">Register</Link>
+                <span>·</span>
+                <Link href="/support">Support</Link>
+              </div>
+            )}
           </div>
 
           {user && !user.email_verified && (
@@ -120,6 +118,8 @@ export async function MainContainer({
           {user && <PushNotificationManager />}
 
           {!hideTopSeparator && <Separator />}
+
+          {user && <MobileNavigation user={user} />}
         </header>
 
         {children}
@@ -188,7 +188,9 @@ export async function MainContainer({
       <CreateRibbonModal />
       <StickersComing />
 
-      {!hideBottomRibbon && <HorizonalRibbon ribbonString={ribbon} />}
+      {!hideBottomRibbon && (
+        <HorizonalRibbon ribbonString={ribbon} user={user} />
+      )}
     </div>
   );
 }

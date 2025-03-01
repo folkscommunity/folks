@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import { toast } from "sonner";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/avatar";
+import { FolksAvatar } from "@/components/folks-avatar";
 import { cn } from "@/lib/utils";
 
 export function SupportAdmin() {
@@ -100,14 +100,11 @@ export function SupportAdmin() {
                 >
                   {request.user && (
                     <div className="flex flex-row gap-2 pb-4">
-                      <Avatar>
-                        <AvatarImage src={request.user.avatar_url} />
-                        <AvatarFallback>
-                          {request.user
-                            ? request.user.username[0].toUpperCase()
-                            : request.email[0].toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
+                      <FolksAvatar
+                        src={request.user.avatar_url}
+                        name={request.user.username}
+                        size={40}
+                      />
                       <div className="flex flex-col">
                         <div className="font-bold">
                           {request.user.display_name} (#{request.user.id})
@@ -151,7 +148,14 @@ export function SupportAdmin() {
                       </span>{" "}
                       )
                     </span>
-                    <pre>{request.body}</pre>
+                    <pre
+                      className="break-words"
+                      style={{
+                        wordBreak: "break-word"
+                      }}
+                    >
+                      {request.body}
+                    </pre>
                   </div>
                   <div className="w-full pt-4 font-bold">
                     {request.completed_at && (

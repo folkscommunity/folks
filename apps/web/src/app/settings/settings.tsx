@@ -5,7 +5,6 @@ import { useLocalStorage } from "@uidotdev/usehooks";
 import Link from "next/link";
 import { toast } from "sonner";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/avatar";
 import { Label } from "@/components/label";
 import { Separator } from "@/components/separator";
 import { Slider } from "@/components/slider";
@@ -64,8 +63,6 @@ export function Settings({ user }: { user: any }) {
   return (
     <div className="flex min-h-[80dvh] w-full max-w-3xl flex-1 flex-col gap-2">
       <h1 className="pb-4">Settings</h1>
-
-      <Separator />
 
       <h3 className="pb-4">Edit Profile</h3>
       <div className="pb-4">

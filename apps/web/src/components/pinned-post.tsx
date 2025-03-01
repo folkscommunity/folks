@@ -35,10 +35,10 @@ export function PinnedPost({
             href={`/${data.post.author.username}/${data.post.id}`}
             className="flex w-fit items-center gap-[1ch] pb-2 pl-[54px] text-sm hover:underline"
           >
-            <PushPin /> Pinned Post
+            <PushPin weight="fill" /> Pinned Post
           </Link>
 
-          <Post user={user} post={data.post} />
+          <Post user={user} post={data.post} hideTime={true} />
         </div>
       )}
     </>

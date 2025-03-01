@@ -11,6 +11,7 @@ function Marquee(props: {
   className?: string;
   content: string;
   direction?: "normal" | "reverse";
+  user?: any;
 }) {
   const { windowIsActive } = useContext(WindowContext);
   const marqueeRef = useRef<HTMLDivElement>(null);
@@ -26,12 +27,18 @@ function Marquee(props: {
     <div
       className={cn("marquee-container fadein", props.className)}
       ref={marqueeRef}
+      onClick={() => {
+        if (props.user) {
+          window.dispatchEvent(new Event("ribbon_create_open"));
+        }
+      }}
       style={
         {
           "--pause-on-hover": "paused",
           "--pause-on-click": "running",
           height: "40px",
-          paddingLeft: stopScrolling ? "1.5ch" : "0px"
+          paddingLeft: stopScrolling ? "1.5ch" : "0px",
+          cursor: props.user ? "pointer" : "default"
         } as any
       }
     >
@@ -70,11 +77,13 @@ function Marquee(props: {
 export function HorizonalRibbon({
   fixed,
   top,
-  ribbonString
+  ribbonString,
+  user
 }: {
   fixed?: boolean;
   top?: boolean;
   ribbonString?: string;
+  user?: any;
 }) {
   const [clientRibbonString, setClientRibbonString] = useState(ribbonString);
   const [isClient, setIsClient] = useState(false);
@@ -108,11 +117,15 @@ export function HorizonalRibbon({
       className={cn(
         "dark:border-black-700 left-0 top-0 z-[99] flex h-8 w-full cursor-default items-center justify-center border-[#00050C] bg-black text-[14px] font-medium text-slate-300",
         fixed && "fixed",
-        top ? "border-b" : "border-t"
+        top ? "border-b" : "border-t",
+        !top && "max-sm:hidden"
       )}
     >
       {isClient && (clientRibbonString || ribbonString) && (
-        <Marquee content={clientRibbonString || ribbonString || ""} />
+        <Marquee
+          content={clientRibbonString || ribbonString || ""}
+          user={user}
+        />
       )}
     </div>
   );

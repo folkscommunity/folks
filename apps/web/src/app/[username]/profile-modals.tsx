@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/avatar";
+import { FolksAvatar } from "@/components/folks-avatar";
 
 export function FollowingModal({
   open,
@@ -45,12 +45,11 @@ export function FollowingModal({
               <div key={f.id} className="flex flex-row items-center gap-2 pb-2">
                 <div>
                   <Link href={`/${f.username}`} className="hover:no-underline">
-                    <Avatar className="size-[50px]">
-                      <AvatarImage src={f.avatar_url} />
-                      <AvatarFallback>
-                        {f.username[0].toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
+                    <FolksAvatar
+                      src={f.avatar_url}
+                      name={f.username}
+                      size={50}
+                    />
                   </Link>
                 </div>
 
@@ -112,12 +111,11 @@ export function FollowersModal({
               <div key={f.id} className="flex flex-row items-center gap-2 pb-2">
                 <div>
                   <Link href={`/${f.username}`} className="hover:no-underline">
-                    <Avatar className="size-[50px]">
-                      <AvatarImage src={f.avatar_url} />
-                      <AvatarFallback>
-                        {f.username[0].toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
+                    <FolksAvatar
+                      src={f.avatar_url}
+                      name={f.username}
+                      size={50}
+                    />
                   </Link>
                 </div>
 

@@ -79,7 +79,7 @@ export function CreateRibbonModal() {
                 maxLength={30}
                 required
                 placeholder="Ribbon Message"
-                className="w-full rounded-none border border-neutral-400 bg-transparent px-2 py-1.5 placeholder:text-neutral-400 focus:border-blue-500 focus:outline-none dark:border-neutral-600 dark:placeholder:text-neutral-600"
+                className="text-md w-full rounded-none border border-neutral-400 bg-transparent px-2 py-1.5 placeholder:text-neutral-400 focus:border-blue-500 focus:outline-none dark:border-neutral-600 dark:placeholder:text-neutral-600"
               />
               <button
                 type="submit"

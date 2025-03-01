@@ -11,7 +11,6 @@ import { toast } from "sonner";
 import { parsePostBody } from "@/lib/post-utils";
 import { cn, dateRelativeTiny } from "@/lib/utils";
 
-import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
 import { ReplyComposeFloating } from "./composer";
 import {
   DropdownMenu,
@@ -38,7 +37,15 @@ interface URLMetadata {
   fetching?: boolean;
 }
 
-export function Post({ post, user }: { post: any; user: any }) {
+export function Post({
+  post,
+  user,
+  hideTime
+}: {
+  post: any;
+  user: any;
+  hideTime?: boolean;
+}) {
   const [lPost, setLPost] = useState(post);
   const [isClient, setIsClient] = useState(false);
   const stickers_teaser_feature_flag = useFeatureFlagPayload("stickers_teaser");
@@ -222,7 +229,7 @@ export function Post({ post, user }: { post: any; user: any }) {
             <Link className="opacity-50" href={`/${lPost.author.username}`}>
               @{lPost.author.username}
             </Link>
-            {lPost && lPost.created_at && isClient && (
+            {lPost && lPost.created_at && isClient && !hideTime && (
               <>
                 <span className="px-0.5 opacity-50">·</span>
                 <span
@@ -286,6 +293,7 @@ export function Post({ post, user }: { post: any; user: any }) {
                       className="dark:hover:bg-black-600 cursor-pointer hover:bg-slate-100"
                       onClick={() => {
                         setPinnedPost(lPost.id.toString());
+                        window.location.reload();
                       }}
                     >
                       Pin
@@ -294,6 +302,7 @@ export function Post({ post, user }: { post: any; user: any }) {
                       className="dark:hover:bg-black-600 cursor-pointer hover:bg-slate-100"
                       onClick={() => {
                         setPinnedPost(null);
+                        window.location.reload();
                       }}
                     >
                       Unpin

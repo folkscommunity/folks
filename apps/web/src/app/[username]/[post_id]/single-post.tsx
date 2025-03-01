@@ -7,7 +7,6 @@ import { EllipsisIcon } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/avatar";
 import { ReplyCompose } from "@/components/composer";
 import {
   DropdownMenu,
@@ -17,6 +16,7 @@ import {
   DropdownMenuTrigger
 } from "@/components/dropdown-menu";
 import { FeedUser } from "@/components/feeds";
+import { FolksAvatar } from "@/components/folks-avatar";
 import { Post, UrlEmbed } from "@/components/post";
 import { Separator } from "@/components/separator";
 import { StickerController } from "@/components/stickers/sticker";
@@ -159,12 +159,11 @@ export function SinglePost({ user, post }: { user: any; post: any }) {
               href={`/${lPost.author.username}`}
               className="hover:no-underline"
             >
-              <Avatar className="size-[60px]">
-                <AvatarImage src={lPost.author.avatar_url} />
-                <AvatarFallback>
-                  {lPost.author.username[0].toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
+              <FolksAvatar
+                src={lPost.author.avatar_url}
+                name={lPost.author.username}
+                size={50}
+              />
             </Link>
           </div>
           <div className="flex flex-col justify-center">
@@ -355,10 +354,7 @@ export function SinglePost({ user, post }: { user: any; post: any }) {
 
       {user && (
         <div className="flex w-full gap-2 pt-4">
-          <Avatar className="size-[40px]">
-            <AvatarImage src={user.avatar_url} />
-            <AvatarFallback>{user.username[0].toUpperCase()}</AvatarFallback>
-          </Avatar>
+          <FolksAvatar src={user.avatar_url} name={user.username} size={40} />
 
           <ReplyCompose
             post={lPost}

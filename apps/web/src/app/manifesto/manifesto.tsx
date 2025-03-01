@@ -1,8 +1,6 @@
 import Link from "next/link";
 
-import { Photo } from "./manifesto-photo";
-
-export function Manifesto() {
+export function Manifesto({ user }: { user?: any }) {
   return (
     <div className="flex min-h-[80dvh] w-full max-w-3xl flex-col gap-2">
       <div className="max-w-[83ch]">
@@ -64,7 +62,16 @@ export function Manifesto() {
     ╰━━┻━━┻╯╰┻╯╰┻━╮╭╯
                 ╭━╯┃
                 ╰━━╯`}</pre>
-        <p className="pt-8 opacity-20">Last updated: 2025-02-01</p>
+
+        {!user && (
+          <p className="mt-8">
+            Join the community by{" "}
+            <Link href="/register" className="font-bold underline">
+              click here
+            </Link>
+            .
+          </p>
+        )}
       </div>
     </div>
   );

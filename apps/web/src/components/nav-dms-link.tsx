@@ -45,7 +45,7 @@ export function NavDMsLink() {
     >
       <span>DMs</span>
       {unread > 0 && (
-        <div className="fadein absolute ml-[27px] mt-[-20px] size-[5px] rounded-full bg-blue-500" />
+        <div className="fadein absolute ml-[28px] mt-[-18px] size-[5px] rounded-full bg-blue-500" />
       )}
     </Link>
   );

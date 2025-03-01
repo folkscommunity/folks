@@ -152,24 +152,21 @@ export function Notifications({ user, small }: { user: any; small?: boolean }) {
   return (
     <div className="relative" ref={dropDownRef}>
       <div className="group cursor-pointer" onClick={() => setShow(!show)}>
-        <span className={cn("select-none")}>
-          <span className={cn("group-hover:underline", show && "underline")}>
-            {small ? (
-              <Bell className="mb-0.5 inline px-0" weight="fill" />
-            ) : (
-              "Notifications"
-            )}{" "}
-            <span className={cn("group-hover:underline", show && "underline")}>
-              [{!loading ? count || "0" : "·"}]
-            </span>
-          </span>
-          <span className="pl-2 text-[10px] !no-underline">▼</span>
-        </span>{" "}
+        <span className="select-none">
+          <Bell
+            className="mb-0.5 inline px-0 hover:fill-slate-700 hover:dark:fill-slate-400"
+            weight="fill"
+          />
+
+          {!loading && count > 0 && (
+            <div className="fadein border-background absolute ml-[9px] mt-[-20px] size-[7px] rounded-full border bg-blue-500" />
+          )}
+        </span>
       </div>
 
       <div
         className={cn(
-          "absolute left-0 z-40 mt-1 origin-top-left text-sm max-sm:ml-[-230%]",
+          "absolute left-0 z-40 ml-[-250px] mt-1 text-sm",
           !show && "hidden"
         )}
       >
