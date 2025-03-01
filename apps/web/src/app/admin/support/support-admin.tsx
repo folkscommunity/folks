@@ -149,7 +149,7 @@ export function SupportAdmin() {
                       )
                     </span>
                     <pre
-                      className="break-words"
+                      className="whitespace-pre-wrap break-all"
                       style={{
                         wordBreak: "break-word"
                       }}
