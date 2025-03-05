@@ -24,7 +24,8 @@ export default {
       ],
       mono: ["var(--font-ibm-plex-mono)", "monospace"],
       serif: ["Zodiak", "serif"],
-      ansi: ["Courier New", "monospace"]
+      ansi: ["Courier New", "monospace"],
+      pserif: ["var(--font-ibm-plex-serif)", "serif"]
     },
     fontSize: {
       base: "14px",

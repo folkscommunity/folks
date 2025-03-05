@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Mono, Inter } from "next/font/google";
+import { IBM_Plex_Mono, IBM_Plex_Serif, Inter } from "next/font/google";
 
 import "./globals.css";
+import "yet-another-react-lightbox/styles.css";
 
 import { ContextProviders } from "@/components/context-providers";
 
@@ -13,6 +14,12 @@ const inter = Inter({
 const mono = IBM_Plex_Mono({
   weight: ["400", "500", "600", "700"],
   variable: "--font-ibm-plex-mono",
+  subsets: ["latin"]
+});
+
+const plex_serif = IBM_Plex_Serif({
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-ibm-plex-serif",
   subsets: ["latin"]
 });
 
@@ -307,7 +314,9 @@ export default function RootLayout({
           src="/js/s.js"
         ></script>
       </head>
-      <body className={`${inter.variable} ${mono.variable} antialiased`}>
+      <body
+        className={`${inter.variable} ${mono.variable} ${plex_serif.variable} antialiased`}
+      >
         <ContextProviders>{children}</ContextProviders>
       </body>
     </html>

@@ -1,8 +1,8 @@
 import { Metadata } from "next";
+import { notFound } from "next/navigation";
 
 import { prisma } from "@folks/db";
 
-import NotFound from "@/app/not-found";
 import { MainContainer } from "@/components/main-container";
 import { ServerSession } from "@/lib/server-session";
 
@@ -71,7 +71,7 @@ export default async function Page({
   const user = await ServerSession();
 
   if (!user) {
-    return <NotFound />;
+    return notFound();
   }
 
   const channel = await prisma.messageChannel.findUnique({
@@ -109,7 +109,7 @@ export default async function Page({
   });
 
   if (!channel) {
-    return <NotFound />;
+    return notFound();
   }
 
   const member = await prisma.messageChannelMember.findFirst({

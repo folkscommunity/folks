@@ -12,6 +12,7 @@ import { Sentry } from "./instrument";
 import { redis, redis_sub } from "./lib/redis";
 import articles_router from "./routes/articles";
 import auth_router from "./routes/auth";
+import boards_router from "./routes/boards";
 import feed_router from "./routes/feed";
 import follow_router from "./routes/follow";
 import messages_router from "./routes/messages";
@@ -60,7 +61,7 @@ async function mainThread() {
 
   app.use(
     express.json({
-      limit: "80mb"
+      limit: "100mb"
     })
   );
 
@@ -86,6 +87,7 @@ async function mainThread() {
   app.use("/api/stickers", stickers_router);
   app.use("/api/messages", messages_router);
   app.use("/api/articles", articles_router);
+  app.use("/api/boards", boards_router);
 
   io.use(async (socket: SocketWithUser | any, next) => {
     try {

@@ -19,7 +19,7 @@ export function ChangeAvatar({ user }: { user: any }) {
     useFilePicker({
       readAs: "DataURL",
       accept: "image/*",
-      multiple: true,
+      multiple: false,
       validators: [
         new FileAmountLimitValidator({ max: 1 }),
         new FileTypeValidator(["jpg", "jpeg", "png", "webp"]),

@@ -1,8 +1,8 @@
 import { Metadata } from "next";
+import { notFound } from "next/navigation";
 
 import { prisma } from "@folks/db";
 
-import NotFound from "@/app/not-found";
 import { MainContainer } from "@/components/main-container";
 import { ServerSession } from "@/lib/server-session";
 
@@ -48,11 +48,14 @@ export async function generateMetadata({
 }
 
 export default async function Page({
-  params
+  params,
+  searchParams
 }: {
   params: Promise<{ username: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const username = (await params).username;
+  const { tab } = await searchParams;
 
   const user = await ServerSession();
 
@@ -77,14 +80,15 @@ export default async function Page({
         select: {
           following: user && user.username === username ? true : false,
           followers: user && user.username === username ? true : false,
-          articles: true
+          articles: true,
+          boards: true
         }
       }
     }
   });
 
   if (!selectedUser) {
-    return <NotFound />;
+    return notFound();
   }
 
   let isUser = false;
@@ -94,8 +98,9 @@ export default async function Page({
   }
 
   return (
-    <MainContainer>
+    <MainContainer hideAbout={true}>
       <Profile
+        queryTab={tab ? tab.toString() : undefined}
         profile={{
           id: selectedUser.id,
           username: selectedUser.username,
@@ -112,7 +117,8 @@ export default async function Page({
           count: {
             following: selectedUser._count.following || undefined,
             followers: selectedUser._count.followers || undefined,
-            articles: selectedUser._count.articles ?? 0
+            articles: selectedUser._count.articles ?? 0,
+            boards: selectedUser._count.boards ?? 0
           }
         }}
         user={user}

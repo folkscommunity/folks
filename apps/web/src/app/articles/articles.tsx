@@ -3,6 +3,8 @@
 import dayjs from "dayjs";
 import Link from "next/link";
 
+import { Button } from "@/components/button";
+
 export function Articles({ articles }: { articles: any[] }) {
   return (
     <div className="flex w-full max-w-3xl flex-1 flex-col gap-4">
@@ -10,9 +12,7 @@ export function Articles({ articles }: { articles: any[] }) {
         <h1 className="leading-[42px]">Your Articles</h1>
 
         <Link href="/articles/create">
-          <button className="rounded-md border border-slate-900 px-3 py-1 dark:border-slate-600">
-            New Article
-          </button>
+          <Button>New Article</Button>
         </Link>
       </div>
 
