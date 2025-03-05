@@ -215,7 +215,12 @@ export function SinglePost({ user, post }: { user: any; post: any }) {
           !(
             lPost.flags &&
             lPost.flags.filter((d: any) => d.hide_embeds).length > 0
-          ) && <UrlEmbed metadata={lPost.urls[0]} className="mt-4" />}
+          ) && (
+            <UrlEmbed
+              metadata={lPost.urls[lPost.urls.length - 1]}
+              className="mt-4"
+            />
+          )}
 
         <div className="min-h-[38px] pt-4">
           {isClient && (
