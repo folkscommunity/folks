@@ -1,4 +1,5 @@
-import NotFound from "@/app/not-found";
+import { notFound } from "next/navigation";
+
 import { MainContainer } from "@/components/main-container";
 import { ServerSession } from "@/lib/server-session";
 
@@ -8,7 +9,7 @@ export default async function Page() {
   const user = await ServerSession();
 
   if (!user || !user.super_admin) {
-    return <NotFound />;
+    return notFound();
   }
 
   return (

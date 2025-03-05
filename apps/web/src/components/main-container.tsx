@@ -80,6 +80,8 @@ export async function MainContainer({
               <div className="text-md flex flex-1 flex-row justify-end gap-2 pt-2 max-sm:hidden">
                 <Link href="/">Posts</Link>
                 <span>·</span>
+                <Link href="/boards">Boards</Link>
+                <span>·</span>
                 <Link href="/articles">Articles</Link>
                 <span>·</span>
 

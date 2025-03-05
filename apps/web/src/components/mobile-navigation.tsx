@@ -195,6 +195,16 @@ function Overlay({ onClose }: { onClose: () => void }) {
           Articles
         </Link>
 
+        <Link
+          href="/boards"
+          onClick={() => {
+            onClose();
+          }}
+          className="!no-underline"
+        >
+          Boards
+        </Link>
+
         <div
           className="cursor-pointer !no-underline"
           onClick={() => {

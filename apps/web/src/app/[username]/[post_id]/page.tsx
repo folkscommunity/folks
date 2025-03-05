@@ -1,9 +1,9 @@
 import { Metadata } from "next";
+import { notFound } from "next/navigation";
 import sanitizeHtml from "sanitize-html";
 
 import { prisma } from "@folks/db";
 
-import NotFound from "@/app/not-found";
 import { MainContainer } from "@/components/main-container";
 import { parseArticleHTML } from "@/lib/prosemirror-parser";
 import { ServerSession } from "@/lib/server-session";
@@ -135,7 +135,7 @@ export default async function Page({
   const username = (await params).username;
 
   if (!post_id) {
-    return <NotFound />;
+    return notFound();
   }
 
   try {
@@ -180,7 +180,7 @@ export default async function Page({
       );
     }
 
-    return <NotFound />;
+    return notFound();
   }
 
   const user = await ServerSession();
@@ -304,7 +304,7 @@ export default async function Page({
   });
 
   if (!post) {
-    return <NotFound />;
+    return notFound();
   }
 
   return (

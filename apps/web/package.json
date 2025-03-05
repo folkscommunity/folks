@@ -46,6 +46,7 @@
     "tippy.js": "^6.3.7",
     "use-file-picker": "^2.1.2",
     "vaul": "^1.1.2",
+    "yet-another-react-lightbox": "^3.21.7",
     "yjs": "^13.6.23",
     "zod": "^3.24.2"
   },

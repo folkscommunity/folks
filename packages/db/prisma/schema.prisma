@@ -37,6 +37,8 @@ model User {
   super_admin Boolean @default(false)
   suspended   Boolean @default(false)
 
+  featured_board_id String?
+
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
@@ -61,6 +63,7 @@ model User {
   message_channel_membership MessageChannelMember[] @relation("message_channel_member")
   messages                   Message[]              @relation("user_message")
   articles                   Article[]              @relation("user_article")
+  boards                     Board[]                @relation("boards")
 
   @@index([id])
   @@index([username])
@@ -386,4 +389,48 @@ model ArticleAttachment {
 
   @@index([article_id])
   @@map("article_attachments")
+}
+
+model Board {
+  id   String @id @unique
+  name String
+
+  public Boolean @default(false)
+
+  user_id BigInt
+  user    User   @relation(fields: [user_id], references: [id], name: "boards", onDelete: Cascade)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  items BoardItem[] @relation("board_items")
+
+  @@index([user_id])
+  @@map("boards")
+}
+
+enum BoardItemType {
+  Image
+  Link
+  Video
+}
+
+model BoardItem {
+  id String @id @unique @default(uuid())
+
+  type BoardItemType
+
+  url String
+
+  width  Int?
+  height Int?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  board_id String
+  board    Board  @relation(fields: [board_id], references: [id], name: "board_items", onDelete: Cascade)
+
+  @@index([board_id])
+  @@map("board_items")
 }

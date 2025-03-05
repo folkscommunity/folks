@@ -1,7 +1,7 @@
 import Autolinker from "autolinker";
 import sanitize from "sanitize-html";
 
-function parsePostBody(text: string): string {
+function parsePostBody(text: string, embed?: boolean): string {
   // autolink urls
   text = Autolinker.link(text, {
     className: "text-sky-600 hover:underline cursor-pointer",

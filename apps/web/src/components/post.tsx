@@ -209,7 +209,7 @@ export function Post({
 
   return (
     <div
-      className="group mx-auto mb-4 flex w-full max-w-3xl gap-4 pb-4"
+      className="group mx-auto mb-4 flex w-full max-w-3xl gap-4 pb-4 max-sm:max-w-[100vw]"
       id={`post-${lPost.id}`}
     >
       <div>
@@ -370,7 +370,15 @@ export function Post({
           <div
             className="max-h-[400px] max-w-full overflow-clip break-words"
             dangerouslySetInnerHTML={{
-              __html: parsePostBody(lPost.body)
+              __html: parsePostBody(
+                lPost.body,
+                lPost.urls &&
+                  lPost.urls.length > 0 &&
+                  !(
+                    lPost.flags &&
+                    lPost.flags.filter((d: any) => d.hide_embeds).length > 0
+                  )
+              )
             }}
             style={{
               wordBreak: "break-word"
@@ -398,7 +406,7 @@ export function Post({
           !(
             lPost.flags &&
             lPost.flags.filter((d: any) => d.hide_embeds).length > 0
-          ) && <UrlEmbed metadata={lPost.urls[0]} />}
+          ) && <UrlEmbed metadata={lPost.urls[lPost.urls.length - 1]} />}
 
         <div className="flex h-[24px] items-center justify-start gap-4 pt-2">
           <div className="flex min-w-12 items-center gap-2">
