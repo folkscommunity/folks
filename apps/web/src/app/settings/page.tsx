@@ -7,7 +7,7 @@ import { ServerSession } from "@/lib/server-session";
 import { Settings } from "./settings";
 
 export const metadata: Metadata = {
-  title: "Folks –Settings"
+  title: "Folks – Settings"
 };
 
 export default async function Page() {

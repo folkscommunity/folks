@@ -5,7 +5,7 @@ import { MainContainer } from "@/components/main-container";
 import { Guidelines } from "./guidelines";
 
 export const metadata: Metadata = {
-  title: "Folks –Guidelines"
+  title: "Folks – Guidelines"
 };
 
 export default async function Page() {

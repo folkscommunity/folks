@@ -10,7 +10,7 @@ import { ServerSession } from "@/lib/server-session";
 import { Boards } from "./boards";
 
 export const metadata: Metadata = {
-  title: "Folks – Boards"
+  title: "Folks –  Boards"
 };
 
 export default async function BoardsPage() {

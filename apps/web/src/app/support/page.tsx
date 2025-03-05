@@ -6,7 +6,7 @@ import { ServerSession } from "@/lib/server-session";
 import { Support } from "./support";
 
 export const metadata: Metadata = {
-  title: "Folks –Support"
+  title: "Folks – Support"
 };
 
 export default async function Page() {
