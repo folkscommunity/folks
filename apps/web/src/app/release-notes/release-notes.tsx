@@ -2,9 +2,19 @@ import dayjs from "dayjs";
 
 import { parsePostBody } from "@/lib/post-utils";
 
-export const current_release = "0.7.4";
+export const current_release = "0.8";
 
 const releases = [
+  {
+    version: "0.8",
+    date: "2025-03-05",
+    changes: [
+      "Added boards / collections.",
+      "Fixed 404 pages not returning a 404 status.",
+      "Fixed avatar rendering issues.",
+      "Added a new mobile navigation along with some ui fixes."
+    ]
+  },
   {
     version: "0.7.4",
     date: "2025-02-28",

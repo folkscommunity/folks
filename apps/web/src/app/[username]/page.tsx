@@ -81,7 +81,11 @@ export default async function Page({
           following: user && user.username === username ? true : false,
           followers: user && user.username === username ? true : false,
           articles: true,
-          boards: true
+          boards: {
+            where: {
+              public: true
+            }
+          }
         }
       }
     }
