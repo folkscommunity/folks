@@ -47,7 +47,7 @@ export function Boards({ aBoards }: { aBoards: any[] }) {
         </div>
       </div>
 
-      <div className="grid w-full grid-flow-dense auto-rows-min grid-cols-[repeat(auto-fill,_minmax(220px,_1fr))] items-start gap-4">
+      <div className="grid w-full grid-flow-dense auto-rows-min grid-cols-[repeat(auto-fill,_minmax(220px,_1fr))] items-start gap-4 max-sm:!grid-cols-2">
         {boards &&
           boards.length > 0 &&
           boards.map((board: any, index: number) => (

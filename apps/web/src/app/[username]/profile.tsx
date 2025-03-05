@@ -116,7 +116,7 @@ function Boards({ profile }: { profile: Profile }) {
   });
 
   return (
-    <div className="grid w-full grid-flow-dense auto-rows-min grid-cols-[repeat(auto-fill,_minmax(220px,_1fr))] items-start gap-4">
+    <div className="grid w-full grid-flow-dense auto-rows-min grid-cols-[repeat(auto-fill,_minmax(220px,_1fr))] items-start gap-4 max-sm:!grid-cols-2">
       {!isLoading &&
         data &&
         data.length > 0 &&
@@ -306,7 +306,7 @@ export default function Profile({
         </div>
 
         <div className="flex w-full justify-center pb-4">
-          <div className="text-black-400 flex flex-row space-x-0.5 text-sm font-bold">
+          <div className="text-black-400 hiddenscrollbar flex flex-row space-x-[1px] overflow-x-auto text-sm font-bold">
             <span
               className={cn(
                 "hover:text-foreground cursor-pointer px-4 py-0.5",

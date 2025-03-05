@@ -2,9 +2,14 @@ import dayjs from "dayjs";
 
 import { parsePostBody } from "@/lib/post-utils";
 
-export const current_release = "0.8.1";
+export const current_release = "0.8.2";
 
 const releases = [
+  {
+    version: "0.8.2",
+    date: "2025-03-06",
+    changes: ["Fixed boards grid on mobile.", "Fixed tabs on the profile."]
+  },
   {
     version: "0.8.1",
     date: "2025-03-05",
