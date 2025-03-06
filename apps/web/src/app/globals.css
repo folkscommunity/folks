@@ -147,7 +147,6 @@ body {
   letter-spacing: -0.38px;
   tab-size: 4;
   scrollbar-gutter: stable;
-  overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
