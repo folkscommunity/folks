@@ -2,9 +2,14 @@ import dayjs from "dayjs";
 
 import { parsePostBody } from "@/lib/post-utils";
 
-export const current_release = "0.8.2";
+export const current_release = "0.8.3";
 
 const releases = [
+  {
+    version: "0.8.3",
+    date: "2025-03-07",
+    changes: ["Improved date formatting for posts."]
+  },
   {
     version: "0.8.2",
     date: "2025-03-06",

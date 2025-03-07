@@ -22,6 +22,10 @@ export function dateRelativeTiny(date: Date, ago?: boolean) {
     return Math.floor(diff / 1000 / 60 / 60) + "h" + (ago ? " ago" : "");
   }
 
+  if (diff < 1000 * 60 * 60 * 24 * 7) {
+    return Math.floor(diff / 1000 / 60 / 60 / 24) + "d" + (ago ? " ago" : "");
+  }
+
   return date.toISOString().split("T")[0];
 }
 
