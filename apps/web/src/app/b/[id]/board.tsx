@@ -1,7 +1,8 @@
 "use client";
 
+import { title } from "process";
 import { useEffect, useRef, useState } from "react";
-import { Plus, SpinnerGap, Trash } from "@phosphor-icons/react";
+import { Pencil, Plus, SpinnerGap, Trash } from "@phosphor-icons/react";
 import { Cog } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -188,6 +189,13 @@ export function Board({
           >
             {board.name}
           </h2>
+
+          {board.description && (
+            <p className="m-0 p-0 text-sm text-neutral-500">
+              {board.description}
+            </p>
+          )}
+
           <div>
             by{" "}
             <Link href={`/${board.user.username}`}>
@@ -252,6 +260,8 @@ export function Board({
                 <BoardImage
                   item_id={item.id}
                   board_id={board.id}
+                  refetch={() => fetchItems()}
+                  title={item.title ?? ""}
                   isUser={isUser}
                   key={index}
                   src={item.url}
@@ -283,6 +293,7 @@ export function Board({
         index={index}
         on={{ view: ({ index: currentIndex }: any) => setIndex(currentIndex) }}
         slides={items.map((item: any) => ({
+          alt: item.title,
           src: item.url,
           width: item.width,
           height: item.height
@@ -297,6 +308,7 @@ export function Board({
           }}
           id={board.id}
           name={board.name}
+          description={board.description ?? ""}
           isPublic={board.public ?? false}
         />
       )}
@@ -307,8 +319,10 @@ export function Board({
 function BoardImage({
   item_id,
   board_id,
+  title,
   isUser,
   src,
+  refetch,
   width,
   height,
   onClick,
@@ -316,14 +330,17 @@ function BoardImage({
 }: {
   item_id: string;
   board_id: string;
+  title: string;
   isUser: boolean;
   src: string;
+  refetch: () => void;
   width: number;
   height: number;
   onDelete: () => void;
   onClick: () => void;
 }) {
   const [loaded, setLoaded] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
   const ref = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
@@ -358,6 +375,7 @@ function BoardImage({
         style={{
           opacity: loaded ? 1 : 0
         }}
+        alt={title ?? ""}
         ref={ref}
         loading="lazy"
         onLoad={() => {
@@ -366,6 +384,15 @@ function BoardImage({
         onClick={onClick}
       />
 
+      <div
+        className="pointer-events-none absolute left-0 top-0 flex w-full items-end justify-start bg-black/50 p-2 font-bold leading-snug text-white opacity-0 transition-opacity group-hover:opacity-100"
+        style={{
+          aspectRatio: width / height
+        }}
+      >
+        {title && <span>{title}</span>}
+      </div>
+
       {isUser && (
         <div
           className="pointer-events-none absolute left-0 top-0 flex w-full items-start justify-end p-2 font-bold opacity-0 transition-opacity group-hover:opacity-100"
@@ -373,7 +400,15 @@ function BoardImage({
             aspectRatio: width / height
           }}
         >
-          <div>
+          <div className="flex gap-2">
+            <button
+              className="pointer-events-auto rounded-full bg-black/50 p-2 text-white"
+              onClick={() => {
+                setEditModalOpen(true);
+              }}
+            >
+              <Pencil size={18} weight="duotone" />
+            </button>
             <button
               className="pointer-events-auto rounded-full bg-black/50 p-2 text-white"
               onClick={() => {
@@ -385,6 +420,18 @@ function BoardImage({
           </div>
         </div>
       )}
+
+      {editModalOpen && (
+        <EditItemModal
+          onClose={() => {
+            setEditModalOpen(false);
+            refetch();
+          }}
+          board_id={board_id}
+          item_id={item_id}
+          name={title}
+        />
+      )}
     </div>
   );
 }
@@ -393,25 +440,29 @@ function EditBoardModal({
   onClose,
   id,
   name,
+  description,
   isPublic
 }: {
   onClose: () => void;
   id: string;
   name: string;
+  description: string;
   isPublic: boolean;
 }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const [AName, setAName] = useState(name);
+  const [ADescription, setADescription] = useState(description);
   const [AIsPublic, setAIsPublic] = useState(isPublic);
 
-  function editBoard(name: string, isPublic: boolean) {
+  function editBoard(name: string, description: string, isPublic: boolean) {
     fetch(`/api/boards/${id}/edit`, {
       method: "POST",
       body: JSON.stringify({
         name: name,
-        isPublic: isPublic
+        isPublic: isPublic,
+        description: description
       }),
       headers: {
         "Content-Type": "application/json"
@@ -440,11 +491,12 @@ function EditBoardModal({
     const target = e.target as HTMLFormElement;
 
     const name = target.colname.value;
+    const description = target.description.value;
     const isPublic = target.isPublic.value === "public" ? true : false;
 
     setLoading(true);
 
-    editBoard(name, isPublic);
+    editBoard(name, description, isPublic);
   }
 
   return (
@@ -458,7 +510,10 @@ function EditBoardModal({
           <div className="pt-1 font-bold">Edit Board</div>
           <button onClick={() => onClose()}>[x]</button>
         </div>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-2">
+        <form
+          onSubmit={handleSubmit}
+          className="flex min-w-[400px] flex-col gap-2 max-sm:min-w-[80dvw]"
+        >
           <Label htmlFor="colname">Name:</Label>
           <input
             autoFocus
@@ -472,6 +527,20 @@ function EditBoardModal({
             required
             id="colname"
             placeholder="Board Name"
+            className="text-md dark:placeholderc:text-neutral-600 mb-2 w-full rounded-none border border-neutral-400 bg-transparent px-2 py-1.5 placeholder:text-neutral-400 focus:border-blue-500 focus:outline-none dark:border-neutral-600"
+          />
+
+          <Label htmlFor="description">Description:</Label>
+
+          <input
+            type="text"
+            name="description"
+            maxLength={128}
+            autoComplete="off"
+            value={ADescription}
+            onChange={(e) => setADescription(e.target.value)}
+            id="description"
+            placeholder="Description"
             className="text-md dark:placeholderc:text-neutral-600 mb-2 w-full rounded-none border border-neutral-400 bg-transparent px-2 py-1.5 placeholder:text-neutral-400 focus:border-blue-500 focus:outline-none dark:border-neutral-600"
           />
 
@@ -505,6 +574,105 @@ function EditBoardModal({
               />
             </svg>
           </div>
+          <button
+            type="submit"
+            className="bg-black-900 dark:bg-black-800 text-black-100 mt-4 rounded-full border border-neutral-300/0 p-2 px-4 disabled:opacity-50 dark:border-slate-800 dark:text-slate-400"
+            disabled={loading}
+          >
+            {loading ? "Saving..." : "Save"}
+          </button>
+          {error && <p className="max-w-sm text-red-500">{error}</p>}
+        </form>
+      </div>
+    </div>
+  );
+}
+
+function EditItemModal({
+  onClose,
+  board_id,
+  item_id,
+  name
+}: {
+  onClose: () => void;
+  board_id: string;
+  item_id: string;
+  name: string;
+}) {
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const [AName, setAName] = useState(name);
+
+  function editItem(name: string) {
+    fetch(`/api/boards/${board_id}/${item_id}`, {
+      method: "PATCH",
+      body: JSON.stringify({
+        title: name
+      }),
+      headers: {
+        "Content-Type": "application/json"
+      }
+    })
+      .then((res) => res.json())
+      .then((res) => {
+        if (res.ok) {
+          onClose();
+          setError("");
+        } else {
+          setError(res.msg || "Something went wrong. Please try again.");
+        }
+      })
+      .catch((err) => {
+        setError(err.msg || "An error occured.");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }
+
+  function handleSubmit(e: any) {
+    e.preventDefault();
+
+    const target = e.target as HTMLFormElement;
+
+    const name = target.itemname.value;
+
+    setLoading(true);
+
+    editItem(name);
+  }
+
+  return (
+    <div className="fixed left-0 top-0 z-[99992] flex h-screen w-screen flex-col items-center justify-center gap-2 p-4">
+      <div
+        className="fixed left-0 top-0 z-[99995] flex h-screen w-screen items-center justify-center bg-black/5 backdrop-blur-sm transition-opacity"
+        onClick={() => onClose()}
+      />
+      <div className="bg-black-100 dark:bg-black-800 z-[99999] flex flex-col gap-4 rounded-lg border border-neutral-300 px-6 py-4 dark:border-slate-900">
+        <div className="flex justify-between gap-4">
+          <div className="pt-1 font-bold">Edit Item</div>
+          <button onClick={() => onClose()}>[x]</button>
+        </div>
+        <form
+          onSubmit={handleSubmit}
+          className="flex min-w-[400px] flex-col gap-2 max-sm:min-w-[80dvw]"
+        >
+          <Label htmlFor="itemname">Item Title:</Label>
+          <input
+            autoFocus
+            type="text"
+            name="itemname"
+            maxLength={46}
+            autoComplete="off"
+            value={AName}
+            onChange={(e) => setAName(e.target.value)}
+            spellCheck="false"
+            id="itemname"
+            placeholder="Item Title"
+            className="text-md dark:placeholderc:text-neutral-600 mb-2 w-full rounded-none border border-neutral-400 bg-transparent px-2 py-1.5 placeholder:text-neutral-400 focus:border-blue-500 focus:outline-none dark:border-neutral-600"
+          />
+
           <button
             type="submit"
             className="bg-black-900 dark:bg-black-800 text-black-100 mt-4 rounded-full border border-neutral-300/0 p-2 px-4 disabled:opacity-50 dark:border-slate-800 dark:text-slate-400"

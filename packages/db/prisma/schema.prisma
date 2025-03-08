@@ -392,8 +392,10 @@ model ArticleAttachment {
 }
 
 model Board {
-  id   String @id @unique
-  name String
+  id              String  @id @unique
+  name            String
+  description     String?
+  cover_image_url String?
 
   public Boolean @default(false)
 
@@ -417,6 +419,8 @@ enum BoardItemType {
 
 model BoardItem {
   id String @id @unique @default(uuid())
+
+  title String?
 
   type BoardItemType
 

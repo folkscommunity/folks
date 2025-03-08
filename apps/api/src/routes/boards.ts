@@ -433,6 +433,7 @@ router.get("/:board_id/items", async (req, res) => {
         ok: true,
         items: items.map((item) => ({
           id: item.id.toString(),
+          title: item.title,
           type: item.type,
           url: item.url,
           width: item.width,
@@ -482,7 +483,7 @@ router.post(
         });
       }
 
-      const { name, isPublic } = req.body;
+      const { name, description, isPublic } = req.body;
 
       if (!name) {
         return res.status(400).json({
@@ -497,13 +498,21 @@ router.post(
         });
       }
 
+      if (description && description.length > 128) {
+        return res.status(400).json({
+          error: "description_too_long",
+          msg: "Description must be less than 128 characters."
+        });
+      }
+
       await prisma.board.update({
         where: {
           id: board_id
         },
         data: {
           name: name,
-          public: isPublic ?? false
+          public: isPublic ?? false,
+          description: description || null
         }
       });
 
@@ -586,6 +595,81 @@ router.delete(
       res.send(JSONtoString({ ok: true }));
     } catch (e) {
       console.error(e);
+
+      res.status(500).json({
+        error: "server_error",
+        message: "Something went wrong."
+      });
+    }
+  }
+);
+
+router.patch(
+  "/:board_id/:item_id",
+  authMiddleware,
+  async (req: RequestWithUser, res) => {
+    try {
+      const user = await prisma.user.findUnique({
+        where: {
+          id: BigInt(req.user.id)
+        }
+      });
+
+      if (!user) {
+        return res.status(401).json({
+          error: "unauthorized"
+        });
+      }
+
+      const { board_id, item_id } = req.params;
+
+      const board = await prisma.board.findUnique({
+        where: {
+          id: board_id,
+          user_id: BigInt(req.user.id)
+        }
+      });
+
+      if (!board) {
+        return res.status(400).json({
+          error: "invalid_request"
+        });
+      }
+
+      const item = await prisma.boardItem.findUnique({
+        where: {
+          id: item_id
+        }
+      });
+
+      if (!item) {
+        return res.status(400).json({
+          error: "invalid_request"
+        });
+      }
+
+      const { title } = req.body;
+
+      if (title.length > 46) {
+        return res.status(400).json({
+          error: "title_too_long"
+        });
+      }
+
+      await prisma.boardItem.update({
+        where: {
+          id: item_id
+        },
+        data: {
+          title: title || null
+        }
+      });
+
+      res.setHeader("Content-Type", "application/json");
+      res.send(JSONtoString({ ok: true }));
+    } catch (e) {
+      console.error(e);
+      Sentry.captureException(e);
 
       res.status(500).json({
         error: "server_error",

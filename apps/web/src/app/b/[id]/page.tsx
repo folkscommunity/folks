@@ -47,7 +47,17 @@ export async function generateMetadata({
   });
 
   return {
-    title: board ? `${board.name} by ${board.user.display_name}` : "Folks"
+    title: board ? `${board.name} by ${board.user.display_name}` : "Folks",
+    description: board ? board.description : undefined,
+    twitter: {
+      card: "summary_large_image",
+      title: board ? `${board.name} by ${board.user.display_name}` : "Folks",
+      description: board ? (board.description ?? undefined) : undefined
+    },
+    openGraph: {
+      title: board ? `${board.name} by ${board.user.display_name}` : "Folks",
+      description: board ? (board.description ?? undefined) : undefined
+    }
   };
 }
 
@@ -81,6 +91,7 @@ export default async function Page({
       items: {
         select: {
           id: true,
+          title: true,
           type: true,
           url: true,
           width: true,
@@ -115,6 +126,7 @@ export default async function Page({
         loaded_items={board.items.map((d) => {
           return {
             id: d.id,
+            title: d.title,
             type: d.type,
             url: d.url,
             width: d.width,
