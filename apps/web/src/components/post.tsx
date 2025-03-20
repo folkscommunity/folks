@@ -505,13 +505,13 @@ export function UrlEmbed({
     <Link
       href={metadata.url}
       className={cn(
-        "border-black-200 hover:bg-black-100/50 dark:border-black-700 dark:hover:bg-black-700/25 group/url mt-2 flex w-full max-w-md flex-col overflow-clip rounded-md border hover:no-underline",
+        "border-black-200/50 hover:bg-black-100/50 dark:border-black-700 dark:hover:bg-black-700/25 group/url mt-2 flex w-full max-w-md flex-col overflow-clip rounded-md border hover:no-underline",
         className
       )}
       target="_blank"
     >
       {metadata.image && (horizontal || metadata.image?.image_square) && (
-        <div className="border-black-200 dark:border-black-700 border-b">
+        <div className="border-black-200/50 dark:border-black-700 border-b">
           <img
             loading="lazy"
             decoding="async"
@@ -523,7 +523,7 @@ export function UrlEmbed({
       )}
       <div className="flex items-center gap-2 pr-3">
         {!(metadata.image && (horizontal || metadata.image?.image_square)) && (
-          <div className="border-black-200 dark:border-black-700 flex aspect-square h-full min-h-[105px] min-w-[105px] flex-1 items-center justify-center border-r">
+          <div className="border-black-200/50 dark:border-black-700 flex aspect-square h-full min-h-[105px] min-w-[105px] flex-1 items-center justify-center border-r">
             <img
               decoding="async"
               loading="lazy"

@@ -44,7 +44,7 @@ export function TimelinePhoto({
           }}
           fetchPriority="low"
           className={cn(
-            "cursor-pointer rounded-lg border border-slate-300/0 dark:border-slate-800",
+            "border-black-200/50 cursor-pointer rounded-lg border dark:border-slate-800",
             big && "rounded-none border-0"
           )}
         />
