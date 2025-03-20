@@ -1,5 +1,6 @@
 /* eslint-disable prefer-const */
 import { DetectModerationLabelsCommand } from "@aws-sdk/client-rekognition";
+import { DeleteObjectCommand } from "@aws-sdk/client-s3";
 import Queue from "bull";
 import sharp from "sharp";
 import webpush from "web-push";
@@ -7,7 +8,7 @@ import webpush from "web-push";
 import { NotificationEndpointType, prisma } from "@folks/db";
 
 import { Sentry } from "./instrument";
-import { rekognition } from "./lib/aws";
+import { rekognition, s3 } from "./lib/aws";
 import { posthog } from "./lib/posthog";
 import { sendDiscordNotification } from "./lib/send_discord_notification";
 import { getURLMetadata } from "./lib/url_metadata";
@@ -272,6 +273,134 @@ export function workerThread(id: number) {
         }
       });
       console.error(e);
+    }
+
+    done();
+  });
+
+  const purge_deleted_posts = new Queue(
+    "queue_purge_deleted_posts",
+    process.env.REDIS_URL!
+  );
+
+  purge_deleted_posts.process(1, async (job, done) => {
+    const instant = job.data.instant;
+
+    try {
+      const deleted_posts = await prisma.post.findMany({
+        where:
+          instant === true
+            ? {
+                deleted_at: {
+                  not: null
+                }
+              }
+            : {
+                AND: [
+                  {
+                    deleted_at: {
+                      not: null
+                    }
+                  },
+                  {
+                    deleted_at: {
+                      lt: new Date(new Date().getTime() - 24 * 60 * 60 * 1000)
+                    }
+                  }
+                ]
+              },
+        select: {
+          id: true,
+          attachments: {
+            select: {
+              id: true,
+              url: true
+            }
+          }
+        }
+      });
+
+      for await (const post of deleted_posts) {
+        if (post.attachments) {
+          for await (const attachment of post.attachments) {
+            await delete_s3_object.add({
+              key: attachment.url
+            });
+
+            await prisma.attachment.delete({
+              where: {
+                id: attachment.id
+              }
+            });
+          }
+        }
+
+        await prisma.post.delete({
+          where: {
+            id: post.id
+          }
+        });
+      }
+
+      done();
+    } catch (e) {
+      Sentry.captureException(e, {
+        tags: {
+          job: "purge_deleted_posts",
+          job_id: job.id
+        }
+      });
+      console.error(e);
+      done(e);
+    }
+  });
+
+  const delete_s3_object = new Queue(
+    "queue_delete_s3_object",
+    process.env.REDIS_URL!
+  );
+
+  delete_s3_object.process(1, async (job, done) => {
+    try {
+      let key = job.data.key;
+
+      if (!key) {
+        return done();
+      }
+
+      if (
+        !process.env.AWS_ACCESS_KEY_ID ||
+        !process.env.AWS_SECRET_ACCESS_KEY
+      ) {
+        return done();
+      }
+
+      const CDN = process.env.CDN_URL
+        ? `${process.env.CDN_URL}/`
+        : `https://${process.env.AWS_BUCKET}.s3.amazonaws.com/`;
+
+      key = key.replace(CDN, "");
+
+      const command = new DeleteObjectCommand({
+        Bucket: process.env.AWS_BUCKET!,
+        Key: key
+      });
+
+      await s3.send(command);
+
+      return done();
+    } catch (e) {
+      Sentry.captureException(e, {
+        tags: {
+          job: "delete_s3_object",
+          job_id: job.id,
+          data: job.data
+        }
+      });
+
+      console.error(e);
+
+      done(e);
     }
 
     done();

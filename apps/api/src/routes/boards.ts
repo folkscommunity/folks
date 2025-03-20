@@ -253,8 +253,6 @@ router.post(
 
       const file_type = file.content.split(";")[0].replace("data:", "");
 
-      console.log(file_type);
-
       if (
         file_type !== "image/png" &&
         file_type !== "image/jpeg" &&
@@ -575,8 +573,6 @@ router.delete(
 
       const item_url_no_domain =
         "boards/" + item.url.split("/").slice(-1).join("/");
-
-      console.log(item_url_no_domain);
 
       await s3.send(
         new DeleteObjectCommand({

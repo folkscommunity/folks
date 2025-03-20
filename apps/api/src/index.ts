@@ -1,8 +1,10 @@
 import { createServer } from "http";
+import Queue from "bull";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import express from "express";
 import jwt from "jsonwebtoken";
+import cron from "node-cron";
 import { Server, Socket } from "socket.io";
 import throng from "throng";
 
@@ -10,6 +12,7 @@ import { prisma } from "@folks/db";
 
 import { Sentry } from "./instrument";
 import { redis, redis_sub } from "./lib/redis";
+import admin_router from "./routes/admin";
 import articles_router from "./routes/articles";
 import auth_router from "./routes/auth";
 import boards_router from "./routes/boards";
@@ -88,6 +91,7 @@ async function mainThread() {
   app.use("/api/messages", messages_router);
   app.use("/api/articles", articles_router);
   app.use("/api/boards", boards_router);
+  app.use("/api/admin", admin_router);
 
   io.use(async (socket: SocketWithUser | any, next) => {
     try {
@@ -199,6 +203,15 @@ async function mainThread() {
 
       io.to(channel).emit(event, data);
     }
+  });
+
+  const purge_deleted_posts = new Queue(
+    "queue_purge_deleted_posts",
+    process.env.REDIS_URL!
+  );
+
+  cron.schedule("0 * * * *", () => {
+    purge_deleted_posts.add({});
   });
 
   Sentry.setupExpressErrorHandler(app);
