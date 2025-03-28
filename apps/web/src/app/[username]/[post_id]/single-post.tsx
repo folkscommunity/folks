@@ -6,6 +6,7 @@ import dayjs from "dayjs";
 import { EllipsisIcon } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import Lightbox from "yet-another-react-lightbox";
 
 import { ReplyCompose } from "@/components/composer";
 import {
@@ -32,6 +33,7 @@ export function SinglePost({ user, post }: { user: any; post: any }) {
   const [replies, setReplies] = useState<any[]>([]);
   const [isClient, setIsClient] = useState(false);
   const postContainerRef = useRef<HTMLDivElement>(null);
+  const [index, setIndex] = useState(-1);
 
   function fetchPost() {
     fetch(`/api/post/${post.id}`, {
@@ -196,17 +198,35 @@ export function SinglePost({ user, post }: { user: any; post: any }) {
         />
 
         {lPost.attachments && lPost.attachments.length > 0 && (
-          <div className="flex gap-2 pt-4">
-            {lPost.attachments.map((attachment: any, i: number) => (
-              <TimelinePhoto
-                key={attachment.id}
-                src={attachment.url}
-                width={attachment.width}
-                height={attachment.height}
-                alt={`${lPost.author.username}'s Photo`} // TODO: Handle ALT text
-              />
-            ))}
-          </div>
+          <>
+            <div className="flex gap-2 pt-4">
+              {lPost.attachments.map((attachment: any, i: number) => (
+                <TimelinePhoto
+                  key={attachment.id}
+                  src={attachment.url}
+                  width={attachment.width}
+                  height={attachment.height}
+                  alt={`${lPost.author.username}'s Photo`} // TODO: Handle ALT text
+                  onClick={() => setIndex(i)}
+                />
+              ))}
+            </div>
+
+            <Lightbox
+              open={index !== -1}
+              close={() => setIndex(-1)}
+              index={index}
+              on={{
+                view: ({ index: currentIndex }: any) => setIndex(currentIndex)
+              }}
+              slides={lPost.attachments.map((item: any) => ({
+                alt: `${lPost.author.username}'s Photo`,
+                src: item.url,
+                width: item.width,
+                height: item.height
+              }))}
+            />
+          </>
         )}
 
         {lPost.attachments.length === 0 &&
