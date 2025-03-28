@@ -1,61 +1,47 @@
 "use client";
 
-import { useState } from "react";
-
-import { cn } from "@/lib/utils";
+import { cn, optimizedImageUrl } from "@/lib/utils";
 
 export function TimelinePhoto({
   src,
   width,
   height,
-  alt
+  alt,
+  onClick
 }: {
   src: string;
   width: number;
   height: number;
   alt: string;
+  onClick?: () => void;
 }) {
-  const [big, setBig] = useState(false);
+  const url_1x = optimizedImageUrl(src, 800);
+  const url_2x = optimizedImageUrl(src, 1600);
+
+  const srcset = `${url_1x} 1x, ${url_2x} 2x`;
 
   return (
-    <div
-      className="group relative flex flex-col items-start"
-      onClick={() => {
-        setBig(!big);
-      }}
-    >
+    <div className="group relative flex flex-col items-start" onClick={onClick}>
       <div
-        className={cn(
-          "max-h-[500px] max-w-full overflow-hidden rounded-lg",
-          big &&
-            "fixed bottom-0 left-0 right-0 top-0 z-[999999] flex h-[100dvh] max-h-[100dvh] w-[100vw] max-w-[100vw] flex-col items-center justify-center gap-4 bg-black bg-opacity-75 p-5 backdrop-blur-sm"
-        )}
+        className={cn("max-h-[500px] max-w-full overflow-hidden rounded-lg")}
       >
         <img
           loading="lazy"
           decoding="async"
           alt={alt}
-          src={src}
+          src={url_1x}
+          srcSet={srcset}
           style={{
-            maxHeight: big ? "90dvh" : "inherit",
+            maxHeight: "inherit",
             maxWidth: "100%",
             height: "auto",
             width: "auto"
           }}
           fetchPriority="low"
           className={cn(
-            "border-black-200/50 cursor-pointer rounded-lg border dark:border-slate-800",
-            big && "rounded-none border-0"
+            "border-black-200/50 cursor-pointer rounded-lg border dark:border-slate-800"
           )}
         />
-        {big && (
-          <button
-            className="bg-black-900 dark:bg-black-800 text-black-100 rounded-full border border-neutral-300/0 p-2 px-4 dark:border-slate-800 dark:text-slate-400"
-            onClick={() => setBig(false)}
-          >
-            Close
-          </button>
-        )}
       </div>
     </div>
   );

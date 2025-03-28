@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useFeatureFlagPayload } from "posthog-js/react";
 import { toast } from "sonner";
+import Lightbox from "yet-another-react-lightbox";
 
 import { parsePostBody } from "@/lib/post-utils";
 import { cn, dateRelativeTiny } from "@/lib/utils";
@@ -52,6 +53,8 @@ export function Post({
 
   const router = useRouter();
   const [replyComposerOpen, setReplyComposerOpen] = useState(false);
+
+  const [index, setIndex] = useState(-1);
 
   function fetchPost() {
     fetch(`/api/post/${post.id}`, {
@@ -387,17 +390,37 @@ export function Post({
         </a>
 
         {lPost.attachments && lPost.attachments.length > 0 && (
-          <div className="flex gap-2 pt-2">
-            {lPost.attachments.map((attachment: any, i: number) => (
-              <TimelinePhoto
-                key={i}
-                src={attachment.url}
-                width={attachment.width}
-                height={attachment.height}
-                alt={`${lPost.author.username}'s Photo`} // TODO: Handle ALT text
+          <>
+            <div className="flex gap-2 pt-2">
+              {lPost.attachments.map((attachment: any, i: number) => (
+                <TimelinePhoto
+                  key={i}
+                  src={attachment.url}
+                  width={attachment.width}
+                  height={attachment.height}
+                  alt={`${lPost.author.username}'s Photo`} // TODO: Handle ALT text
+                  onClick={() => setIndex(i)}
+                />
+              ))}
+            </div>
+
+            {index !== -1 && (
+              <Lightbox
+                open={index !== -1}
+                close={() => setIndex(-1)}
+                index={index}
+                on={{
+                  view: ({ index: currentIndex }: any) => setIndex(currentIndex)
+                }}
+                slides={lPost.attachments.map((item: any) => ({
+                  alt: `${lPost.author.username}'s Photo`,
+                  src: item.url,
+                  width: item.width,
+                  height: item.height
+                }))}
               />
-            ))}
-          </div>
+            )}
+          </>
         )}
 
         {lPost.attachments.length === 0 &&

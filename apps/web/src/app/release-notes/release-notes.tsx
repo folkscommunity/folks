@@ -2,9 +2,16 @@ import dayjs from "dayjs";
 
 import { parsePostBody } from "@/lib/post-utils";
 
-export const current_release = "0.9";
+export const current_release = "0.9.1";
 
 const releases = [
+  {
+    version: "0.9.1",
+    changes: [
+      "Optimized timeline images.",
+      "Changed the timeline full screen image viewer."
+    ]
+  },
   {
     version: "0.9",
     changes: [
