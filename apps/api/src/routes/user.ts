@@ -2,6 +2,7 @@ import { createHash, randomUUID } from "crypto";
 import { DeleteObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import argon2 from "argon2";
 import { Router } from "express";
+import multer from "multer";
 import sharp from "sharp";
 
 import { prisma } from "@folks/db";
@@ -10,6 +11,12 @@ import { JSONtoString, schemas } from "@folks/utils";
 import { authMiddleware, RequestWithUser } from "@/lib/auth_middleware";
 import { s3 } from "@/lib/aws";
 import { posthog } from "@/lib/posthog";
+
+const upload = multer({
+  limits: {
+    fileSize: 15 * 1024 * 1024
+  }
+});
 
 const router = Router();
 
@@ -187,159 +194,146 @@ router.patch("/password", authMiddleware, async (req: RequestWithUser, res) => {
   }
 });
 
-router.post("/avatar", authMiddleware, async (req: RequestWithUser, res) => {
-  try {
-    const { files } = req.body;
-
-    if (!files || files.length === 0) {
-      return res.status(400).json({
-        error: "invalid_request",
-        msg: "You must provide an image."
-      });
-    }
-
-    if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
-      return res.status(400).json({
-        error: "invalid_request",
-        message: "AWS credentials not set. Avatar uploads are disabled."
-      });
-    }
-
-    const user = await prisma.user.findUnique({
-      where: {
-        id: BigInt(req.user.id)
+router.post(
+  "/avatar",
+  authMiddleware,
+  upload.single("avatar"),
+  async (req: RequestWithUser, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({
+          error: "invalid_request",
+          msg: "You must provide an image."
+        });
       }
-    });
 
-    if (!user) {
-      return res.status(401).json({
-        error: "unauthorized"
+      if (
+        !process.env.AWS_ACCESS_KEY_ID ||
+        !process.env.AWS_SECRET_ACCESS_KEY
+      ) {
+        return res.status(400).json({
+          error: "invalid_request",
+          message: "AWS credentials not set. Avatar uploads are disabled."
+        });
+      }
+
+      const user = await prisma.user.findUnique({
+        where: {
+          id: BigInt(req.user.id)
+        }
       });
-    }
 
-    const file = files[0];
+      if (!user) {
+        return res.status(401).json({
+          error: "unauthorized"
+        });
+      }
 
-    const file_type = file.content.split(";")[0].replace("data:", "");
+      const buffer = Buffer.from(req.file.buffer);
 
-    if (
-      file_type !== "image/png" &&
-      file_type !== "image/jpeg" &&
-      file_type !== "image/jpg" &&
-      file_type !== "image/webp"
-    ) {
-      return res.status(400).json({
-        error: "invalid_request",
-        message: "Invalid file type."
+      if (buffer.length > 15 * 1024 * 1024) {
+        return res.status(400).json({
+          error: "invalid_request",
+          message: "File size exceeds limit."
+        });
+      }
+
+      let img = await sharp(buffer, {
+        animated: false
       });
-    }
 
-    const buffer = Buffer.from(
-      file.content.replace(/^data:image\/\w+;base64,/, ""),
-      "base64"
-    );
+      const img_metadata = await img.metadata();
 
-    if (buffer.length > 15 * 1024 * 1024) {
-      return res.status(400).json({
-        error: "invalid_request",
-        message: "File size exceeds limit."
+      if (img_metadata.width > 8000 || img_metadata.height > 8000) {
+        return res.status(400).json({
+          error: "invalid_request",
+          message: "Image dimensions exceeds limit. (8000x8000 max)"
+        });
+      }
+
+      img = await img.resize(800, 800, {
+        fit: "cover"
       });
-    }
 
-    let img = await sharp(buffer, {
-      animated: false
-    });
+      img = await img.webp({ quality: 80 });
 
-    const img_metadata = await img.metadata();
+      const transformed_image_buffer = await img.toBuffer();
 
-    if (img_metadata.width > 8000 || img_metadata.height > 8000) {
-      return res.status(400).json({
-        error: "invalid_request",
-        message: "Image dimensions exceeds limit. (8000x8000 max)"
-      });
-    }
+      const file_key = `avatars/${createHash("sha256")
+        .update(user.id.toString() + "-" + new Date().getTime())
+        .digest("hex")}.webp`;
 
-    img = await img.resize(800, 800, {
-      fit: "cover"
-    });
+      const s3_file = await s3.send(
+        new PutObjectCommand({
+          Bucket: process.env.AWS_BUCKET!,
+          Key: file_key,
+          Body: transformed_image_buffer,
+          Metadata: {
+            "Uploaded-By-User": req.user.id.toString()
+          },
+          ContentType: "image/webp",
+          ACL: "public-read",
+          CacheControl: "max-age=2592000" // 30 days
+        })
+      );
 
-    img = await img.webp({ quality: 80 });
+      if (s3_file.$metadata.httpStatusCode !== 200) {
+        console.error("Error uploading file to S3.", s3_file);
 
-    const transformed_image_buffer = await img.toBuffer();
+        return res.status(400).json({
+          error: "invalid_request",
+          message: "Something went wrong."
+        });
+      }
 
-    const file_key = `avatars/${createHash("sha256")
-      .update(user.id.toString() + "-" + new Date().getTime())
-      .digest("hex")}.webp`;
+      let original_file_key;
 
-    const s3_file = await s3.send(
-      new PutObjectCommand({
-        Bucket: process.env.AWS_BUCKET!,
-        Key: file_key,
-        Body: transformed_image_buffer,
-        Metadata: {
-          "Uploaded-By-User": req.user.id.toString()
+      const original_avatar_url = user.avatar_url;
+      if (original_avatar_url) {
+        original_file_key = original_avatar_url
+          .replace("https://", "")
+          .replace("http://", "")
+          .split("?")[0]
+          .split("/");
+      }
+
+      await prisma.user.update({
+        where: {
+          id: BigInt(req.user.id)
         },
-        ContentType: "image/webp",
-        ACL: "public-read",
-        CacheControl: "max-age=2592000" // 30 days
-      })
-    );
+        data: {
+          avatar_url: process.env.CDN_URL
+            ? `${process.env.CDN_URL}/${file_key}`
+            : `https://${process.env.AWS_BUCKET}.s3.amazonaws.com/${file_key}`
+        }
+      });
 
-    if (s3_file.$metadata.httpStatusCode !== 200) {
-      console.error("Error uploading file to S3.", s3_file);
+      if (original_avatar_url) {
+        await s3.send(
+          new DeleteObjectCommand({
+            Bucket: process.env.AWS_BUCKET!,
+            Key: original_file_key[1] + "/" + original_file_key[2]
+          })
+        );
+      }
 
-      return res.status(400).json({
-        error: "invalid_request",
+      await posthog.capture({
+        distinctId: user.id.toString(),
+        event: "update_avatar"
+      });
+
+      res.setHeader("Content-Type", "application/json");
+      res.send(JSONtoString({ ok: true }));
+    } catch (e) {
+      console.error(e);
+
+      res.status(500).json({
+        error: "server_error",
         message: "Something went wrong."
       });
     }
-
-    let original_file_key;
-
-    const original_avatar_url = user.avatar_url;
-    if (original_avatar_url) {
-      original_file_key = original_avatar_url
-        .replace("https://", "")
-        .replace("http://", "")
-        .split("?")[0]
-        .split("/");
-    }
-
-    await prisma.user.update({
-      where: {
-        id: BigInt(req.user.id)
-      },
-      data: {
-        avatar_url: process.env.CDN_URL
-          ? `${process.env.CDN_URL}/${file_key}`
-          : `https://${process.env.AWS_BUCKET}.s3.amazonaws.com/${file_key}`
-      }
-    });
-
-    if (original_avatar_url) {
-      await s3.send(
-        new DeleteObjectCommand({
-          Bucket: process.env.AWS_BUCKET!,
-          Key: original_file_key[1] + "/" + original_file_key[2]
-        })
-      );
-    }
-
-    await posthog.capture({
-      distinctId: user.id.toString(),
-      event: "update_avatar"
-    });
-
-    res.setHeader("Content-Type", "application/json");
-    res.send(JSONtoString({ ok: true }));
-  } catch (e) {
-    console.error(e);
-
-    res.status(500).json({
-      error: "server_error",
-      message: "Something went wrong."
-    });
   }
-});
+);
 
 router.post(
   "/notification-preferences",

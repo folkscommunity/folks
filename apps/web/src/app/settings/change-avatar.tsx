@@ -17,7 +17,7 @@ export function ChangeAvatar({ user }: { user: any }) {
 
   const { openFilePicker, filesContent, loading, errors, clear } =
     useFilePicker({
-      readAs: "DataURL",
+      readAs: "ArrayBuffer",
       accept: "image/*",
       multiple: false,
       validators: [
@@ -37,7 +37,7 @@ export function ChangeAvatar({ user }: { user: any }) {
         } else if (reason === "FILE_SIZE_TOO_LARGE") {
           toast.error("File size exceeds limit.");
         } else if (reason === "MAX_AMOUNT_OF_FILES_EXCEEDED") {
-          toast.error("You can only upload one file.");
+          toast.error("You can upload only a single image.");
         } else if (
           reason === "IMAGE_HEIGHT_TOO_BIG" ||
           reason === "IMAGE_WIDTH_TOO_BIG"
@@ -49,33 +49,37 @@ export function ChangeAvatar({ user }: { user: any }) {
       }
     });
 
-  function uploadAvatar(files: any[]) {
+  function uploadAvatars(files: any[]) {
+    const formData = new FormData();
+
+    files.forEach((file) => {
+      formData.append("avatar", new Blob([file.content]), file.name);
+    });
+
     fetch("/api/user/avatar", {
       method: "POST",
-      body: JSON.stringify({
-        files: files
-      }),
-      headers: {
-        "Content-Type": "application/json"
-      }
+      body: formData
     })
       .then((res) => res.json())
       .then((res) => {
         if (res.ok) {
-          setAvatar(files[0].content);
-          toast.success("Avatar updated.");
+          const base64String = `data:${files[0].type};base64,${Buffer.from(files[0].content, "binary").toString("base64")}`;
+          setAvatar(base64String);
+
+          toast.success(`Avatar changed successfully.`);
         } else {
-          toast.error("Something went wrong.");
+          toast.error(res.message || "Something went wrong.");
         }
       })
       .catch((err) => {
+        console.log(err);
         toast.error("Something went wrong.");
       });
   }
 
   useEffect(() => {
     if (filesContent.length > 0) {
-      uploadAvatar(filesContent);
+      uploadAvatars(filesContent);
       clear();
     }
   }, [filesContent, clear]);

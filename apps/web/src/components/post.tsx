@@ -387,7 +387,7 @@ export function Post({
         </a>
 
         {lPost.attachments && lPost.attachments.length > 0 && (
-          <div className="pt-2">
+          <div className="flex gap-2 pt-2">
             {lPost.attachments.map((attachment: any, i: number) => (
               <TimelinePhoto
                 key={i}

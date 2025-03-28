@@ -2,9 +2,16 @@ import dayjs from "dayjs";
 
 import { parsePostBody } from "@/lib/post-utils";
 
-export const current_release = "0.8.6";
+export const current_release = "0.9";
 
 const releases = [
+  {
+    version: "0.9",
+    changes: [
+      "Added suport for multiple images in a post.",
+      "Improved navigation history on profiles."
+    ]
+  },
   {
     version: "0.8.6",
     date: "2025-03-20",

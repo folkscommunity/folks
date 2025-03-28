@@ -1,11 +1,10 @@
 /* eslint-disable prefer-const */
 import { randomUUID } from "crypto";
-import { Readable } from "stream";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import Queue from "bull";
-import exifReader from "exif-reader";
 import { Router } from "express";
 import jwt from "jsonwebtoken";
+import multer from "multer";
 import sharp from "sharp";
 
 import { prisma } from "@folks/db";
@@ -94,192 +93,183 @@ async function generatePostMentions(post_id: string, body: string) {
   return;
 }
 
-router.post("/", authMiddleware, async (req: RequestWithUser, res) => {
-  try {
-    const { body, files, replying_to, hide_embeds } = req.body;
+const upload = multer({
+  limits: {
+    fileSize: 50 * 1024 * 1024
+  }
+});
 
-    const rate_limit = await redis.get(`rate_limit:post:${req.user.id}`);
+router.post(
+  "/",
+  authMiddleware,
+  upload.fields([{ name: "files", maxCount: 5 }]),
+  async (req: RequestWithUser, res) => {
+    try {
+      const { body, replying_to } = req.body;
+      const files = (req.files as any)?.files ?? [];
 
-    if (Number(rate_limit) > 8 && req.user.id !== "1") {
-      return res.status(429).json({
-        error: "rate_limit_exceeded",
-        message:
-          "You have exceeded the rate limit. Please try again in a few minutes."
-      });
-    }
+      // Rate Limiting
+      const rate_limit = await redis.get(`rate_limit:post:${req.user.id}`);
 
-    await redis.set(
-      `rate_limit:post:${req.user.id}`,
-      Number(rate_limit) + 1,
-      "EX",
-      60
-    );
-
-    const user = await prisma.user.findUnique({
-      where: {
-        id: BigInt(req.user.id)
+      if (Number(rate_limit) > 8 && req.user.id !== "1") {
+        return res.status(429).json({
+          error: "rate_limit_exceeded",
+          message:
+            "You have exceeded the rate limit. Please try again in a few minutes."
+        });
       }
-    });
 
-    if (!user) {
-      return res.status(401).json({
-        error: "unauthorized"
-      });
-    }
+      await redis.set(
+        `rate_limit:post:${req.user.id}`,
+        Number(rate_limit) + 1,
+        "EX",
+        60
+      );
 
-    if (user.suspended) {
-      return res.status(401).json({
-        error: "suspended",
-        message: "Your account is suspended."
-      });
-    }
-
-    if (!user.email_verified) {
-      return res.status(401).json({
-        error: "email_not_verified",
-        message: "You must verify your email before posting."
-      });
-    }
-
-    if (replying_to) {
-      const replying_to_post = await prisma.post.findUnique({
+      // Get user from db
+      const user = await prisma.user.findUnique({
         where: {
-          id: BigInt(replying_to)
+          id: BigInt(req.user.id)
         }
       });
 
-      if (!replying_to_post) {
-        return res.status(400).json({
-          error: "invalid_request",
-          message: "Replying to post not found."
-        });
-      }
-    }
-
-    try {
-      await schemas.postBodySchema.parseAsync(body);
-    } catch (err) {
-      return res.status(400).json({
-        error: "invalid_request",
-        message: JSON.parse(err.message)[0].message
-      });
-    }
-
-    if (files && files.length > 1) {
-      return res.status(400).json({
-        error: "invalid_request",
-        message: "You can only upload one photo."
-      });
-    }
-
-    let flags: any[] = [];
-
-    if (hide_embeds) {
-      flags = [...flags, { hide_embeds: true }];
-    }
-
-    if (files && files.length > 0) {
-      const file = files[0];
-
-      const file_type = file.content.split(";")[0].replace("data:", "");
-
-      if (
-        file_type !== "image/png" &&
-        file_type !== "image/jpeg" &&
-        file_type !== "image/jpg" &&
-        file_type !== "image/webp" &&
-        file_type !== "image/gif"
-      ) {
-        return res.status(400).json({
-          error: "invalid_request",
-          message: "Invalid file type."
+      if (!user) {
+        return res.status(401).json({
+          error: "unauthorized"
         });
       }
 
-      const buffer = Buffer.from(
-        file.content.replace(/^data:image\/\w+;base64,/, ""),
-        "base64"
-      );
-
-      if (buffer.length > 50 * 1024 * 1024) {
-        return res.status(400).json({
-          error: "invalid_request",
-          message: "File size exceeds limit."
+      if (user.suspended) {
+        return res.status(401).json({
+          error: "suspended",
+          message: "Your account is suspended."
         });
       }
 
-      if (
-        !process.env.AWS_ACCESS_KEY_ID ||
-        !process.env.AWS_SECRET_ACCESS_KEY
-      ) {
-        return res.status(400).json({
-          error: "invalid_request",
-          message: "AWS credentials not set. Image uploads are disabled."
+      if (!user.email_verified) {
+        return res.status(401).json({
+          error: "email_not_verified",
+          message: "You must verify your email before posting."
         });
       }
 
-      let quality = 80;
+      if (replying_to) {
+        const replying_to_post = await prisma.post.findUnique({
+          where: {
+            id: BigInt(replying_to)
+          }
+        });
 
-      if (buffer.length < 2 * 1024 * 1024) {
-        quality = 100;
+        if (!replying_to_post) {
+          return res.status(400).json({
+            error: "invalid_request",
+            message: "Replying to post not found."
+          });
+        }
       }
 
-      let img = await sharp(buffer, {
-        animated: true
-      }).rotate();
-
-      const img_metadata = await img.metadata();
-
-      if (
-        (img_metadata.width > 8000 ||
-          (img_metadata.pageHeight || img_metadata.height) > 8000) &&
-        file_type !== "image/gif"
-      ) {
+      try {
+        await schemas.postBodySchema.parseAsync(body);
+      } catch (err) {
         return res.status(400).json({
           error: "invalid_request",
-          message: "Image dimensions exceeds limit. (8000x8000 max)"
+          message: JSON.parse(err.message)[0].message
         });
       }
 
-      img = await img.webp({ quality: quality });
+      let flags: any[] = [];
 
-      const transformed_image_buffer = await img.toBuffer();
+      if (files && files.length > 0) {
+        // Fail if there are more than 5 files
+        if (files.length > 5) {
+          return res.status(400).json({
+            error: "invalid_request",
+            message: "You can only upload up to 5 images."
+          });
+        }
 
-      const randomFileName = (randomUUID() + randomUUID()).replaceAll("-", "");
+        if (
+          !process.env.AWS_ACCESS_KEY_ID ||
+          !process.env.AWS_SECRET_ACCESS_KEY
+        ) {
+          return res.status(400).json({
+            error: "invalid_request",
+            message: "AWS credentials not set. Image uploads are disabled."
+          });
+        }
 
-      const file_key = `attachments/${randomFileName}.webp`;
+        let files_to_upload = [];
 
-      const s3_file = await s3.send(
-        new PutObjectCommand({
-          Bucket: process.env.AWS_BUCKET!,
-          Key: file_key,
-          Body: transformed_image_buffer,
-          Metadata: {
-            "Uploaded-By-User": req.user.id.toString()
-          },
-          ContentType: "image/webp",
-          ACL: "public-read",
-          CacheControl: "max-age=2592000" // 30 days
-        })
-      );
+        for await (const file of files) {
+          const buffer = Buffer.from(file.buffer);
 
-      if (s3_file.$metadata.httpStatusCode !== 200) {
-        console.error("Error uploading file to S3.", s3_file);
+          if (buffer.length > 50 * 1024 * 1024) {
+            return res.status(400).json({
+              error: "invalid_request",
+              message: "File size exceeds limit."
+            });
+          }
 
-        return res.status(400).json({
-          error: "invalid_request",
-          message: "Something went wrong."
-        });
-      }
+          let quality = 80;
 
-      const post = await prisma.post.create({
-        data: {
-          body,
-          author_id: BigInt(req.user.id),
-          reply_to_id: replying_to ? BigInt(replying_to) : undefined,
-          flags: flags,
-          attachments: {
-            create: {
+          if (buffer.length < 2 * 1024 * 1024) {
+            quality = 100;
+          }
+
+          let img = await sharp(buffer, {
+            animated: true,
+            failOnError: true
+          }).rotate();
+
+          const img_metadata = await img.metadata();
+
+          if (
+            (img_metadata.width > 8000 ||
+              (img_metadata.pageHeight || img_metadata.height) > 8000) &&
+            img_metadata.format !== "gif"
+          ) {
+            return res.status(400).json({
+              error: "invalid_request",
+              message: "Image dimensions exceeds limit. (8000x8000 max)"
+            });
+          }
+
+          img = await img.webp({ quality: quality });
+
+          const transformed_image_buffer = await img.toBuffer();
+
+          const randomFileName = (randomUUID() + randomUUID()).replaceAll(
+            "-",
+            ""
+          );
+
+          const file_key = `attachments/${randomFileName}.webp`;
+
+          const s3_file = await s3.send(
+            new PutObjectCommand({
+              Bucket: process.env.AWS_BUCKET!,
+              Key: file_key,
+              Body: transformed_image_buffer,
+              Metadata: {
+                "Uploaded-By-User": req.user.id.toString()
+              },
+              ContentType: "image/webp",
+              ACL: "public-read",
+              CacheControl: "max-age=2592000" // 30 days
+            })
+          );
+
+          if (s3_file.$metadata.httpStatusCode !== 200) {
+            console.error("Error uploading file to S3.", s3_file);
+
+            return res.status(400).json({
+              error: "invalid_request",
+              message: "Something went wrong."
+            });
+          }
+
+          const attachment = await prisma.attachment.create({
+            data: {
               type: "Image",
               url: process.env.CDN_URL
                 ? `${process.env.CDN_URL}/${file_key}`
@@ -287,143 +277,154 @@ router.post("/", authMiddleware, async (req: RequestWithUser, res) => {
               width: img_metadata.width,
               height: img_metadata.pageHeight || img_metadata.height
             }
-          }
-        },
-        include: {
-          attachments: true
+          });
+
+          const queue_scan_images = new Queue(
+            "queue_scan_images",
+            process.env.REDIS_URL!
+          );
+
+          await queue_scan_images.add({
+            attachment_id: attachment.id,
+            data: buffer
+          });
+
+          files_to_upload.push(attachment.id);
         }
-      });
 
-      const queue_scan_images = new Queue(
-        "queue_scan_images",
-        process.env.REDIS_URL!
-      );
-
-      await queue_scan_images.add({
-        attachment_id: post.attachments[0].id,
-        data: buffer
-      });
-
-      await generatePostMentions(post.id.toString(), body);
-
-      await posthog.capture({
-        distinctId: req.user.id.toString(),
-        event: "post",
-        properties: {
-          post_id: post.id.toString(),
-          ip_address:
-            req.headers["x-forwarded-for"] || req.headers["cf-connecting-ip"],
-          user_agent: req.headers["user-agent"],
-          replying_to: replying_to ? replying_to : undefined,
-          image: process.env.CDN_URL
-            ? `${process.env.CDN_URL}/${file_key}`
-            : `https://${process.env.AWS_BUCKET}.s3.amazonaws.com/${file_key}`,
-          body: body
-        }
-      });
-
-      if (replying_to) {
-        const original_post = await prisma.post.findUnique({
-          where: {
-            id: BigInt(replying_to)
+        const post = await prisma.post.create({
+          data: {
+            body,
+            author_id: BigInt(req.user.id),
+            reply_to_id: replying_to ? BigInt(replying_to) : undefined,
+            flags: flags,
+            attachments: {
+              connect: files_to_upload.map((id) => ({ id: id }))
+            }
           },
           include: {
-            author: {
-              select: {
-                id: true,
-                username: true,
-                notifications_push_replied_to: true
-              }
-            }
+            attachments: true
           }
         });
 
-        if (
-          original_post.author.notifications_push_replied_to &&
-          original_post.author_id !== user.id
-        ) {
-          await sendNotification(
-            original_post.author.id,
-            `Folks`,
-            `${user.display_name} replied to your post: ${post.body.slice(
-              0,
-              20
-            )}${post.body.length > 20 ? "..." : ""}`,
-            `${process.env.NODE_ENV === "production" ? "https://folkscommunity.com" : process.env.DEV_URL}/${user.username}/${post.id}`
-          );
-        }
-      }
-    } else {
-      const post = await prisma.post.create({
-        data: {
-          body,
-          flags: flags,
-          author_id: BigInt(req.user.id),
-          reply_to_id: replying_to ? BigInt(replying_to) : undefined
-        }
-      });
+        await generatePostMentions(post.id.toString(), body);
 
-      await generatePostMentions(post.id.toString(), body);
-
-      await posthog.capture({
-        distinctId: req.user.id.toString(),
-        event: "post",
-        properties: {
-          post_id: post.id.toString(),
-          ip_address:
-            req.headers["x-forwarded-for"] || req.headers["cf-connecting-ip"],
-          user_agent: req.headers["user-agent"],
-          replying_to: replying_to ? replying_to : undefined,
-          image: false,
-          body: body
-        }
-      });
-
-      if (replying_to) {
-        const original_post = await prisma.post.findUnique({
-          where: {
-            id: BigInt(replying_to)
-          },
-          include: {
-            author: {
-              select: {
-                id: true,
-                username: true,
-                notifications_push_replied_to: true
-              }
-            }
+        await posthog.capture({
+          distinctId: req.user.id.toString(),
+          event: "post",
+          properties: {
+            post_id: post.id.toString(),
+            ip_address:
+              req.headers["x-forwarded-for"] || req.headers["cf-connecting-ip"],
+            user_agent: req.headers["user-agent"],
+            replying_to: replying_to ? replying_to : undefined,
+            body: body
           }
         });
 
-        if (
-          original_post.author.notifications_push_replied_to &&
-          original_post.author_id !== user.id
-        ) {
-          await sendNotification(
-            original_post.author.id,
-            `Folks`,
-            `${user.display_name} replied to your post: ${post.body.slice(
-              0,
-              20
-            )}${post.body.length > 20 ? "..." : ""}`,
-            `${process.env.NODE_ENV === "production" ? "https://folkscommunity.com" : process.env.DEV_URL}/${user.username}/${post.id}`
-          );
+        if (replying_to) {
+          const original_post = await prisma.post.findUnique({
+            where: {
+              id: BigInt(replying_to)
+            },
+            include: {
+              author: {
+                select: {
+                  id: true,
+                  username: true,
+                  notifications_push_replied_to: true
+                }
+              }
+            }
+          });
+
+          if (
+            original_post.author.notifications_push_replied_to &&
+            original_post.author_id !== user.id
+          ) {
+            await sendNotification(
+              original_post.author.id,
+              `Folks`,
+              `${user.display_name} replied to your post: ${post.body.slice(
+                0,
+                20
+              )}${post.body.length > 20 ? "..." : ""}`,
+              `${process.env.NODE_ENV === "production" ? "https://folkscommunity.com" : process.env.DEV_URL}/${user.username}/${post.id}`
+            );
+          }
+        }
+      } else {
+        const post = await prisma.post.create({
+          data: {
+            body,
+            flags: flags,
+            author_id: BigInt(req.user.id),
+            reply_to_id: replying_to ? BigInt(replying_to) : undefined
+          }
+        });
+
+        await generatePostMentions(post.id.toString(), body);
+
+        await posthog.capture({
+          distinctId: req.user.id.toString(),
+          event: "post",
+          properties: {
+            post_id: post.id.toString(),
+            ip_address:
+              req.headers["x-forwarded-for"] || req.headers["cf-connecting-ip"],
+            user_agent: req.headers["user-agent"],
+            replying_to: replying_to ? replying_to : undefined,
+            image: false,
+            body: body
+          }
+        });
+
+        if (replying_to) {
+          const original_post = await prisma.post.findUnique({
+            where: {
+              id: BigInt(replying_to)
+            },
+            include: {
+              author: {
+                select: {
+                  id: true,
+                  username: true,
+                  notifications_push_replied_to: true
+                }
+              }
+            }
+          });
+
+          if (
+            original_post.author.notifications_push_replied_to &&
+            original_post.author_id !== user.id
+          ) {
+            await sendNotification(
+              original_post.author.id,
+              `Folks`,
+              `${user.display_name} replied to your post: ${post.body.slice(
+                0,
+                20
+              )}${post.body.length > 20 ? "..." : ""}`,
+              `${process.env.NODE_ENV === "production" ? "https://folkscommunity.com" : process.env.DEV_URL}/${user.username}/${post.id}`
+            );
+          }
         }
       }
+
+      res.setHeader("Content-Type", "application/json");
+      res.send(JSONtoString({ ok: true }));
+    } catch (e) {
+      console.error(e);
+      Sentry.captureException(e);
+
+      res.status(500).json({
+        error: "server_error",
+        message: "Something went wrong."
+      });
     }
-
-    res.setHeader("Content-Type", "application/json");
-    res.send(JSONtoString({ ok: true }));
-  } catch (e) {
-    console.error(e);
-    Sentry.captureException(e);
-
-    res.status(500).json({
-      error: "server_error",
-      message: "Something went wrong."
-    });
   }
-});
+);
 
 router.get("/:id", async (req: RequestWithUser, res) => {
   try {

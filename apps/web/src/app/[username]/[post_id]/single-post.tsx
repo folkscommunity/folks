@@ -196,7 +196,7 @@ export function SinglePost({ user, post }: { user: any; post: any }) {
         />
 
         {lPost.attachments && lPost.attachments.length > 0 && (
-          <div className="pt-4">
+          <div className="flex gap-2 pt-4">
             {lPost.attachments.map((attachment: any, i: number) => (
               <TimelinePhoto
                 key={attachment.id}

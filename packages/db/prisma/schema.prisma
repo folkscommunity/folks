@@ -180,8 +180,8 @@ enum AttachmentType {
 model Attachment {
   id String @id @unique @default(uuid())
 
-  post_id BigInt
-  post    Post   @relation(fields: [post_id], references: [id], name: "attachments", onDelete: Cascade)
+  post_id BigInt?
+  post    Post?   @relation(fields: [post_id], references: [id], name: "attachments", onDelete: Cascade)
 
   type AttachmentType
 

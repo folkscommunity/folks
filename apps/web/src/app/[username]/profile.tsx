@@ -186,15 +186,28 @@ export default function Profile({
   useEffect(() => {
     if (tab !== queryTab) {
       const url = new URL(window.location.href);
+
       if (tab === Tabs.POSTS) {
         url.searchParams.delete("tab");
-        window.history.pushState({}, "", url.toString());
+        window.history.replaceState({ tab }, "", url.toString());
       } else {
         url.searchParams.set("tab", tab);
-        window.history.pushState({}, "", url.toString());
+        window.history.replaceState({ tab }, "", url.toString());
       }
     }
-  }, [tab]);
+
+    const handlePopState = (e: PopStateEvent) => {
+      if (e.state?.tab) {
+        setTab(e.state.tab);
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, [tab, queryTab]);
 
   return (
     <>
