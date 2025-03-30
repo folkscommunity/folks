@@ -2,9 +2,13 @@ import dayjs from "dayjs";
 
 import { parsePostBody } from "@/lib/post-utils";
 
-export const current_release = "0.9.2";
+export const current_release = "0.9.3";
 
 const releases = [
+  {
+    version: "0.9.3",
+    changes: ["Fixed the reply composer."]
+  },
   {
     version: "0.9.2",
     changes: ["Fixed full screen images in single post view."]

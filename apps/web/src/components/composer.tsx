@@ -77,9 +77,6 @@ export function ReplyCompose({
 
     fetch("/api/post", {
       method: "POST",
-      headers: {
-        "Content-Type": "multipart/form-data"
-      },
       body: formData
     })
       .then((res) => res.json())
