@@ -90,7 +90,9 @@ export function Users({ users }: { users: any[] }) {
                       {!user.email_verified && (
                         <button
                           className="text-foreground inline"
-                          onClick={() => sendVerifyEmail(user.id, user.email)}
+                          onClick={() =>
+                            sendVerifyEmail(user.id.toString(), user.email)
+                          }
                         >
                           !! Resend Email !!
                         </button>
