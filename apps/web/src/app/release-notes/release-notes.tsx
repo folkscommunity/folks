@@ -2,9 +2,13 @@ import dayjs from "dayjs";
 
 import { parsePostBody } from "@/lib/post-utils";
 
-export const current_release = "0.9.3";
+export const current_release = "0.9.4";
 
 const releases = [
+  {
+    version: "0.9.4",
+    changes: ["Admin tool to resend verify emails."]
+  },
   {
     version: "0.9.3",
     changes: ["Fixed the reply composer."]

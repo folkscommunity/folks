@@ -1,8 +1,36 @@
+"use client";
+
 import dayjs from "dayjs";
+import { toast } from "sonner";
 
 import { FolksAvatar } from "@/components/folks-avatar";
 
 export function Users({ users }: { users: any[] }) {
+  function sendVerifyEmail(id: string, email: string) {
+    fetch(`/api/admin/resend-verify-email`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        id: id
+      })
+    })
+      .then((res) => res.json())
+      .then((d) => {
+        if (d.ok) {
+          toast.success("Verification email sent to " + email);
+        } else {
+          console.log(d);
+          toast.error("Failed to send verification email to " + email);
+        }
+      })
+      .catch((e) => {
+        console.log(e);
+        toast.error("Failed to send verification email to " + email);
+      });
+  }
+
   return (
     <div className="flex w-full max-w-3xl flex-1 flex-col gap-2 max-sm:px-2">
       <div className="max-w-[83ch]">
@@ -59,6 +87,14 @@ export function Users({ users }: { users: any[] }) {
                     <div>
                       <span className="opacity-50">Email Verified:</span>{" "}
                       {user.email_verified ? "Yes" : "No"}
+                      {!user.email_verified && (
+                        <button
+                          className="text-foreground inline"
+                          onClick={() => sendVerifyEmail(user.id, user.email)}
+                        >
+                          !! Resend Email !!
+                        </button>
+                      )}
                     </div>
                     <div>
                       <span className="opacity-50">Follower Count:</span>{" "}

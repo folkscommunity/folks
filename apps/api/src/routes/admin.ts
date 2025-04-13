@@ -6,6 +6,7 @@ import { JSONtoString } from "@folks/utils";
 
 import { Sentry } from "@/instrument";
 import { authMiddleware, RequestWithUser } from "@/lib/auth_middleware";
+import { sendVerifyEmail } from "@/lib/send_email";
 
 const router = Router();
 
@@ -205,5 +206,49 @@ router.get("/jobs", authMiddleware, async (req: RequestWithUser, res) => {
     res.status(500).json({ error: "server_error" });
   }
 });
+
+router.post(
+  "/resend-verify-email",
+  authMiddleware,
+  async (req: RequestWithUser, res) => {
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id: BigInt(req.user.id), super_admin: true }
+      });
+      if (!user) {
+        return res.status(403).json({ error: "unauthorized" });
+      }
+
+      const { id } = req.body;
+
+      if (!id) {
+        return res.status(400).json({ error: "invalid_request" });
+      }
+
+      const user_to_resend_verify_email = await prisma.user.findUnique({
+        where: {
+          id: BigInt(id)
+        }
+      });
+
+      if (!user_to_resend_verify_email) {
+        return res.status(400).json({ error: "user_not_found" });
+      }
+
+      if (user_to_resend_verify_email.email_verified) {
+        return res.status(400).json({ error: "email_already_verified" });
+      }
+
+      await sendVerifyEmail(user_to_resend_verify_email.id.toString());
+
+      res.json({ ok: true });
+    } catch (err) {
+      console.error(err);
+      Sentry.captureException(err);
+
+      res.status(500).json({ error: "server_error" });
+    }
+  }
+);
 
 export default router;
