@@ -2,23 +2,36 @@ import dayjs from "dayjs";
 
 import { parsePostBody } from "@/lib/post-utils";
 
-export const current_release = "0.9.4";
+export const current_release = "0.9.5";
 
 const releases = [
   {
+    version: "0.9.5",
+    date: "2025-04-16",
+    changes: [
+      "Added a public roadmap.",
+      "Added an announcement banner.",
+      "Fixed a bug with the notifications on PWA's."
+    ]
+  },
+  {
     version: "0.9.4",
+    date: "2025-04-13",
     changes: ["Admin tool to resend verify emails."]
   },
   {
     version: "0.9.3",
+    date: "2025-03-30",
     changes: ["Fixed the reply composer."]
   },
   {
     version: "0.9.2",
+    date: "2025-03-28",
     changes: ["Fixed full screen images in single post view."]
   },
   {
     version: "0.9.1",
+    date: "2025-03-28",
     changes: [
       "Optimized timeline images.",
       "Changed the timeline full screen image viewer."
@@ -26,6 +39,7 @@ const releases = [
   },
   {
     version: "0.9",
+    date: "2025-03-28",
     changes: [
       "Added suport for multiple images in a post.",
       "Improved navigation history on profiles."

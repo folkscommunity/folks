@@ -239,6 +239,15 @@ function Overlay({ onClose }: { onClose: () => void }) {
         >
           Manifesto
         </Link>
+        <Link
+          href="/roadmap"
+          className="!no-underline"
+          onClick={() => {
+            onClose();
+          }}
+        >
+          Roadmap
+        </Link>
 
         <div className="flex flex-row gap-4 px-4 text-sm">
           <span>·</span>

@@ -21,6 +21,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8
     },
     {
+      url: "https://folkscommunity.com/roadmap",
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 0.8
+    },
+    {
       url: "https://folkscommunity.com/guidelines",
       lastModified: new Date(),
       changeFrequency: "weekly",

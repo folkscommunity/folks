@@ -22,6 +22,7 @@ import messages_router from "./routes/messages";
 import notifications_router from "./routes/notifications";
 import post_router from "./routes/post";
 import ribbon_router from "./routes/ribbon";
+import roadmap_router from "./routes/roadmap";
 import stickers_router from "./routes/stickers";
 import support_router from "./routes/support";
 import user_router from "./routes/user";
@@ -92,6 +93,7 @@ async function mainThread() {
   app.use("/api/articles", articles_router);
   app.use("/api/boards", boards_router);
   app.use("/api/admin", admin_router);
+  app.use("/api/roadmap", roadmap_router);
 
   io.use(async (socket: SocketWithUser | any, next) => {
     try {

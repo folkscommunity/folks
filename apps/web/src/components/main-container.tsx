@@ -2,6 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { current_release } from "@/app/release-notes/release-notes";
+import { parsePostBody } from "@/lib/post-utils";
+import { redis } from "@/lib/redis";
 import { ServerRibbon } from "@/lib/server-ribbon";
 import { ServerSession } from "@/lib/server-session";
 import { cn } from "@/lib/utils";
@@ -37,6 +39,8 @@ export async function MainContainer({
 }) {
   const user = await ServerSession();
   const ribbon = await ServerRibbon();
+
+  const announcement = await redis.get("announcement");
 
   return (
     <div className={cn("mx-auto flex flex-col", !hideTopRibbon && "pt-[32px]")}>
@@ -116,6 +120,17 @@ export async function MainContainer({
           {!user && !hideAbout && <Separator />}
 
           {!user && !hideAbout && <FolksAboutTop />}
+
+          {user && announcement && (
+            <div className="flex w-full flex-col gap-2 text-center text-sm">
+              <Separator />
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: parsePostBody(announcement)
+                }}
+              />
+            </div>
+          )}
 
           {user && <PushNotificationManager />}
 

@@ -22,6 +22,7 @@ function PushNotificationManagerClient() {
   const [subscription, setSubscription] = useState<PushSubscription | null>(
     null
   );
+  const [isClient, setIsClient] = useState(false);
 
   function isRunningStandalone() {
     return window.matchMedia("(display-mode: standalone)").matches;
@@ -31,6 +32,10 @@ function PushNotificationManagerClient() {
     if ("serviceWorker" in navigator && "PushManager" in window) {
       setIsSupported(true);
       registerServiceWorker();
+
+      setTimeout(() => {
+        setIsClient(true);
+      }, 1000);
     }
   }, []);
 
@@ -92,7 +97,7 @@ function PushNotificationManagerClient() {
 
   return (
     <>
-      {isRunningStandalone() && isSupported && !subscription ? (
+      {isRunningStandalone() && isSupported && !subscription && isClient ? (
         <div className="flex w-full items-center justify-center">
           <button onClick={() => subscribeToPush()}>
             Enable Push Notifications

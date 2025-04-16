@@ -64,6 +64,7 @@ model User {
   messages                   Message[]              @relation("user_message")
   articles                   Article[]              @relation("user_article")
   boards                     Board[]                @relation("boards")
+  roadmap_items              RoadmapItem[]          @relation("roadmap_items")
 
   @@index([id])
   @@index([username])
@@ -437,4 +438,29 @@ model BoardItem {
 
   @@index([board_id])
   @@map("board_items")
+}
+
+enum RoadmapItemStatus {
+  SUGGESTED
+  PLANNED
+  IN_PROGRESS
+  COMPLETED
+}
+
+model RoadmapItem {
+  id String @id @default(cuid())
+
+  title       String
+  description String?
+
+  status RoadmapItemStatus @default(SUGGESTED)
+
+  created_by_id BigInt
+  created_by    User   @relation(fields: [created_by_id], references: [id], name: "roadmap_items", onDelete: Cascade)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([status])
+  @@map("roadmap_items")
 }

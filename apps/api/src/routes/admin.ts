@@ -6,6 +6,7 @@ import { JSONtoString } from "@folks/utils";
 
 import { Sentry } from "@/instrument";
 import { authMiddleware, RequestWithUser } from "@/lib/auth_middleware";
+import { redis } from "@/lib/redis";
 import { sendVerifyEmail } from "@/lib/send_email";
 
 const router = Router();
@@ -240,6 +241,37 @@ router.post(
       }
 
       await sendVerifyEmail(user_to_resend_verify_email.id.toString());
+
+      res.json({ ok: true });
+    } catch (err) {
+      console.error(err);
+      Sentry.captureException(err);
+
+      res.status(500).json({ error: "server_error" });
+    }
+  }
+);
+
+router.patch(
+  "/announcement",
+  authMiddleware,
+  async (req: RequestWithUser, res) => {
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id: BigInt(req.user.id), super_admin: true }
+      });
+
+      if (!user) {
+        return res.status(403).json({ error: "unauthorized" });
+      }
+
+      const { announcement } = req.body;
+
+      if (!announcement) {
+        await redis.del("announcement");
+      }
+
+      await redis.set("announcement", announcement);
 
       res.json({ ok: true });
     } catch (err) {

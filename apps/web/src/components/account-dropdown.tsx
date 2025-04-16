@@ -106,6 +106,13 @@ export function AccountDropdown({ user }: { user: any }) {
             Manifesto
           </Link>
 
+          <Link
+            href="/roadmap"
+            className="font-base text-foreground cursor-pointer px-4 py-1 hover:text-slate-500 hover:underline"
+          >
+            Roadmap
+          </Link>
+
           <div className="text-black-600 px-4 text-sm">· · ·</div>
 
           <span
