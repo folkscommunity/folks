@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 
 import { AccountDropdown } from "./account-dropdown";
 import { CreateRibbonModal } from "./create-ribbon-modal";
+import { EasterEgg } from "./easter-egg";
 import { FolksAboutTop } from "./folks-about-top";
 import { MobileNavigation } from "./mobile-navigation";
 import { NavDMsLink } from "./nav-dms-link";
@@ -41,6 +42,7 @@ export async function MainContainer({
   const ribbon = await ServerRibbon();
 
   const announcement = await redis.get("announcement");
+  const easter_feature_flag = await redis.get("feature_flags:easter");
 
   return (
     <div className={cn("mx-auto flex flex-col", !hideTopRibbon && "pt-[32px]")}>
@@ -82,6 +84,12 @@ export async function MainContainer({
 
             {user && (
               <div className="text-md flex flex-1 flex-row justify-end gap-2 pt-2 max-sm:hidden">
+                {easter_feature_flag === "true" && (
+                  <>
+                    <EasterEgg />
+                    <span>·</span>
+                  </>
+                )}
                 <Link href="/">Posts</Link>
                 <span>·</span>
                 <Link href="/boards">Boards</Link>
