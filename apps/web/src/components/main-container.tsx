@@ -72,15 +72,29 @@ export async function MainContainer({
           )}
         >
           <div className="flex w-full flex-row items-center justify-center gap-2 max-sm:flex-col">
-            <Link href="/">
-              <Image
-                src="/images/logo.svg"
-                alt="Folks Logo"
-                width={80}
-                height={80 * 0.3221}
-                className="dark:invert"
-              />
-            </Link>
+            <div className="max-sm:flex max-sm:w-full max-sm:items-center max-sm:justify-between">
+              <div className="hidden max-sm:flex max-sm:w-[32px]"></div>
+
+              <Link href="/">
+                <Image
+                  src="/images/logo.svg"
+                  alt="Folks Logo"
+                  width={80}
+                  height={80 * 0.3221}
+                  className="dark:invert"
+                />
+              </Link>
+
+              {user && (
+                <div className="z-[99999] hidden max-sm:flex">
+                  {easter_feature_flag === "true" && (
+                    <>
+                      <EasterEgg mobile={true} />
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
 
             {user && (
               <div className="text-md flex flex-1 flex-row justify-end gap-2 pt-2 max-sm:hidden">
