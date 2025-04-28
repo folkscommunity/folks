@@ -144,7 +144,7 @@ router.post("/create", authMiddleware, async (req: RequestWithUser, res) => {
 
 router.get("/user/:user_id", async (req, res) => {
   try {
-    const folks_sid = req.cookies.folks_sid;
+    const folks_sid = req.cookies.folks_sid || req.headers.authorization;
     let user_id = null;
     let user = null;
 
@@ -368,7 +368,7 @@ router.post(
 
 router.get("/:board_id/items", async (req, res) => {
   try {
-    const folks_sid = req.cookies.folks_sid;
+    const folks_sid = req.cookies.folks_sid || req.headers.authorization;
     let user_id = null;
     let user = null;
 

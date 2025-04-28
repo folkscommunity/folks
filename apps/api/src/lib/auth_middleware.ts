@@ -16,7 +16,7 @@ export async function authMiddleware(
   res: Response,
   next: NextFunction
 ) {
-  const folks_sid = req.cookies.folks_sid;
+  const folks_sid = req.cookies.folks_sid || req.headers.authorization;
 
   try {
     if (folks_sid) {

@@ -239,7 +239,7 @@ router.post("/register", async (req, res) => {
 // POST @/api/auth/login
 router.post("/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, mobile } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({ error: "invalid_request" });
@@ -306,16 +306,18 @@ router.post("/login", async (req, res) => {
       60 * 60 * 24 * 180
     );
 
-    res.cookie("folks_sid", token, {
-      httpOnly: true,
-      maxAge: 1000 * 60 * 60 * 24 * 180,
-      sameSite: "strict",
-      domain:
-        process.env.NODE_ENV === "production"
-          ? "folkscommunity.com"
-          : undefined,
-      secure: process.env.NODE_ENV === "production"
-    });
+    if (!mobile) {
+      res.cookie("folks_sid", token, {
+        httpOnly: true,
+        maxAge: 1000 * 60 * 60 * 24 * 180,
+        sameSite: "strict",
+        domain:
+          process.env.NODE_ENV === "production"
+            ? "folkscommunity.com"
+            : undefined,
+        secure: process.env.NODE_ENV === "production"
+      });
+    }
 
     await redis.del(`rate_limit:login:${ip_address}`);
 
@@ -324,12 +326,17 @@ router.post("/login", async (req, res) => {
       event: "login",
       properties: {
         ip_address: ip_address,
-        user_agent: user_agent
+        user_agent: user_agent,
+        mobile: mobile
       }
     });
 
     res.setHeader("Content-Type", "application/json");
-    res.send(JSONtoString({ ok: true }));
+    if (mobile) {
+      res.send(JSONtoString({ ok: true, token: token }));
+    } else {
+      res.send(JSONtoString({ ok: true }));
+    }
   } catch (err) {
     console.error(err);
 
@@ -339,7 +346,7 @@ router.post("/login", async (req, res) => {
 
 router.get("/logout", async (req, res) => {
   try {
-    const token = req.cookies.folks_sid;
+    const token = req.cookies.folks_sid || req.headers.authorization;
 
     if (!token) {
       return res.status(400).json({ error: "invalid_credentials" });

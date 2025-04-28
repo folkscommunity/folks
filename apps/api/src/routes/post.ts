@@ -430,7 +430,7 @@ router.get("/:id", async (req: RequestWithUser, res) => {
   try {
     const { id } = req.params;
 
-    const folks_sid = req.cookies.folks_sid;
+    const folks_sid = req.cookies.folks_sid || req.headers.authorization;
 
     let user_id = null;
 
@@ -746,7 +746,7 @@ router.get("/:id/thread", async (req, res) => {
   try {
     const { id } = req.params;
 
-    const folks_sid = req.cookies.folks_sid;
+    const folks_sid = req.cookies.folks_sid || req.headers.authorization;
     let user_id = null;
 
     if (folks_sid) {
@@ -794,7 +794,7 @@ router.get("/:id/likes", async (req, res) => {
   try {
     const { id } = req.params;
 
-    const folks_sid = req.cookies.folks_sid;
+    const folks_sid = req.cookies.folks_sid || req.headers.authorization;
 
     let user_id = null;
 

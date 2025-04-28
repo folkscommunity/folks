@@ -32,7 +32,7 @@ router.get("/", async (req, res) => {
       });
     }
 
-    const folks_sid = req.cookies.folks_sid;
+    const folks_sid = req.cookies.folks_sid || req.headers.authorization;
 
     let user_id = null;
 
