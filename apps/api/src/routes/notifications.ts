@@ -306,4 +306,74 @@ router.post(
   }
 );
 
+router.post(
+  "/register/ios",
+  authMiddleware,
+  async (req: RequestWithUser, res) => {
+    try {
+      const user = await prisma.user.findUnique({
+        where: {
+          id: BigInt(req.user.id)
+        }
+      });
+
+      if (!user) {
+        return res.status(400).json({ error: "invalid_request" });
+      }
+
+      const { token } = req.body;
+
+      if (!token) {
+        return res.status(400).json({ error: "invalid_request" });
+      }
+
+      const existing = await prisma.notificationEndpoint.findFirst({
+        where: {
+          id: btoa(token),
+          user_id: user.id
+        }
+      });
+
+      if (existing) {
+        return res.status(200).json({ error: "already_registered" });
+      }
+
+      const user_agent = req.headers["user-agent"];
+
+      await prisma.notificationEndpoint.create({
+        data: {
+          id: btoa(token),
+          user_id: user.id,
+          type: NotificationEndpointType.IOS,
+          user_agent: user_agent,
+          enabled: true,
+          endpoint: {
+            token: token
+          }
+        }
+      });
+
+      await posthog.capture({
+        distinctId: user.id.toString(),
+        event: "register_notification_endpoint",
+        properties: {
+          endpoint_type: "ios",
+          endpoint_id: token
+        }
+      });
+
+      res.setHeader("Content-Type", "application/json");
+      res.send(
+        JSONtoString({
+          ok: true
+        })
+      );
+    } catch (err) {
+      console.error(err);
+
+      res.status(500).json({ error: "server_error" });
+    }
+  }
+);
+
 export default router;
