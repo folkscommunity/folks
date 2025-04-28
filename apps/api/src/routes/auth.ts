@@ -346,7 +346,10 @@ router.post("/login", async (req, res) => {
 
 router.get("/logout", async (req, res) => {
   try {
-    const token = req.cookies.folks_sid || req.headers.authorization;
+    const token =
+      req.cookies.folks_sid ||
+      req.headers.authorization ||
+      req.headers.Authorization;
 
     if (!token) {
       return res.status(400).json({ error: "invalid_credentials" });

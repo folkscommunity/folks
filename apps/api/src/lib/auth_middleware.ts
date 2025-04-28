@@ -16,7 +16,10 @@ export async function authMiddleware(
   res: Response,
   next: NextFunction
 ) {
-  const folks_sid = req.cookies.folks_sid || req.headers.authorization;
+  const folks_sid =
+    req.cookies.folks_sid ||
+    req.headers.authorization ||
+    req.headers.Authorization;
 
   try {
     if (folks_sid) {

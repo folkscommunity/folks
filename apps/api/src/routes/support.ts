@@ -49,7 +49,10 @@ router.post("/", async (req, res) => {
       });
     }
 
-    const folks_sid = req.cookies.folks_sid || req.headers.authorization;
+    const folks_sid =
+      req.cookies.folks_sid ||
+      req.headers.authorization ||
+      req.headers.Authorization;
 
     let user_id = null;
 
