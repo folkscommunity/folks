@@ -580,4 +580,78 @@ router.get("/search", authMiddleware, async (req: RequestWithUser, res) => {
   }
 });
 
-export default router;
+router.get("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const selectedUser = await prisma.user.findUnique({
+      where: {
+        id: BigInt(id)
+      },
+      select: {
+        id: true,
+        username: true,
+        display_name: true,
+        avatar_url: true,
+        occupation: true,
+        location: true,
+        pronouns: true,
+        website: true,
+        super_admin: true,
+        suspended: true,
+        created_at: true,
+        updated_at: true,
+        _count: {
+          select: {
+            following: user && user.username === username ? true : false,
+            followers: user && user.username === username ? true : false,
+            articles: true,
+            boards: {
+              where: {
+                public: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    if (!selectedUser) {
+      res.status(404).json({
+        error: "not_found"
+      });
+      return;
+    }
+
+    res.setHeader("Content-Type", "application/json");
+    res.send(
+      JSONtoString({
+        ok: true,
+        data: {
+          id: selectedUser.id,
+          username: selectedUser.username,
+          display_name: selectedUser.display_name,
+          occupation: selectedUser.occupation || undefined,
+          avatar_url: selectedUser.avatar_url || undefined,
+          location: selectedUser.location || undefined,
+          pronouns: selectedUser.pronouns || undefined,
+          website: selectedUser.website || undefined,
+          ...(selectedUser.super_admin && { super_admin: true }),
+          ...(selectedUser.suspended && { suspended: true }),
+          created_at: selectedUser.created_at,
+          updated_at: selectedUser.updated_at,
+          count: {
+            following: selectedUser._count.following || undefined,
+            followers: selectedUser._count.followers || undefined,
+            articles: selectedUser._count.articles ?? 0,
+            boards: selectedUser._count.boards ?? 0
+          }
+        }
+      })
+    );
+  } catch (e) {
+    res.status(500).json({
+      error: "server_error"
+    });
+  }
+});
