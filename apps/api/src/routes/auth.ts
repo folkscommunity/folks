@@ -67,7 +67,7 @@ router.get("/", authMiddleware, async (req: RequestWithUser, res) => {
 // POST @/api/auth/register
 router.post("/register", async (req, res) => {
   try {
-    const { email, password, username, display_name } = req.body;
+    const { email, password, username, display_name, mobile } = req.body;
 
     if (!email || !password || !username || !display_name) {
       return res.status(400).json({ error: "invalid_request" });
@@ -197,16 +197,18 @@ router.post("/register", async (req, res) => {
       60 * 60 * 24 * 180
     );
 
-    res.cookie("folks_sid", token, {
-      httpOnly: true,
-      maxAge: 1000 * 60 * 60 * 24 * 180,
-      sameSite: "strict",
-      domain:
-        process.env.NODE_ENV === "production"
-          ? "folkscommunity.com"
-          : undefined,
-      secure: process.env.NODE_ENV === "production"
-    });
+    if (!mobile) {
+      res.cookie("folks_sid", token, {
+        httpOnly: true,
+        maxAge: 1000 * 60 * 60 * 24 * 180,
+        sameSite: "strict",
+        domain:
+          process.env.NODE_ENV === "production"
+            ? "folkscommunity.com"
+            : undefined,
+        secure: process.env.NODE_ENV === "production"
+      });
+    }
 
     sendVerifyEmail(created_user.id.toString());
 
@@ -221,14 +223,19 @@ router.post("/register", async (req, res) => {
       event: "register",
       properties: {
         ip_address: ip,
-        user_agent: user_agent
+        user_agent: user_agent,
+        mobile: mobile
       }
     });
 
     await redis.del(`rate_limit:register:${ip}:5m`);
 
     res.setHeader("Content-Type", "application/json");
-    res.send(JSONtoString({ ok: true }));
+    if (mobile) {
+      res.send(JSONtoString({ ok: true, token: token }));
+    } else {
+      res.send(JSONtoString({ ok: true }));
+    }
   } catch (err) {
     console.error(err);
 

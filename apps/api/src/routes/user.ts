@@ -2,6 +2,7 @@ import { createHash, randomUUID } from "crypto";
 import { DeleteObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import argon2 from "argon2";
 import { Router } from "express";
+import jwt from "jsonwebtoken";
 import multer from "multer";
 import sharp from "sharp";
 
@@ -11,6 +12,7 @@ import { JSONtoString, schemas } from "@folks/utils";
 import { authMiddleware, RequestWithUser } from "@/lib/auth_middleware";
 import { s3 } from "@/lib/aws";
 import { posthog } from "@/lib/posthog";
+import { redis } from "@/lib/redis";
 
 const upload = multer({
   limits: {
@@ -584,6 +586,23 @@ router.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
+    const folks_sid =
+      req.cookies.folks_sid ||
+      req.headers.authorization ||
+      req.headers.Authorization;
+
+    let user_id = null;
+
+    if (folks_sid) {
+      const jwt_object: any = jwt.decode(folks_sid);
+
+      const session = await redis.get(`session:${jwt_object.id}:${folks_sid}`);
+
+      if (session) {
+        user_id = jwt_object.id;
+      }
+    }
+
     const selectedUser = await prisma.user.findUnique({
       where: {
         id: BigInt(id)
@@ -603,12 +622,17 @@ router.get("/:id", async (req, res) => {
         updated_at: true,
         _count: {
           select: {
+            following:
+              user_id && user_id.toString() === id.toString() ? true : false,
+            followers:
+              user_id && user_id.toString() === id.toString() ? true : false,
             articles: true,
             boards: {
               where: {
                 public: true
               }
-            }
+            },
+            posts: true
           }
         }
       }
@@ -639,8 +663,11 @@ router.get("/:id", async (req, res) => {
           created_at: selectedUser.created_at,
           updated_at: selectedUser.updated_at,
           count: {
+            following: selectedUser._count.following || undefined,
+            followers: selectedUser._count.followers || undefined,
             articles: selectedUser._count.articles ?? 0,
-            boards: selectedUser._count.boards ?? 0
+            boards: selectedUser._count.boards ?? 0,
+            posts: selectedUser._count.posts ?? 0
           }
         }
       })
@@ -651,3 +678,5 @@ router.get("/:id", async (req, res) => {
     });
   }
 });
+
+export default router;
