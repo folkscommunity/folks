@@ -603,8 +603,6 @@ router.get("/:id", async (req, res) => {
         updated_at: true,
         _count: {
           select: {
-            following: user && user.username === username ? true : false,
-            followers: user && user.username === username ? true : false,
             articles: true,
             boards: {
               where: {
@@ -641,8 +639,6 @@ router.get("/:id", async (req, res) => {
           created_at: selectedUser.created_at,
           updated_at: selectedUser.updated_at,
           count: {
-            following: selectedUser._count.following || undefined,
-            followers: selectedUser._count.followers || undefined,
             articles: selectedUser._count.articles ?? 0,
             boards: selectedUser._count.boards ?? 0
           }
