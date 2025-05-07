@@ -25,9 +25,17 @@ webpush.setVapidDetails(
 
 const forbidden_labels = ["Explicit Nudity", "Visually Disturbing"];
 
+function fixAPNSp8Key(key: string) {
+  let key_replaced = key.replace(/ /g, "");
+  let token = key_replaced.split("-----")[2];
+  if (token.length > 150)
+    return `-----BEGIN PRIVATE KEY-----\n${token}\n-----END PRIVATE KEY-----`;
+  else return key;
+}
+
 const apnProvider = new apn.Provider({
   token: {
-    key: process.env.APN_AUTH_KEY!,
+    key: fixAPNSp8Key(process.env.APN_AUTH_KEY!),
     keyId: process.env.APN_KEY_ID!,
     teamId: process.env.APN_TEAM_ID!
   },
