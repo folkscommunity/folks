@@ -77,6 +77,10 @@ jobs:
           VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
           REDIS_URL: ${{ secrets.REDIS_URL }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          APN_AUTH_KEY: ${{ secrets.APN_AUTH_KEY }}
+          APN_KEY_ID: ${{ secrets.APN_KEY_ID }}
+          APN_TEAM_ID: ${{ secrets.APN_TEAM_ID }}
+          APN_TOPIC: ${{ secrets.APN_TOPIC }}
 
       - name: Discord notification (success)
         if: success()

@@ -4,7 +4,10 @@ import { prisma } from "@folks/db";
 import { JSONtoString } from "@folks/utils";
 
 import { authMiddleware, RequestWithUser } from "@/lib/auth_middleware";
-import { sendNotification } from "@/lib/notification_utils";
+import {
+  sendMobileNotification,
+  sendNotification
+} from "@/lib/notification_utils";
 import { sendToChannel } from "@/lib/socket";
 
 const router = Router();
@@ -281,7 +284,7 @@ router.get(
 );
 
 router.get(
-  "/channel/:channel_id",
+  "/get_channel/:channel_id",
   authMiddleware,
   async (req: RequestWithUser, res) => {
     try {
@@ -549,12 +552,20 @@ router.post("/message", authMiddleware, async (req: RequestWithUser, res) => {
           ) &&
           !member.muted
         ) {
-          await sendNotification(
-            member.user_id,
-            user.display_name,
-            message.toString().slice(0, 200),
-            `https://folkscommunity.com/messages/${channel_id}`
-          );
+          await sendNotification({
+            user_id: member.user_id,
+            title: "Folks",
+            body: `${user.display_name} sent you a message: ${message.toString().slice(0, 500)}`,
+            url: `/messages/${channel_id}`
+          });
+
+          await sendMobileNotification({
+            user_id: member.user_id,
+            title: `${user.display_name}`,
+            body: message.toString(),
+            url: `/messages/${channel_id}`,
+            thread_id: "messages-" + channel_id
+          });
         }
       }
     } catch (e) {

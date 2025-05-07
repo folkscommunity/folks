@@ -1,6 +1,7 @@
 /* eslint-disable prefer-const */
 import { DetectModerationLabelsCommand } from "@aws-sdk/client-rekognition";
 import { DeleteObjectCommand } from "@aws-sdk/client-s3";
+import apn from "@parse/node-apn";
 import Queue from "bull";
 import sharp from "sharp";
 import webpush from "web-push";
@@ -23,6 +24,15 @@ webpush.setVapidDetails(
 );
 
 const forbidden_labels = ["Explicit Nudity", "Visually Disturbing"];
+
+const apnProvider = new apn.Provider({
+  token: {
+    key: process.env.APN_AUTH_KEY!,
+    keyId: process.env.APN_KEY_ID!,
+    teamId: process.env.APN_TEAM_ID!
+  },
+  production: false
+});
 
 export async function sendWebPushNotification(
   id: any,
@@ -111,8 +121,94 @@ export function workerThread(id: number) {
           endpoint.endpoint,
           title,
           body,
-          url
+          "https://folkscommunity.com" + url
         );
+      }
+
+      return done();
+    } catch (e) {
+      Sentry.captureException(e, {
+        tags: {
+          job: "send_notification",
+          job_id: job.id,
+          data: job.data
+        }
+      });
+
+      console.error(e);
+    }
+
+    done();
+  });
+
+  const queue_send_mobile_notification = new Queue(
+    "queue_send_mobile_notification",
+    process.env.REDIS_URL!
+  );
+
+  queue_send_mobile_notification.process(1, async (job, done) => {
+    try {
+      const user_id = job.data.user_id;
+      const title = job.data.title;
+      const subtitle = job.data.subtitle;
+      const body = job.data.body;
+      const url = job.data.url;
+      const thread_id = job.data.thread_id;
+
+      if (!user_id || !body) {
+        return done();
+      }
+
+      const user = await prisma.user.findUnique({
+        where: {
+          id: BigInt(user_id)
+        },
+        include: {
+          notification_endpoints: true
+        }
+      });
+
+      if (!user || !user.notification_endpoints) {
+        return done();
+      }
+
+      const ios_device_tokens = user.notification_endpoints.filter(
+        (endpoint) => endpoint.type === NotificationEndpointType.IOS
+      );
+
+      for await (const endpoint of ios_device_tokens) {
+        const device_token = (endpoint.endpoint as { token: string })?.token;
+
+        const note = new apn.Notification();
+
+        note.alert = {
+          title: title,
+          subtitle: subtitle || undefined,
+          body: body
+        };
+
+        note.pushType = "alert";
+
+        note.payload = {
+          url: url || undefined
+        };
+
+        if (thread_id) {
+          note.threadId = thread_id;
+        }
+
+        note.topic = process.env.APN_TOPIC!;
+
+        try {
+          const result = await apnProvider.send(note, device_token);
+          console.log(result);
+
+          return done();
+        } catch (error) {
+          console.log(error);
+
+          return done();
+        }
       }
 
       return done();

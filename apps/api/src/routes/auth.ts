@@ -53,7 +53,10 @@ router.get("/", authMiddleware, async (req: RequestWithUser, res) => {
           created_at: user.created_at,
           email_verified: user.email_verified,
           notifications_last_read_at: user.notifications_last_read_at,
-          marketing_emails: user.marketing_emails
+          marketing_emails: user.marketing_emails,
+          ...(user.super_admin && {
+            super_admin: true
+          })
         }
       })
     );

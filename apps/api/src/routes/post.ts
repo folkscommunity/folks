@@ -13,7 +13,10 @@ import { JSONtoString, schemas } from "@folks/utils";
 import { Sentry } from "@/instrument";
 import { authMiddleware, RequestWithUser } from "@/lib/auth_middleware";
 import { s3 } from "@/lib/aws";
-import { sendNotification } from "@/lib/notification_utils";
+import {
+  sendMobileNotification,
+  sendNotification
+} from "@/lib/notification_utils";
 import { posthog } from "@/lib/posthog";
 import { redis } from "@/lib/redis";
 import { getURLFromText } from "@/lib/url_metadata";
@@ -75,15 +78,21 @@ async function generatePostMentions(post_id: string, body: string) {
       });
 
       if (matched_user.notifications_push_mentioned) {
-        await sendNotification(
-          matched_user.id,
-          `Folks`,
-          `${post.author.display_name} mentioned you in a post: ${post.body.slice(
-            0,
-            20
-          )}${post.body.length > 20 ? "..." : ""}`,
-          `${process.env.NODE_ENV === "production" ? "https://folkscommunity.com" : process.env.DEV_URL}/${post.author.username}/${post.id}`
-        );
+        await sendNotification({
+          user_id: matched_user.id,
+          title: `${post.author.display_name} mentioned you in a post`,
+          body: post.body,
+          url: `/${post.author.username}/${post.id}`
+        });
+
+        await sendMobileNotification({
+          user_id: matched_user.id,
+          title: `${post.author.display_name}`,
+          subtitle: "mentioned you in a post.",
+          body: post.body,
+          url: `/post/${post.id}`,
+          thread_id: "post-" + post.id
+        });
       }
     }
 
@@ -342,15 +351,24 @@ router.post(
             original_post.author.notifications_push_replied_to &&
             original_post.author_id !== user.id
           ) {
-            await sendNotification(
-              original_post.author.id,
-              `Folks`,
-              `${user.display_name} replied to your post: ${post.body.slice(
+            await sendNotification({
+              user_id: original_post.author.id,
+              title: "Folks",
+              body: `${user.display_name} replied to your post: ${post.body.slice(
                 0,
                 20
               )}${post.body.length > 20 ? "..." : ""}`,
-              `${process.env.NODE_ENV === "production" ? "https://folkscommunity.com" : process.env.DEV_URL}/${user.username}/${post.id}`
-            );
+              url: `/${user.username}/${post.id}`
+            });
+
+            await sendMobileNotification({
+              user_id: original_post.author.id,
+              title: `${user.display_name}`,
+              subtitle: "replied to your post.",
+              body: post.body,
+              url: `/post/${post.id}`,
+              thread_id: "post-" + post.id
+            });
           }
         }
       } else {
@@ -399,15 +417,24 @@ router.post(
             original_post.author.notifications_push_replied_to &&
             original_post.author_id !== user.id
           ) {
-            await sendNotification(
-              original_post.author.id,
-              `Folks`,
-              `${user.display_name} replied to your post: ${post.body.slice(
+            await sendNotification({
+              user_id: original_post.author.id,
+              title: "Folks",
+              body: `${user.display_name} replied to your post: ${post.body.slice(
                 0,
                 20
               )}${post.body.length > 20 ? "..." : ""}`,
-              `${process.env.NODE_ENV === "production" ? "https://folkscommunity.com" : process.env.DEV_URL}/${user.username}/${post.id}`
-            );
+              url: `/${user.username}/${post.id}`
+            });
+
+            await sendMobileNotification({
+              user_id: original_post.author.id,
+              title: `${user.display_name}`,
+              subtitle: "replied to your post.",
+              body: post.body,
+              url: `/post/${post.id}`,
+              thread_id: "post-" + post.id
+            });
           }
         }
       }
@@ -935,12 +962,21 @@ router.post("/like", authMiddleware, async (req: RequestWithUser, res) => {
     });
 
     if (post.author.notifications_push_liked_posts) {
-      await sendNotification(
-        post.author.id,
-        `Folks`,
-        `${user.display_name} liked your post: ${post.body.slice(0, 20)}${post.body.length > 20 ? "..." : ""}`,
-        `${process.env.NODE_ENV === "production" ? "https://folkscommunity.com" : process.env.DEV_URL}/${post.author.username}/${post_id}`
-      );
+      await sendNotification({
+        user_id: post.author.id,
+        title: "Folks",
+        body: `${user.display_name} liked your post: ${post.body.slice(0, 20)}${post.body.length > 20 ? "..." : ""}`,
+        url: `/${post.author.username}/${post_id}`
+      });
+
+      await sendMobileNotification({
+        user_id: post.author.id,
+        title: `${user.display_name}`,
+        subtitle: "liked your post.",
+        body: post.body,
+        url: `/post/${post_id}`,
+        thread_id: "post-" + post_id
+      });
     }
 
     res.setHeader("Content-Type", "application/json");

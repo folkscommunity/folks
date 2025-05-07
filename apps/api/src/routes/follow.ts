@@ -4,7 +4,10 @@ import { prisma } from "@folks/db";
 import { JSONtoString } from "@folks/utils";
 
 import { authMiddleware, RequestWithUser } from "@/lib/auth_middleware";
-import { sendNotification } from "@/lib/notification_utils";
+import {
+  sendMobileNotification,
+  sendNotification
+} from "@/lib/notification_utils";
 import { posthog } from "@/lib/posthog";
 
 const router = Router();
@@ -68,12 +71,19 @@ router.post("/", authMiddleware, async (req: RequestWithUser, res) => {
     });
 
     if (target.notifications_push_followed) {
-      await sendNotification(
-        target.id,
-        `Folks`,
-        `${user.display_name} (@${user.username}) followed you.`,
-        `${process.env.NODE_ENV === "production" ? "https://folkscommunity.com" : process.env.DEV_URL}/${user.username}`
-      );
+      await sendNotification({
+        user_id: target.id,
+        title: "Folks",
+        body: `${user.display_name} followed you.`,
+        url: `/${user.username}`
+      });
+
+      await sendMobileNotification({
+        user_id: target.id,
+        title: `${user.display_name})`,
+        body: `followed you.`,
+        url: `/user/${user.username}`
+      });
     }
 
     res.setHeader("Content-Type", "application/json");
