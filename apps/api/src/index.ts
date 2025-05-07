@@ -97,11 +97,15 @@ async function mainThread() {
 
   io.use(async (socket: SocketWithUser | any, next) => {
     try {
-      const folks_session = decodeURIComponent(
-        process_cookies(socket.handshake.headers.cookie).filter((cookie) =>
-          cookie.name.includes("folks_sid")
-        )[0].value
-      );
+      const auth_header = socket.handshake.headers.mobileauth;
+
+      const folks_session =
+        auth_header ||
+        decodeURIComponent(
+          process_cookies(socket.handshake.headers.cookie).filter((cookie) =>
+            cookie.name.includes("folks_sid")
+          )[0].value
+        );
 
       const jwt_object: any = jwt.decode(folks_session);
 
