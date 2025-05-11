@@ -398,7 +398,9 @@ export function Post({
                   src={attachment.url}
                   width={attachment.width}
                   height={attachment.height}
-                  alt={`${lPost.author.username}'s Photo`} // TODO: Handle ALT text
+                  alt={
+                    attachment.alt_text || `${lPost.author.username}'s Photo`
+                  }
                   onClick={() => setIndex(i)}
                 />
               ))}
@@ -413,7 +415,7 @@ export function Post({
                   view: ({ index: currentIndex }: any) => setIndex(currentIndex)
                 }}
                 slides={lPost.attachments.map((item: any) => ({
-                  alt: `${lPost.author.username}'s Photo`,
+                  alt: item.alt_text || `${lPost.author.username}'s Photo`,
                   src: item.url,
                   width: item.width,
                   height: item.height

@@ -116,6 +116,10 @@ router.post(
     try {
       const { body, replying_to } = req.body;
       const files = (req.files as any)?.files ?? [];
+      const alt_texts = req.body.alt_texts
+        ? JSON.parse(req.body.alt_texts)
+        : [];
+      let files_to_upload: string[] = [];
 
       // Rate Limiting
       const rate_limit = await redis.get(`rate_limit:post:${req.user.id}`);
@@ -207,8 +211,6 @@ router.post(
           });
         }
 
-        let files_to_upload = [];
-
         for await (const file of files) {
           const buffer = Buffer.from(file.buffer);
 
@@ -284,7 +286,8 @@ router.post(
                 ? `${process.env.CDN_URL}/${file_key}`
                 : `https://${process.env.AWS_BUCKET}.s3.amazonaws.com/${file_key}`,
               width: img_metadata.width,
-              height: img_metadata.pageHeight || img_metadata.height
+              height: img_metadata.pageHeight || img_metadata.height,
+              alt_text: alt_texts[files_to_upload.length] || null
             }
           });
 
@@ -527,7 +530,8 @@ router.get("/:id", async (req: RequestWithUser, res) => {
                 url: true,
                 type: true,
                 height: true,
-                width: true
+                width: true,
+                alt_text: true
               }
             },
             likes: user_id
@@ -560,10 +564,10 @@ router.get("/:id", async (req: RequestWithUser, res) => {
             url: true,
             type: true,
             height: true,
-            width: true
+            width: true,
+            alt_text: true
           }
         },
-
         author: {
           select: {
             id: true,
@@ -699,7 +703,8 @@ async function getReplies(
           url: true,
           type: true,
           height: true,
-          width: true
+          width: true,
+          alt_text: true
         }
       },
       author: {
@@ -1325,6 +1330,8 @@ router.delete(
 router.post("/import", authMiddleware, async (req: RequestWithUser, res) => {
   try {
     const { body, files, hide_embeds, timestamp, user_id } = req.body;
+    const alt_texts = req.body.alt_texts ? JSON.parse(req.body.alt_texts) : [];
+    let files_to_upload: string[] = [];
 
     const user = await prisma.user.findUnique({
       where: {
@@ -1475,7 +1482,8 @@ router.post("/import", authMiddleware, async (req: RequestWithUser, res) => {
                 ? `${process.env.CDN_URL}/${file_key}`
                 : `https://${process.env.AWS_BUCKET}.s3.amazonaws.com/${file_key}`,
               width: img_metadata.width,
-              height: img_metadata.pageHeight || img_metadata.height
+              height: img_metadata.pageHeight || img_metadata.height,
+              alt_text: alt_texts[0] || null
             }
           }
         },

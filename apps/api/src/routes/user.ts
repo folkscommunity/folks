@@ -568,11 +568,36 @@ router.get("/search", authMiddleware, async (req: RequestWithUser, res) => {
       }
     });
 
+    // Get follow states for all users in search results
+    const followStates = await prisma.following.findMany({
+      where: {
+        user_id: user.id,
+        target_id: {
+          in: users.map((u) => u.id)
+        }
+      },
+      select: {
+        target_id: true
+      }
+    });
+
+    const followingMap = new Map(
+      followStates.map((f) => [f.target_id.toString(), true])
+    );
+
+    const usersWithFollowState = users.map((u) => ({
+      id: u.id,
+      username: u.username,
+      display_name: u.display_name,
+      avatar_url: u.avatar_url,
+      following: followingMap.has(u.id.toString())
+    }));
+
     res.setHeader("Content-Type", "application/json");
     res.send(
       JSONtoString({
         ok: true,
-        data: users
+        data: usersWithFollowState
       })
     );
   } catch (e) {
@@ -581,6 +606,120 @@ router.get("/search", authMiddleware, async (req: RequestWithUser, res) => {
     });
   }
 });
+
+// search recommended users
+router.get(
+  "/search/recommended",
+  authMiddleware,
+  async (req: RequestWithUser, res) => {
+    try {
+      const user = await prisma.user.findUnique({
+        where: {
+          id: BigInt(req.user.id)
+        }
+      });
+
+      if (!user) {
+        res.status(403).json({
+          error: "forbidden"
+        });
+        return;
+      }
+
+      const recommendedUsers = await prisma.user.findMany({
+        where: {
+          NOT: {
+            id: user.id
+          },
+          posts: {
+            some: {} // Only include users who have at least one post
+          },
+          email_verified: true
+        },
+        take: 20,
+        select: {
+          id: true,
+          username: true,
+          display_name: true,
+          avatar_url: true
+        },
+        orderBy: {
+          posts: {
+            _count: "desc"
+          }
+        }
+      });
+
+      // Get the most recent post for each user
+      const userPosts = await prisma.post.findMany({
+        where: {
+          author_id: {
+            in: recommendedUsers.map((u) => u.id)
+          }
+        },
+        select: {
+          author_id: true,
+          created_at: true
+        },
+        orderBy: {
+          created_at: "desc"
+        }
+      });
+
+      // Create a map of most recent post dates
+      const mostRecentPosts = new Map();
+      for (const post of userPosts) {
+        if (!mostRecentPosts.has(post.author_id.toString())) {
+          mostRecentPosts.set(post.author_id.toString(), post.created_at);
+        }
+      }
+
+      // Sort recommended users by their most recent post date
+      const sortedUsers = [...recommendedUsers].sort((a, b) => {
+        const aDate = mostRecentPosts.get(a.id.toString());
+        const bDate = mostRecentPosts.get(b.id.toString());
+        return bDate.getTime() - aDate.getTime();
+      });
+
+      // Get follow states for all recommended users
+      const followStates = await prisma.following.findMany({
+        where: {
+          user_id: user.id,
+          target_id: {
+            in: sortedUsers.map((u) => u.id)
+          }
+        },
+        select: {
+          target_id: true
+        }
+      });
+
+      const followingMap = new Map(
+        followStates.map((f) => [f.target_id.toString(), true])
+      );
+
+      const usersWithFollowState = sortedUsers.map((u) => ({
+        id: u.id,
+        username: u.username,
+        display_name: u.display_name,
+        avatar_url: u.avatar_url,
+        following: followingMap.has(u.id.toString())
+      }));
+
+      res.setHeader("Content-Type", "application/json");
+      res.send(
+        JSONtoString({
+          ok: true,
+          data: usersWithFollowState
+        })
+      );
+    } catch (e) {
+      res.status(500).json({
+        error: "server_error"
+      });
+    }
+  }
+);
 
 router.get("/:id", async (req, res) => {
   try {

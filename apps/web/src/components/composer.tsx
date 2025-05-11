@@ -15,6 +15,16 @@ import {
 
 import { cn } from "@/lib/utils";
 
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
+} from "./dialog";
+
 export function ReplyCompose({
   post,
   user,
@@ -25,44 +35,55 @@ export function ReplyCompose({
   onPost: () => void;
 }) {
   const [text, setText] = useState("");
-
+  const [filesContent, setFilesContent] = useState<
+    { content: Uint8Array; name: string }[]
+  >([]);
+  const [altTexts, setAltTexts] = useState<string[]>([]);
   const [error, setError] = useState("");
   const [open, setOpen] = useState(false);
   const [posting, setPosting] = useState(false);
 
-  const { openFilePicker, filesContent, loading, errors, clear } =
-    useFilePicker({
-      readAs: "ArrayBuffer",
-      accept: "image/*",
-      multiple: true,
-      validators: [
-        new FileAmountLimitValidator({ max: 5 }),
-        new FileTypeValidator(["jpg", "jpeg", "png", "webp", "gif", "heic"]),
-        new FileSizeValidator({ maxFileSize: 50 * 1024 * 1024 /* 50 MB */ }),
-        new ImageDimensionsValidator({
-          maxWidth: 8000,
-          maxHeight: 8000
-        })
-      ],
-      onFilesRejected: (rejectedFiles: any) => {
-        const reason = rejectedFiles?.errors[0]?.reason;
-
-        if (reason === "FILE_TYPE_NOT_ACCEPTED") {
-          toast.error("Invalid file type.");
-        } else if (reason === "FILE_SIZE_TOO_LARGE") {
-          toast.error("File size exceeds limit.");
-        } else if (reason === "MAX_AMOUNT_OF_FILES_EXCEEDED") {
-          toast.error("You can upload up to 5 images.");
-        } else if (
-          reason === "IMAGE_HEIGHT_TOO_BIG" ||
-          reason === "IMAGE_WIDTH_TOO_BIG"
-        ) {
-          toast.error("Image dimensions exceeds limit. (8000x8000 max)");
-        } else {
-          toast.error("Invalid file type or size.");
-        }
+  const { openFilePicker, loading, errors, clear } = useFilePicker({
+    readAs: "ArrayBuffer",
+    accept: "image/*",
+    multiple: true,
+    validators: [
+      new FileAmountLimitValidator({ max: 5 }),
+      new FileTypeValidator(["jpg", "jpeg", "png", "webp", "gif", "heic"]),
+      new FileSizeValidator({ maxFileSize: 50 * 1024 * 1024 /* 50 MB */ }),
+      new ImageDimensionsValidator({
+        maxWidth: 8000,
+        maxHeight: 8000
+      })
+    ],
+    onFilesSelected: ({ plainFiles, filesContent: newFiles }) => {
+      if (plainFiles.length > 5) {
+        setError("You can only upload up to 5 images.");
+        return;
       }
-    });
+
+      setFilesContent(newFiles);
+      setAltTexts(new Array(newFiles.length).fill(""));
+    },
+    onFilesRejected: (rejectedFiles: any) => {
+      const reason = rejectedFiles?.errors[0]?.reason;
+
+      if (reason === "FILE_TYPE_NOT_ACCEPTED") {
+        toast.error("Invalid file type.");
+      } else if (reason === "FILE_SIZE_TOO_LARGE") {
+        toast.error("File size exceeds limit.");
+      } else if (reason === "MAX_AMOUNT_OF_FILES_EXCEEDED") {
+        toast.error("You can upload up to 5 images.");
+      } else if (
+        reason === "IMAGE_HEIGHT_TOO_BIG" ||
+        reason === "IMAGE_WIDTH_TOO_BIG"
+      ) {
+        toast.error("Image dimensions exceeds limit. (8000x8000 max)");
+      } else {
+        toast.error("Invalid file type or size.");
+      }
+    }
+  });
 
   function createPost(body: string, files: any[]) {
     setPosting(true);
@@ -70,6 +91,7 @@ export function ReplyCompose({
     const formData = new FormData();
     formData.append("body", body);
     formData.append("replying_to", post.id);
+    formData.append("alt_texts", JSON.stringify(altTexts));
 
     files.forEach((file) => {
       formData.append("files", new Blob([file.content]), file.name);
@@ -83,6 +105,8 @@ export function ReplyCompose({
       .then((res) => {
         if (res.ok) {
           setText("");
+          setFilesContent([]);
+          setAltTexts([]);
           setError("");
           clear();
 
@@ -141,17 +165,72 @@ export function ReplyCompose({
               className="group relative flex flex-col items-start"
             >
               <img
-                alt={file.name}
+                alt={altTexts[index] || file.name}
                 src={URL.createObjectURL(new Blob([file.content]))}
                 className="max-h-40 max-w-80 rounded-md border border-slate-300/0 dark:border-slate-800"
               />
 
               <button
                 className="bg-black-900 dark:bg-black-800 text-black-100 absolute ml-1 mt-1 rounded-full border border-neutral-300/0 p-1 dark:border-slate-800 dark:text-slate-400"
-                onClick={() => clear()}
+                onClick={() => {
+                  const newFiles = [...filesContent];
+                  newFiles.splice(index, 1);
+                  setFilesContent(newFiles);
+
+                  const newAltTexts = [...altTexts];
+                  newAltTexts.splice(index, 1);
+                  setAltTexts(newAltTexts);
+                }}
               >
                 <X className="size-4" />
               </button>
+
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button className="bg-black-900 dark:bg-black-800 text-black-100 absolute bottom-1 right-1 rounded-full border border-neutral-300/0 p-1 text-xs font-medium dark:border-slate-800 dark:text-slate-400">
+                    alt
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Add alt text</DialogTitle>
+                    <div className="pt-1 text-xs text-slate-500">
+                      Add a brief description of this image (1-2 sentences) to
+                      help visually impaired users and display if the image
+                      doesn't load.
+                    </div>
+                  </DialogHeader>
+                  <div className="flex items-center space-x-2 py-4">
+                    <div className="grid flex-1 gap-2">
+                      <input
+                        type="text"
+                        placeholder="Describe this image..."
+                        className="w-full rounded-md border border-slate-300 bg-transparent px-3 py-2 text-sm dark:border-slate-800"
+                        value={altTexts[index] || ""}
+                        onChange={(e) => {
+                          const newAltTexts = [...altTexts];
+                          newAltTexts[index] = e.target.value;
+                          setAltTexts(newAltTexts);
+                        }}
+                      />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <div className="flex gap-2">
+                      <DialogClose asChild>
+                        <button className="rounded-md border border-neutral-900 px-3 py-1 text-black disabled:border-neutral-400 dark:border-neutral-600 dark:text-white dark:disabled:border-neutral-800">
+                          Cancel
+                        </button>
+                      </DialogClose>
+                      <DialogClose asChild>
+                        <button className="rounded-md bg-neutral-900 px-3 py-1 text-white disabled:bg-neutral-400 dark:bg-neutral-600 dark:disabled:bg-neutral-800">
+                          Save
+                        </button>
+                      </DialogClose>
+                    </div>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </div>
           ))}
         </div>
@@ -184,6 +263,8 @@ export function ReplyCompose({
                     setOpen(false);
                     setText("");
                     setError("");
+                    setFilesContent([]);
+                    setAltTexts([]);
                     clear();
                   }}
                 >
@@ -223,44 +304,55 @@ export function ReplyComposeFloating({
   onPost: () => void;
 }) {
   const [text, setText] = useState("");
-
+  const [filesContent, setFilesContent] = useState<
+    { content: Uint8Array; name: string }[]
+  >([]);
+  const [altTexts, setAltTexts] = useState<string[]>([]);
   const [error, setError] = useState("");
   const [posting, setPosting] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
-  const { openFilePicker, filesContent, loading, errors, clear } =
-    useFilePicker({
-      readAs: "ArrayBuffer",
-      accept: "image/*",
-      multiple: true,
-      validators: [
-        new FileAmountLimitValidator({ max: 5 }),
-        new FileTypeValidator(["jpg", "jpeg", "png", "webp", "gif", "heic"]),
-        new FileSizeValidator({ maxFileSize: 50 * 1024 * 1024 /* 50 MB */ }),
-        new ImageDimensionsValidator({
-          maxWidth: 8000,
-          maxHeight: 8000
-        })
-      ],
-      onFilesRejected: (rejectedFiles: any) => {
-        const reason = rejectedFiles?.errors[0]?.reason;
-
-        if (reason === "FILE_TYPE_NOT_ACCEPTED") {
-          toast.error("Invalid file type.");
-        } else if (reason === "FILE_SIZE_TOO_LARGE") {
-          toast.error("File size exceeds limit.");
-        } else if (reason === "MAX_AMOUNT_OF_FILES_EXCEEDED") {
-          toast.error("You can upload up to 5 images.");
-        } else if (
-          reason === "IMAGE_HEIGHT_TOO_BIG" ||
-          reason === "IMAGE_WIDTH_TOO_BIG"
-        ) {
-          toast.error("Image dimensions exceeds limit. (8000x8000 max)");
-        } else {
-          toast.error("Invalid file type or size.");
-        }
+  const { openFilePicker, loading, errors, clear } = useFilePicker({
+    readAs: "ArrayBuffer",
+    accept: "image/*",
+    multiple: true,
+    validators: [
+      new FileAmountLimitValidator({ max: 5 }),
+      new FileTypeValidator(["jpg", "jpeg", "png", "webp", "gif", "heic"]),
+      new FileSizeValidator({ maxFileSize: 50 * 1024 * 1024 /* 50 MB */ }),
+      new ImageDimensionsValidator({
+        maxWidth: 8000,
+        maxHeight: 8000
+      })
+    ],
+    onFilesSelected: ({ plainFiles, filesContent: newFiles }) => {
+      if (plainFiles.length > 5) {
+        setError("You can only upload up to 5 images.");
+        return;
       }
-    });
+
+      setFilesContent(newFiles);
+      setAltTexts(new Array(newFiles.length).fill(""));
+    },
+    onFilesRejected: (rejectedFiles: any) => {
+      const reason = rejectedFiles?.errors[0]?.reason;
+
+      if (reason === "FILE_TYPE_NOT_ACCEPTED") {
+        toast.error("Invalid file type.");
+      } else if (reason === "FILE_SIZE_TOO_LARGE") {
+        toast.error("File size exceeds limit.");
+      } else if (reason === "MAX_AMOUNT_OF_FILES_EXCEEDED") {
+        toast.error("You can upload up to 5 images.");
+      } else if (
+        reason === "IMAGE_HEIGHT_TOO_BIG" ||
+        reason === "IMAGE_WIDTH_TOO_BIG"
+      ) {
+        toast.error("Image dimensions exceeds limit. (8000x8000 max)");
+      } else {
+        toast.error("Invalid file type or size.");
+      }
+    }
+  });
 
   function createPost(body: string, files: any[]) {
     setPosting(true);
@@ -268,6 +360,7 @@ export function ReplyComposeFloating({
     const formData = new FormData();
     formData.append("body", body);
     formData.append("replying_to", post.id);
+    formData.append("alt_texts", JSON.stringify(altTexts));
 
     files.forEach((file) => {
       formData.append("files", new Blob([file.content]), file.name);
@@ -281,6 +374,8 @@ export function ReplyComposeFloating({
       .then((res) => {
         if (res.ok) {
           setText("");
+          setFilesContent([]);
+          setAltTexts([]);
           setError("");
           clear();
 
@@ -360,17 +455,72 @@ export function ReplyComposeFloating({
                     className="group relative flex flex-col items-start"
                   >
                     <img
-                      alt={file.name}
+                      alt={altTexts[index] || file.name}
                       src={URL.createObjectURL(new Blob([file.content]))}
                       className="max-h-40 max-w-80 rounded-md border border-slate-300/0 dark:border-slate-800"
                     />
 
                     <button
                       className="bg-black-900 dark:bg-black-800 text-black-100 absolute ml-1 mt-1 rounded-full border border-neutral-300/0 p-1 dark:border-slate-800 dark:text-slate-400"
-                      onClick={() => clear()}
+                      onClick={() => {
+                        const newFiles = [...filesContent];
+                        newFiles.splice(index, 1);
+                        setFilesContent(newFiles);
+
+                        const newAltTexts = [...altTexts];
+                        newAltTexts.splice(index, 1);
+                        setAltTexts(newAltTexts);
+                      }}
                     >
                       <X className="size-4" />
                     </button>
+
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <button className="bg-black-900 dark:bg-black-800 text-black-100 absolute bottom-1 right-1 rounded-full border border-neutral-300/0 p-1 text-xs font-medium dark:border-slate-800 dark:text-slate-400">
+                          alt
+                        </button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-md">
+                        <DialogHeader>
+                          <DialogTitle>Add alt text</DialogTitle>
+                          <div className="pt-1 text-xs text-slate-500">
+                            Add a brief description of this image (1-2
+                            sentences) to help visually impaired users and
+                            display if the image doesn't load.
+                          </div>
+                        </DialogHeader>
+                        <div className="flex items-center space-x-2 py-4">
+                          <div className="grid flex-1 gap-2">
+                            <input
+                              type="text"
+                              placeholder="Describe this image..."
+                              className="w-full rounded-md border border-slate-300 bg-transparent px-3 py-2 text-sm dark:border-slate-800"
+                              value={altTexts[index] || ""}
+                              onChange={(e) => {
+                                const newAltTexts = [...altTexts];
+                                newAltTexts[index] = e.target.value;
+                                setAltTexts(newAltTexts);
+                              }}
+                            />
+                          </div>
+                        </div>
+                        <DialogFooter>
+                          <div className="flex gap-2">
+                            <DialogClose asChild>
+                              <button className="rounded-md border border-neutral-900 px-3 py-1 text-black disabled:border-neutral-400 dark:border-neutral-600 dark:text-white dark:disabled:border-neutral-800">
+                                Cancel
+                              </button>
+                            </DialogClose>
+                            <DialogClose asChild>
+                              <button className="rounded-md bg-neutral-900 px-3 py-1 text-white disabled:bg-neutral-400 dark:bg-neutral-600 dark:disabled:bg-neutral-800">
+                                Save
+                              </button>
+                            </DialogClose>
+                          </div>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
                   </div>
                 ))}
               </div>
@@ -419,92 +569,72 @@ export function ReplyComposeFloating({
   );
 }
 
-export function InlineComposer() {
+export function InlineComposer({ onPost }: { onPost?: () => void }) {
   const [text, setText] = useState("");
-
-  const [error, setError] = useState("");
-  const [open, setOpen] = useState(false);
+  const [filesContent, setFilesContent] = useState<
+    { content: Uint8Array; name: string }[]
+  >([]);
+  const [altTexts, setAltTexts] = useState<string[]>([]);
   const [posting, setPosting] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [error, setError] = useState("");
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const { openFilePicker, filesContent, loading, errors, clear } =
-    useFilePicker({
-      readAs: "ArrayBuffer",
-      accept: "image/*",
-      multiple: true,
-      validators: [
-        new FileAmountLimitValidator({ max: 5 }),
-        new FileTypeValidator(["jpg", "jpeg", "png", "webp", "gif", "heic"]),
-        new FileSizeValidator({ maxFileSize: 50 * 1024 * 1024 /* 50 MB */ }),
-        new ImageDimensionsValidator({
-          maxWidth: 8000,
-          maxHeight: 8000
-        })
-      ],
-      onFilesRejected: (rejectedFiles: any) => {
-        const reason = rejectedFiles?.errors[0]?.reason;
-
-        if (reason === "FILE_TYPE_NOT_ACCEPTED") {
-          toast.error("Invalid file type.");
-        } else if (reason === "FILE_SIZE_TOO_LARGE") {
-          toast.error("File size exceeds limit.");
-        } else if (reason === "MAX_AMOUNT_OF_FILES_EXCEEDED") {
-          toast.error("You can upload up to 5 images.");
-        } else if (
-          reason === "IMAGE_HEIGHT_TOO_BIG" ||
-          reason === "IMAGE_WIDTH_TOO_BIG"
-        ) {
-          toast.error("Image dimensions exceeds limit. (8000x8000 max)");
-        } else {
-          toast.error("Invalid file type or size.");
-        }
+  const { openFilePicker, loading, errors, clear } = useFilePicker({
+    readAs: "ArrayBuffer",
+    accept: "image/*",
+    multiple: true,
+    maxFileSize: 50,
+    onFilesSelected: ({ plainFiles, filesContent: newFiles }) => {
+      if (plainFiles.length > 5) {
+        setError("You can only upload up to 5 images.");
+        return;
       }
-    });
 
-  function onPost() {
-    window.dispatchEvent(new Event("refresh_feeds"));
-    window.dispatchEvent(new Event("go_to_everything"));
-  }
+      setFilesContent(newFiles);
+      setAltTexts(new Array(newFiles.length).fill(""));
+    }
+  });
 
-  function createPost(body: string, files: any[]) {
+  const handleSubmit = async () => {
+    if (posting) return;
     setPosting(true);
 
-    const formData = new FormData();
-    formData.append("body", body);
+    try {
+      const formData = new FormData();
+      formData.append("body", text);
+      formData.append("alt_texts", JSON.stringify(altTexts));
 
-    files.forEach((file) => {
-      formData.append("files", new Blob([file.content]), file.name);
-    });
-
-    fetch("/api/post", {
-      method: "POST",
-      body: formData
-    })
-      .then((res) => res.json())
-      .then((res) => {
-        if (res.ok) {
-          setText("");
-          setError("");
-          clear();
-
-          setOpen(false);
-          onPost();
-
-          if (textareaRef.current) {
-            textareaRef.current.style.height = "auto";
-          }
-        } else {
-          setError(res.message || "An error occured.");
-        }
-      })
-      .catch((err) => {
-        setError(err.message || "An error occured.");
-      })
-      .finally(() => {
-        setPosting(false);
+      filesContent.forEach((file) => {
+        const blob = new Blob([file.content]);
+        formData.append("files", blob, file.name);
       });
-  }
 
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+      const response = await fetch("/api/post", {
+        method: "POST",
+        body: formData
+      });
+
+      const data = await response.json();
+
+      if (data.ok) {
+        setText("");
+        setFilesContent([]);
+        setAltTexts([]);
+        setError("");
+        setOpen(false);
+        if (onPost) onPost();
+      } else {
+        setError(data.message || "An error occurred.");
+      }
+    } catch (e) {
+      console.error(e);
+      setError("An error occurred.");
+    }
+
+    setPosting(false);
+  };
+
   return (
     <div className="fadein min-h-[62px] w-full">
       <textarea
@@ -527,6 +657,8 @@ export function InlineComposer() {
         style={{ overflow: "hidden" }}
       />
 
+      {error && <div className="px-4 py-2 text-sm text-red-500">{error}</div>}
+
       {posting && (
         <div className="pointer-events-auto absolute bottom-0 left-0 right-0 top-0 flex items-center justify-center">
           <CircleNotch className="size-20 animate-spin opacity-50" />
@@ -537,17 +669,72 @@ export function InlineComposer() {
         {filesContent.map((file, index) => (
           <div key={index} className="group relative flex flex-col items-start">
             <img
-              alt={file.name}
+              alt={altTexts[index] || file.name}
               src={URL.createObjectURL(new Blob([file.content]))}
               className="max-h-40 max-w-80 rounded-md border border-slate-300/0 dark:border-slate-800"
             />
 
             <button
               className="bg-black-900 dark:bg-black-800 text-black-100 absolute ml-1 mt-1 rounded-full border border-neutral-300/0 p-1 dark:border-slate-800 dark:text-slate-400"
-              onClick={() => clear()}
+              onClick={() => {
+                const newFiles = [...filesContent];
+                newFiles.splice(index, 1);
+                setFilesContent(newFiles);
+
+                const newAltTexts = [...altTexts];
+                newAltTexts.splice(index, 1);
+                setAltTexts(newAltTexts);
+              }}
             >
               <X className="size-4" />
             </button>
+
+            <Dialog>
+              <DialogTrigger asChild>
+                <button className="bg-black-900 dark:bg-black-800 text-black-100 absolute bottom-1 right-1 rounded-full border border-neutral-300/0 p-1 text-xs font-medium dark:border-slate-800 dark:text-slate-400">
+                  alt
+                </button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Add alt text</DialogTitle>
+                  <div className="pt-1 text-xs text-slate-500">
+                    Add a brief description of this image (1-2 sentences) to
+                    help visually impaired users and display if the image
+                    doesn't load.
+                  </div>
+                </DialogHeader>
+                <div className="flex items-center space-x-2 py-4">
+                  <div className="grid flex-1 gap-2">
+                    <input
+                      type="text"
+                      placeholder="Describe this image..."
+                      className="w-full rounded-md border border-slate-300 bg-transparent px-3 py-2 text-sm dark:border-slate-800"
+                      value={altTexts[index] || ""}
+                      onChange={(e) => {
+                        const newAltTexts = [...altTexts];
+                        newAltTexts[index] = e.target.value;
+                        setAltTexts(newAltTexts);
+                      }}
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <div className="flex gap-2">
+                    <DialogClose asChild>
+                      <button className="rounded-md border border-neutral-900 px-3 py-1 text-black disabled:border-neutral-400 dark:border-neutral-600 dark:text-white dark:disabled:border-neutral-800">
+                        Cancel
+                      </button>
+                    </DialogClose>
+                    <DialogClose asChild>
+                      <button className="rounded-md bg-neutral-900 px-3 py-1 text-white disabled:bg-neutral-400 dark:bg-neutral-600 dark:disabled:bg-neutral-800">
+                        Save
+                      </button>
+                    </DialogClose>
+                  </div>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
         ))}
       </div>
@@ -578,7 +765,8 @@ export function InlineComposer() {
                 onClick={() => {
                   setOpen(false);
                   setText("");
-                  setError("");
+                  setFilesContent([]);
+                  setAltTexts([]);
                   clear();
 
                   if (textareaRef.current) {
@@ -591,9 +779,7 @@ export function InlineComposer() {
               <button
                 disabled={!text || posting}
                 className="rounded-md bg-neutral-900 px-3 py-1 text-white disabled:bg-neutral-400 dark:bg-neutral-600 dark:disabled:bg-neutral-800"
-                onClick={() => {
-                  createPost(text, filesContent);
-                }}
+                onClick={handleSubmit}
               >
                 Post
               </button>

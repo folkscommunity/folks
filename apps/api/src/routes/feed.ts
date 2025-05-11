@@ -175,7 +175,8 @@ router.get("/", async (req, res) => {
             url: true,
             type: true,
             height: true,
-            width: true
+            width: true,
+            alt_text: true
           }
         },
         author: {
@@ -359,6 +360,7 @@ router.get("/media/:user_id", async (req, res) => {
         type: true,
         height: true,
         width: true,
+        alt_text: true,
         post: {
           select: {
             id: true,

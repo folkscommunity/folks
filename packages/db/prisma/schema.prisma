@@ -186,6 +186,8 @@ model Attachment {
   post_id BigInt?
   post    Post?   @relation(fields: [post_id], references: [id], name: "attachments", onDelete: Cascade)
 
+  alt_text String?
+
   type AttachmentType
 
   url String
