@@ -39,7 +39,7 @@ const apnProvider = new apn.Provider({
     keyId: process.env.APN_KEY_ID!,
     teamId: process.env.APN_TEAM_ID!
   },
-  production: false
+  production: true
 });
 
 export async function sendWebPushNotification(
@@ -210,6 +210,16 @@ export function workerThread(id: number) {
         try {
           const result = await apnProvider.send(note, device_token);
           console.log(result);
+
+          if (result.failed) {
+            console.log(result.failed);
+
+            await prisma.notificationEndpoint.delete({
+              where: {
+                id: endpoint.id
+              }
+            });
+          }
 
           return done();
         } catch (error) {
