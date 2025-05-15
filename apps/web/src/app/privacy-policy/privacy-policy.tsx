@@ -17,10 +17,6 @@ export function PrivacyPolicy() {
               as a CDN.
             </li>
             <li>Website is being protected by Cloudflare.</li>
-            <li>
-              We use self hosted service wherever possible to facilitate the
-              service (posthog, plausible).
-            </li>
 
             <li>We will NEVER sell your data!</li>
           </ul>
@@ -60,7 +56,7 @@ export function PrivacyPolicy() {
           <p>
             Cookies are files with small amount of data that is commonly used an
             anonymous unique identifier. These are sent to your browser from the
-            website that you visit and are stored on your devices’s internal
+            website that you visit and are stored on your devices's internal
             memory.
           </p>
           <p className="font-bold">
@@ -101,9 +97,42 @@ export function PrivacyPolicy() {
             <li>Cloudflare - reverse proxy & cdn</li>
             <li>AWS - attachment storage, cdn and email delivery</li>
             <li>Sentry - error reporting</li>
-            <li>PostHog (self hosted) - feature flagging, analytics</li>
+            <li>
+              PostHog - product analytics, feature flagging, and session
+              recording to improve user experience
+            </li>
             <li>Plausible (self hosted) - analytics</li>
           </ul>
+
+          <h3>Analytics and Feature Management</h3>
+          <p>
+            We use PostHog to help us understand how our service is used and to
+            provide better features. PostHog collects information about:
+          </p>
+          <ul className="list-disc space-y-1 pl-6">
+            <li>
+              How you interact with our website (clicks, page views, navigation
+              patterns)
+            </li>
+            <li>Technical information (browser type, device information)</li>
+            <li>Feature flag preferences and configurations</li>
+            <li>
+              Session recordings (which help us identify and fix usability
+              issues)
+            </li>
+          </ul>
+          <p>
+            PostHog processes this data in accordance with their{" "}
+            <a
+              href="https://posthog.com/privacy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:font-bold"
+            >
+              privacy policy
+            </a>
+            .
+          </p>
 
           <h3>Security</h3>
           <p>
