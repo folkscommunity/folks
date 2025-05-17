@@ -211,15 +211,19 @@ export function workerThread(id: number) {
           const result = await apnProvider.send(note, device_token);
           console.log(result);
 
-          if (result.failed) {
-            console.log(result.failed);
+          //
+          // Code below is causing issues at the moment, let's ignore this until the new notifications system is ready.
+          //
 
-            await prisma.notificationEndpoint.delete({
-              where: {
-                id: endpoint.id
-              }
-            });
-          }
+          // if (result.failed) {
+          //   console.log(result.failed);
+
+          //   await prisma.notificationEndpoint.delete({
+          //     where: {
+          //       id: endpoint.id
+          //     }
+          //   });
+          // }
 
           return done();
         } catch (error) {
