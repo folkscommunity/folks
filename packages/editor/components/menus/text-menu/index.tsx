@@ -10,7 +10,7 @@ import {
   TextAlignJustify,
   TextAlignLeft,
   TextAlignRight,
-  TextBolder,
+  TextB as TextBolder,
   TextItalic,
   TextStrikethrough,
   TextSubscript,
