@@ -2,9 +2,14 @@ import dayjs from "dayjs";
 
 import { parsePostBody } from "@/lib/post-utils";
 
-export const current_release = "0.9.6";
+export const current_release = "0.9.7";
 
 const releases = [
+  {
+    version: "0.9.7",
+    date: "2025-05-23",
+    changes: ["Fix feed refresh on post."]
+  },
   {
     version: "0.9.6",
     date: "2025-05-11",

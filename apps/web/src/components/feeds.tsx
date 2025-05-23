@@ -230,7 +230,12 @@ function FeedsClient({
         <div className="mb-4 w-full max-w-3xl flex-1 justify-center">
           <div className="flex w-full gap-2 pt-4">
             <FolksAvatar src={user.avatar_url} name={user.username} />
-            <InlineComposer />
+            <InlineComposer
+              onPost={() => {
+                window.dispatchEvent(new CustomEvent("go_to_everything"));
+                window.dispatchEvent(new CustomEvent("refresh_feeds"));
+              }}
+            />
           </div>
         </div>
       )}
