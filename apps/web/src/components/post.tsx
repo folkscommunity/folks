@@ -219,10 +219,10 @@ export function Post({
 
   return (
     <div
-      className="group mx-auto mb-4 flex w-full max-w-3xl gap-4 overflow-x-clip pb-4 max-sm:mx-[-16px] max-sm:w-[100dvw] max-sm:max-w-[100vw]"
+      className="group mx-auto mb-4 flex w-full max-w-3xl gap-4 overflow-visible pb-4 max-sm:mx-[-16px] max-sm:w-[100dvw] max-sm:max-w-[100vw]"
       id={`post-${lPost.id}`}
     >
-      <div className="max-sm:pl-4">
+      <div className="shrink-0 max-sm:pl-4">
         <Link href={`/${lPost.author.username}`} className="hover:no-underline">
           <FolksAvatar
             src={lPost.author.avatar_url}
@@ -230,8 +230,8 @@ export function Post({
           />
         </Link>
       </div>
-      <div className="flex max-w-full flex-1 flex-col gap-1 max-sm:pr-4">
-        <div className="flex items-center justify-between gap-[2px]">
+      <div className="flex w-full min-w-0 flex-1 flex-col gap-1 max-sm:pr-4">
+        <div className="flex max-w-full items-center justify-between gap-[2px]">
           <div>
             <Link className="font-bold" href={`/${lPost.author.username}`}>
               {lPost.author.display_name}
@@ -265,99 +265,105 @@ export function Post({
               )}
           </div>
           <div>
-            <DropdownMenu>
-              <DropdownMenuTrigger className="h-[20px] outline-none">
-                <EllipsisVerticalIcon className="size-5 opacity-10 hover:!opacity-100 focus:block group-hover:opacity-50" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="dark:bg-black-800 !z-[99999] bg-white dark:border-slate-900">
-                <DropdownMenuItem
-                  className="dark:hover:bg-black-600 cursor-pointer hover:bg-slate-100"
-                  onClick={() =>
-                    navigator.clipboard.writeText(
-                      `https://folkscommunity.com/${lPost.author.username}/${lPost.id}`
-                    )
-                  }
+            <div className="relative z-10">
+              <DropdownMenu>
+                <DropdownMenuTrigger className="h-[20px] outline-none">
+                  <EllipsisVerticalIcon className="size-5 opacity-10 hover:!opacity-100 focus:block group-hover:opacity-50" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  className="dark:bg-black-800 !z-[99999] bg-white dark:border-slate-900"
+                  side="bottom"
+                  align="end"
                 >
-                  Copy Link
-                </DropdownMenuItem>
-
-                {user && user.super_admin && (
                   <DropdownMenuItem
                     className="dark:hover:bg-black-600 cursor-pointer hover:bg-slate-100"
-                    onClick={() => {
-                      if (lPost.highlighted) {
-                        unhighlightPost();
-                      } else {
-                        highlightPost();
-                      }
-                    }}
+                    onClick={() =>
+                      navigator.clipboard.writeText(
+                        `https://folkscommunity.com/${lPost.author.username}/${lPost.id}`
+                      )
+                    }
                   >
-                    {lPost.highlighted ? "Remove Highlight" : "Highlight"}
+                    Copy Link
                   </DropdownMenuItem>
-                )}
 
-                {user && user.super_admin && (
-                  <>
-                    <DropdownMenuSeparator className="bg-slate-100 dark:bg-slate-900" />
+                  {user && user.super_admin && (
                     <DropdownMenuItem
                       className="dark:hover:bg-black-600 cursor-pointer hover:bg-slate-100"
                       onClick={() => {
-                        setPinnedPost(lPost.id.toString());
-                        window.location.reload();
+                        if (lPost.highlighted) {
+                          unhighlightPost();
+                        } else {
+                          highlightPost();
+                        }
                       }}
                     >
-                      Pin
+                      {lPost.highlighted ? "Remove Highlight" : "Highlight"}
                     </DropdownMenuItem>
-                    <DropdownMenuItem
-                      className="dark:hover:bg-black-600 cursor-pointer hover:bg-slate-100"
-                      onClick={() => {
-                        setPinnedPost(null);
-                        window.location.reload();
-                      }}
-                    >
-                      Unpin
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator className="bg-slate-100 dark:bg-slate-900" />
-                  </>
-                )}
+                  )}
 
-                {user &&
-                  (user.super_admin ||
-                    lPost.author.id.toString() === user.id.toString()) && (
+                  {user && user.super_admin && (
                     <>
-                      {lPost.flags &&
-                        lPost.flags.filter((d: any) => d.hide_embeds).length ===
-                          0 && (
-                          <DropdownMenuItem
-                            className="dark:hover:bg-black-600 cursor-pointer hover:bg-slate-100"
-                            onClick={() => setHideEmbeds(true)}
-                          >
-                            Hide Embeds
-                          </DropdownMenuItem>
-                        )}
-
-                      {lPost.flags &&
-                        lPost.flags.filter((d: any) => d.hide_embeds).length >
-                          0 && (
-                          <DropdownMenuItem
-                            className="dark:hover:bg-black-600 cursor-pointer hover:bg-slate-100"
-                            onClick={() => setHideEmbeds(false)}
-                          >
-                            Show Embeds
-                          </DropdownMenuItem>
-                        )}
                       <DropdownMenuSeparator className="bg-slate-100 dark:bg-slate-900" />
-
                       <DropdownMenuItem
-                        className="dark:hover:bg-black-600 cursor-pointer text-red-500 hover:bg-slate-100"
-                        onClick={() => deletePost()}
+                        className="dark:hover:bg-black-600 cursor-pointer hover:bg-slate-100"
+                        onClick={() => {
+                          setPinnedPost(lPost.id.toString());
+                          window.location.reload();
+                        }}
                       >
-                        Delete Post
+                        Pin
                       </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="dark:hover:bg-black-600 cursor-pointer hover:bg-slate-100"
+                        onClick={() => {
+                          setPinnedPost(null);
+                          window.location.reload();
+                        }}
+                      >
+                        Unpin
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator className="bg-slate-100 dark:bg-slate-900" />
                     </>
                   )}
-              </DropdownMenuContent>
-            </DropdownMenu>
+
+                  {user &&
+                    (user.super_admin ||
+                      lPost.author.id.toString() === user.id.toString()) && (
+                      <>
+                        {lPost.flags &&
+                          lPost.flags.filter((d: any) => d.hide_embeds)
+                            .length === 0 && (
+                            <DropdownMenuItem
+                              className="dark:hover:bg-black-600 cursor-pointer hover:bg-slate-100"
+                              onClick={() => setHideEmbeds(true)}
+                            >
+                              Hide Embeds
+                            </DropdownMenuItem>
+                          )}
+
+                        {lPost.flags &&
+                          lPost.flags.filter((d: any) => d.hide_embeds).length >
+                            0 && (
+                            <DropdownMenuItem
+                              className="dark:hover:bg-black-600 cursor-pointer hover:bg-slate-100"
+                              onClick={() => setHideEmbeds(false)}
+                            >
+                              Show Embeds
+                            </DropdownMenuItem>
+                          )}
+                        <DropdownMenuSeparator className="bg-slate-100 dark:bg-slate-900" />
+
+                        <DropdownMenuItem
+                          className="dark:hover:bg-black-600 cursor-pointer text-red-500 hover:bg-slate-100"
+                          onClick={() => deletePost()}
+                        >
+                          Delete Post
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
         </div>
 
@@ -398,8 +404,8 @@ export function Post({
 
         {lPost.attachments && lPost.attachments.length > 0 && (
           <>
-            <div className="w-[calc(100%+72px] relative -ml-[72px] mt-2 overflow-hidden max-sm:!w-[calc(100%+144px)] sm:ml-0 sm:w-full">
-              <div className="hiddenscrollbar flex max-w-[100dvw] snap-x snap-mandatory gap-2 overflow-x-auto pr-16 max-sm:pl-[72px] max-sm:pr-8">
+            <div className="relative -ml-[72px] -mr-4 mt-2 w-[calc(100%+88px)] overflow-hidden sm:mx-0 sm:w-full">
+              <div className="hiddenscrollbar flex snap-x snap-mandatory gap-2 overflow-x-auto max-sm:pl-[72px]">
                 {(() => {
                   // Calculate base height from first image
                   const firstImage = lPost.attachments[0];
@@ -495,7 +501,11 @@ export function Post({
           !(
             lPost.flags &&
             lPost.flags.filter((d: any) => d.hide_embeds).length > 0
-          ) && <UrlEmbed metadata={lPost.urls[lPost.urls.length - 1]} />}
+          ) && (
+            <div className="w-full">
+              <UrlEmbed metadata={lPost.urls[lPost.urls.length - 1]} />
+            </div>
+          )}
 
         <div className="flex h-[24px] items-center justify-start gap-4 pt-2">
           <div className="flex min-w-12 items-center gap-2">

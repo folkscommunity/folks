@@ -636,10 +636,10 @@ export function InlineComposer({ onPost }: { onPost?: () => void }) {
   };
 
   return (
-    <div className="fadein min-h-[62px] w-full px-4">
+    <div className="fadein min-h-[62px] w-full px-2 pr-0">
       <textarea
         ref={textareaRef}
-        className="text-md max-h-[300px] w-full flex-1 resize-none border-0 bg-transparent px-4 py-1 pt-2 placeholder:text-neutral-700 focus:outline-none"
+        className="text-md max-h-[300px] w-full flex-1 resize-none border-0 bg-transparent px-4 py-1 pl-0 pt-2 placeholder:text-neutral-700 focus:outline-none"
         placeholder="What's on your mind?"
         name="body"
         maxLength={300}
@@ -739,7 +739,7 @@ export function InlineComposer({ onPost }: { onPost?: () => void }) {
         ))}
       </div>
       {open && (
-        <div className="mt-2 p-4 dark:border-slate-900">
+        <div className="mt-2 py-4 dark:border-slate-900">
           <div className="flex items-center justify-between gap-2">
             <button
               className="rounded-md text-neutral-700 dark:text-neutral-600"
