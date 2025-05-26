@@ -57,15 +57,35 @@ router.get("/", async (req, res) => {
 
     let where: any;
 
+    let blocked_users = [];
+
+    if (user_id) {
+      blocked_users = await prisma.userBlocked.findMany({
+        where: {
+          user_id: BigInt(user_id)
+        }
+      });
+
+      blocked_users = blocked_users.map(
+        (blocked_user) => blocked_user.target_id
+      );
+    }
+
     if (type === "everything") {
       where = {
         deleted_at: null,
-        imported: false
+        imported: false,
+        author_id: {
+          notIn: blocked_users
+        }
       };
     } else if (type === "highlighted") {
       where = {
         deleted_at: null,
-        highlighted: true
+        highlighted: true,
+        author_id: {
+          notIn: blocked_users
+        }
       };
     } else if (type === "following") {
       if (!user_id) {
@@ -90,7 +110,14 @@ router.get("/", async (req, res) => {
 
       where = {
         author_id: {
-          in: following.map((following) => following.target_id)
+          AND: [
+            {
+              in: following.map((following) => following.target_id)
+            },
+            {
+              notIn: blocked_users
+            }
+          ]
         },
         imported: false,
         deleted_at: null
@@ -126,26 +153,9 @@ router.get("/", async (req, res) => {
       }
     }
 
-    let blocked_users = [];
-
-    if (user_id) {
-      blocked_users = await prisma.userBlocked.findMany({
-        where: {
-          user_id: BigInt(user_id)
-        }
-      });
-
-      blocked_users = blocked_users.map(
-        (blocked_user) => blocked_user.target_id
-      );
-    }
-
     const feed = await prisma.post.findMany({
       where: {
-        ...where,
-        author_id: {
-          notIn: blocked_users
-        }
+        ...where
       },
       cursor: cursorId ? { id: cursorId } : undefined,
       skip: cursorId ? 1 : 0,
