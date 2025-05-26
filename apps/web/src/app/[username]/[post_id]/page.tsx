@@ -185,6 +185,18 @@ export default async function Page({
 
   const user = await ServerSession();
 
+  let blocked_users: bigint[] = [];
+
+  if (user && user.id) {
+    const BlockedUsers = await prisma.userBlocked.findMany({
+      where: {
+        user_id: BigInt(user.id)
+      }
+    });
+
+    blocked_users = BlockedUsers.map((blocked_user) => blocked_user.target_id);
+  }
+
   const post = await prisma.post.findUnique({
     where: {
       id: BigInt(post_id),
@@ -213,7 +225,12 @@ export default async function Page({
       },
       replies: {
         where: {
-          deleted_at: null
+          deleted_at: null,
+          ...(blocked_users.length > 0 && {
+            author_id: {
+              notIn: blocked_users.map((id) => BigInt(id))
+            }
+          })
         },
         orderBy: {
           created_at: "asc"
@@ -310,6 +327,7 @@ export default async function Page({
   return (
     <MainContainer>
       <SinglePost
+        blocked_users={blocked_users}
         post={{
           ...post,
           id: post.id.toString(),

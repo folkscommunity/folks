@@ -27,7 +27,15 @@ import { cn, dateRelativeTiny } from "@/lib/utils";
 
 import { LikesModal } from "./likes-modal";
 
-export function SinglePost({ user, post }: { user: any; post: any }) {
+export function SinglePost({
+  user,
+  post,
+  blocked_users
+}: {
+  user: any;
+  post: any;
+  blocked_users: bigint[];
+}) {
   const [lPost, setLPost] = useState(post);
   const [likesModalOpen, setLikesModalOpen] = useState(false);
   const [replies, setReplies] = useState<any[]>([]);
@@ -199,7 +207,7 @@ export function SinglePost({ user, post }: { user: any; post: any }) {
 
         {lPost.attachments && lPost.attachments.length > 0 && (
           <>
-            <div className="flex gap-2 pt-4">
+            <div className="flex w-full flex-wrap gap-4 pt-4">
               {lPost.attachments.map((attachment: any, i: number) => (
                 <TimelinePhoto
                   key={attachment.id}

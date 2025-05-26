@@ -721,6 +721,201 @@ router.get(
   }
 );
 
+// block user
+router.post("/block", authMiddleware, async (req: RequestWithUser, res) => {
+  try {
+    const { target_id } = req.body;
+
+    if (!target_id) {
+      return res.status(400).json({
+        error: "invalid_request",
+        msg: "You must provide a target user ID."
+      });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: {
+        id: BigInt(req.user.id)
+      }
+    });
+
+    if (!user) {
+      return res.status(401).json({
+        error: "unauthorized"
+      });
+    }
+
+    if (user.id === BigInt(target_id)) {
+      return res.status(400).json({
+        error: "invalid_request",
+        msg: "You cannot block yourself."
+      });
+    }
+
+    const targetUser = await prisma.user.findUnique({
+      where: {
+        id: BigInt(target_id)
+      }
+    });
+
+    if (!targetUser) {
+      return res.status(404).json({
+        error: "not_found",
+        msg: "Target user not found."
+      });
+    }
+
+    const isBlocked = await prisma.userBlocked.findUnique({
+      where: {
+        user_blocked_unique: {
+          user_id: BigInt(req.user.id),
+          target_id: BigInt(target_id)
+        }
+      }
+    });
+
+    if (isBlocked) {
+      return res.status(400).json({
+        error: "already_blocked"
+      });
+    }
+
+    await prisma.userBlocked.create({
+      data: {
+        user_id: BigInt(req.user.id),
+        target_id: BigInt(target_id)
+      }
+    });
+
+    await prisma.following.deleteMany({
+      where: {
+        user_id: BigInt(req.user.id),
+        target_id: BigInt(target_id)
+      }
+    });
+
+    await posthog.capture({
+      event: "user_blocked",
+      distinctId: req.user.id.toString(),
+      properties: {
+        target_id: target_id.toString()
+      }
+    });
+
+    res.setHeader("Content-Type", "application/json");
+    res.send(JSONtoString({ ok: true }));
+  } catch (e) {
+    console.error(e);
+
+    res.status(500).json({
+      error: "server_error",
+      message: "Something went wrong."
+    });
+  }
+});
+
+router.post("/unblock", authMiddleware, async (req: RequestWithUser, res) => {
+  try {
+    const { target_id } = req.body;
+
+    if (!target_id) {
+      return res.status(400).json({
+        error: "invalid_request",
+        msg: "You must provide a target user ID."
+      });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: {
+        id: BigInt(req.user.id)
+      }
+    });
+
+    if (!user) {
+      return res.status(401).json({
+        error: "unauthorized"
+      });
+    }
+
+    const isBlocked = await prisma.userBlocked.findUnique({
+      where: {
+        user_blocked_unique: {
+          user_id: BigInt(req.user.id),
+          target_id: BigInt(target_id)
+        }
+      }
+    });
+
+    if (!isBlocked) {
+      return res.status(400).json({
+        error: "not_blocked"
+      });
+    }
+
+    await prisma.userBlocked.delete({
+      where: {
+        user_blocked_unique: {
+          user_id: BigInt(req.user.id),
+          target_id: BigInt(target_id)
+        }
+      }
+    });
+
+    await posthog.capture({
+      event: "user_unblocked",
+      distinctId: req.user.id.toString(),
+      properties: {
+        target_id: target_id.toString()
+      }
+    });
+
+    res.setHeader("Content-Type", "application/json");
+    res.send(JSONtoString({ ok: true }));
+  } catch (e) {
+    console.error(e);
+
+    res.status(500).json({
+      error: "server_error",
+      message: "Something went wrong."
+    });
+  }
+});
+
+router.get("/blocked", authMiddleware, async (req: RequestWithUser, res) => {
+  try {
+    const blockedUsers = await prisma.userBlocked.findMany({
+      where: {
+        user_id: BigInt(req.user.id)
+      },
+      select: {
+        target: {
+          select: {
+            id: true,
+            username: true,
+            display_name: true,
+            avatar_url: true
+          }
+        }
+      }
+    });
+
+    res.setHeader("Content-Type", "application/json");
+    res.send(
+      JSONtoString({
+        ok: true,
+        data: blockedUsers ? blockedUsers.map((u) => u.target) : []
+      })
+    );
+  } catch (e) {
+    console.error(e);
+
+    res.status(500).json({
+      error: "server_error",
+      message: "Something went wrong."
+    });
+  }
+});
+
 router.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -784,6 +979,23 @@ router.get("/:id", async (req, res) => {
       return;
     }
 
+    let blockedByUser = false;
+
+    if (user_id) {
+      const isBlockedByUser = await prisma.userBlocked.findUnique({
+        where: {
+          user_blocked_unique: {
+            user_id: BigInt(user_id),
+            target_id: BigInt(id)
+          }
+        }
+      });
+
+      if (isBlockedByUser) {
+        blockedByUser = true;
+      }
+    }
+
     res.setHeader("Content-Type", "application/json");
     res.send(
       JSONtoString({
@@ -799,6 +1011,7 @@ router.get("/:id", async (req, res) => {
           website: selectedUser.website || undefined,
           ...(selectedUser.super_admin && { super_admin: true }),
           ...(selectedUser.suspended && { suspended: true }),
+          ...(user_id && { blocked_by_user: blockedByUser }),
           created_at: selectedUser.created_at,
           updated_at: selectedUser.updated_at,
           count: {

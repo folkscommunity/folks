@@ -5,6 +5,7 @@ import { useLocalStorage } from "@uidotdev/usehooks";
 import Link from "next/link";
 import { toast } from "sonner";
 
+import { Button } from "@/components/button";
 import { Label } from "@/components/label";
 import { Separator } from "@/components/separator";
 import { Slider } from "@/components/slider";
@@ -169,6 +170,10 @@ export function Settings({ user }: { user: any }) {
         <h3 className="py-4">Ribbon Settings</h3>
 
         {isClient && <Preferences />}
+
+        <h3 className="py-4">Blocked Users</h3>
+
+        {isClient && <BlockedUsers />}
       </div>
     </div>
   );
@@ -383,5 +388,91 @@ function Preferences() {
         />
       </div>
     </>
+  );
+}
+
+function BlockedUsers() {
+  const [blockedUsers, setBlockedUsers] = useState<any[]>([]);
+
+  function fetchBlockedUsers() {
+    fetch("/api/user/blocked", {
+      method: "GET"
+    })
+      .then((res) => res.json())
+      .then((res) => {
+        if (res.ok) {
+          setBlockedUsers(res.data);
+        } else {
+          if (res.msg) {
+            toast.error(res.msg);
+          } else {
+            toast.error("Something went wrong.");
+          }
+        }
+      })
+      .catch((err) => {
+        if (err.msg) {
+          toast.error(err.msg);
+        } else {
+          toast.error("Something went wrong.");
+        }
+      });
+  }
+
+  useEffect(() => {
+    fetchBlockedUsers();
+  }, []);
+
+  function unblockUser(username: string, user_id: string) {
+    fetch(`/api/user/unblock`, {
+      method: "POST",
+      body: JSON.stringify({
+        target_id: user_id
+      }),
+      headers: {
+        "Content-Type": "application/json"
+      }
+    })
+      .then((res) => res.json())
+      .then((res) => {
+        if (res.ok) {
+          toast.success(`@${username} unblocked.`);
+          fetchBlockedUsers();
+        } else {
+          if (res.msg) {
+            toast.error(res.msg);
+          } else {
+            toast.error("Something went wrong.");
+          }
+        }
+      })
+      .catch((err) => {
+        if (err.msg) {
+          toast.error(err.msg);
+        } else {
+          toast.error("Something went wrong.");
+        }
+      });
+  }
+
+  return (
+    <div className="flex flex-col gap-2">
+      {blockedUsers.map((user) => (
+        <div key={user.id} className="flex items-center gap-2">
+          <div>
+            {user.display_name} (@{user.username})
+          </div>
+          <div>–</div>
+
+          <div>
+            <Button onClick={() => unblockUser(user.username, user.id)}>
+              Unblock
+            </Button>
+          </div>
+        </div>
+      ))}
+
+      {!blockedUsers.length && <div>You have not blocked anyone.</div>}
+    </div>
   );
 }

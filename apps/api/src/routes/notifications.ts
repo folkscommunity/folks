@@ -21,6 +21,12 @@ router.get("/", authMiddleware, async (req: RequestWithUser, res) => {
       return res.status(400).json({ error: "invalid_request" });
     }
 
+    const blocked_users = await prisma.userBlocked.findMany({
+      where: {
+        user_id: user.id
+      }
+    });
+
     const last_read_at = user.notifications_last_read_at || new Date(0);
 
     const likes = await prisma.postLike.findMany({
@@ -32,7 +38,12 @@ router.get("/", authMiddleware, async (req: RequestWithUser, res) => {
         },
         user_id: {
           not: user.id
-        }
+        },
+        ...(blocked_users.length > 0 && {
+          user_id: {
+            notIn: blocked_users.map((u) => u.target_id)
+          }
+        })
       },
       include: {
         user: {
@@ -58,7 +69,12 @@ router.get("/", authMiddleware, async (req: RequestWithUser, res) => {
 
     const follows = await prisma.following.findMany({
       where: {
-        target_id: user.id
+        target_id: user.id,
+        ...(blocked_users.length > 0 && {
+          user_id: {
+            notIn: blocked_users.map((u) => u.target_id)
+          }
+        })
       },
       include: {
         user: {
@@ -93,7 +109,12 @@ router.get("/", authMiddleware, async (req: RequestWithUser, res) => {
             id: user.id
           }
         },
-        deleted_at: null
+        deleted_at: null,
+        ...(blocked_users.length > 0 && {
+          author_id: {
+            notIn: blocked_users.map((u) => u.target_id)
+          }
+        })
       },
       include: {
         author: {
@@ -126,7 +147,14 @@ router.get("/", authMiddleware, async (req: RequestWithUser, res) => {
 
     const post_mentions = await prisma.postMention.findMany({
       where: {
-        user_id: user.id
+        user_id: user.id,
+        ...(blocked_users.length > 0 && {
+          post: {
+            author_id: {
+              notIn: blocked_users.map((u) => u.target_id)
+            }
+          }
+        })
       },
       include: {
         post: {

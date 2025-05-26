@@ -47,6 +47,12 @@ async function generatePostMentions(post_id: string, body: string) {
     }
   });
 
+  const blocked_users = await prisma.userBlocked.findMany({
+    where: {
+      target_id: post.author_id
+    }
+  });
+
   let processed_matches: string[] = [];
 
   for await (const match of matches) {
@@ -78,6 +84,10 @@ async function generatePostMentions(post_id: string, body: string) {
       });
 
       if (matched_user.notifications_push_mentioned) {
+        if (blocked_users.map((u) => u.user_id).includes(matched_user.id)) {
+          continue;
+        }
+
         await sendNotification({
           user_id: matched_user.id,
           title: `${post.author.display_name} mentioned you in a post`,
@@ -319,6 +329,12 @@ router.post(
           }
         });
 
+        const blocked_users = await prisma.userBlocked.findMany({
+          where: {
+            target_id: BigInt(req.user.id)
+          }
+        });
+
         await generatePostMentions(post.id.toString(), body);
 
         await posthog.capture({
@@ -352,7 +368,10 @@ router.post(
 
           if (
             original_post.author.notifications_push_replied_to &&
-            original_post.author_id !== user.id
+            original_post.author_id !== user.id &&
+            !blocked_users
+              .map((u) => u.user_id)
+              .includes(original_post.author.id)
           ) {
             await sendNotification({
               user_id: original_post.author.id,
@@ -381,6 +400,12 @@ router.post(
             flags: flags,
             author_id: BigInt(req.user.id),
             reply_to_id: replying_to ? BigInt(replying_to) : undefined
+          }
+        });
+
+        const blocked_users = await prisma.userBlocked.findMany({
+          where: {
+            target_id: BigInt(req.user.id)
           }
         });
 
@@ -418,7 +443,10 @@ router.post(
 
           if (
             original_post.author.notifications_push_replied_to &&
-            original_post.author_id !== user.id
+            original_post.author_id !== user.id &&
+            !blocked_users
+              .map((u) => u.user_id)
+              .includes(original_post.author.id)
           ) {
             await sendNotification({
               user_id: original_post.author.id,
@@ -477,6 +505,20 @@ router.get("/:id", async (req: RequestWithUser, res) => {
       }
     }
 
+    let blocked_users: bigint[] = [];
+
+    if (user_id) {
+      const BlockedUsers = await prisma.userBlocked.findMany({
+        where: {
+          user_id: BigInt(user_id)
+        }
+      });
+
+      blocked_users = BlockedUsers.map(
+        (blocked_user) => blocked_user.target_id
+      );
+    }
+
     const post = await prisma.post.findUnique({
       where: {
         id: BigInt(id),
@@ -503,7 +545,12 @@ router.get("/:id", async (req: RequestWithUser, res) => {
         },
         replies: {
           where: {
-            deleted_at: null
+            deleted_at: null,
+            ...(blocked_users.length > 0 && {
+              author_id: {
+                notIn: blocked_users
+              }
+            })
           },
           orderBy: {
             created_at: "asc"
@@ -667,6 +714,7 @@ router.get("/:id", async (req: RequestWithUser, res) => {
 async function getReplies(
   post_id: bigint,
   user_id: string | null,
+  blocked_users: bigint[],
   depth: number = 0,
   maxDepth: number = 5
 ) {
@@ -678,7 +726,12 @@ async function getReplies(
   const replies = await prisma.post.findMany({
     where: {
       reply_to_id: post_id,
-      deleted_at: null
+      deleted_at: null,
+      ...(blocked_users.length > 0 && {
+        author_id: {
+          notIn: blocked_users
+        }
+      })
     },
     orderBy: {
       created_at: "asc"
@@ -737,6 +790,7 @@ async function getReplies(
       const nestedReplies = await getReplies(
         reply.id,
         user_id,
+        blocked_users,
         depth + 1,
         maxDepth
       );
@@ -795,6 +849,20 @@ router.get("/:id/thread", async (req, res) => {
       }
     }
 
+    let blocked_users: bigint[] = [];
+
+    if (user_id) {
+      const BlockedUsers = await prisma.userBlocked.findMany({
+        where: {
+          user_id: BigInt(user_id)
+        }
+      });
+
+      blocked_users = BlockedUsers.map(
+        (blocked_user) => blocked_user.target_id
+      );
+    }
+
     const main_post = await prisma.post.findUnique({
       where: {
         id: BigInt(id),
@@ -810,7 +878,7 @@ router.get("/:id/thread", async (req, res) => {
     }
 
     // Pass initial depth of 0 when calling getReplies
-    const replies = await getReplies(main_post.id, user_id, 0);
+    const replies = await getReplies(main_post.id, user_id, blocked_users, 0);
 
     res.setHeader("Content-Type", "application/json");
     res.send(
@@ -966,7 +1034,16 @@ router.post("/like", authMiddleware, async (req: RequestWithUser, res) => {
       }
     });
 
-    if (post.author.notifications_push_liked_posts) {
+    const blocked_users = await prisma.userBlocked.findMany({
+      where: {
+        target_id: BigInt(req.user.id)
+      }
+    });
+
+    if (
+      post.author.notifications_push_liked_posts &&
+      !blocked_users.map((u) => u.user_id).includes(post.author.id)
+    ) {
       await sendNotification({
         user_id: post.author.id,
         title: "Folks",

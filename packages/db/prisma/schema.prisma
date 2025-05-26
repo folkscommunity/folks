@@ -67,6 +67,8 @@ model User {
   articles                   Article[]              @relation("user_article")
   boards                     Board[]                @relation("boards")
   roadmap_items              RoadmapItem[]          @relation("roadmap_items")
+  user_blocked               UserBlocked[]          @relation("user_blocked")
+  user_blocked_by            UserBlocked[]          @relation("user_blocked_by")
 
   @@index([id])
   @@index([username])
@@ -467,4 +469,22 @@ model RoadmapItem {
 
   @@index([status])
   @@map("roadmap_items")
+}
+
+model UserBlocked {
+  id String @id @default(cuid())
+
+  user_id BigInt
+  user    User   @relation(fields: [user_id], references: [id], name: "user_blocked", onDelete: Cascade)
+
+  target_id BigInt
+  target    User   @relation(fields: [target_id], references: [id], name: "user_blocked_by", onDelete: Cascade)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@unique([user_id, target_id], name: "user_blocked_unique")
+  @@index([user_id])
+  @@index([target_id])
+  @@map("user_blocked")
 }

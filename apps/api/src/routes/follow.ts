@@ -70,7 +70,18 @@ router.post("/", authMiddleware, async (req: RequestWithUser, res) => {
       }
     });
 
-    if (target.notifications_push_followed) {
+    const blocked_users = await prisma.userBlocked.findMany({
+      where: {
+        target_id: user.id
+      }
+    });
+
+    console.log(blocked_users);
+
+    if (
+      target.notifications_push_followed &&
+      !blocked_users.map((u) => u.target_id).includes(user.id)
+    ) {
       await sendNotification({
         user_id: target.id,
         title: "Folks",

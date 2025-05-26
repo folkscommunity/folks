@@ -27,6 +27,12 @@ router.get("/channels", authMiddleware, async (req: RequestWithUser, res) => {
       return;
     }
 
+    const blocked_users = await prisma.userBlocked.findMany({
+      where: {
+        user_id: BigInt(req.user.id)
+      }
+    });
+
     const channel_memberships = await prisma.messageChannelMember.findMany({
       where: {
         user_id: BigInt(req.user.id)
@@ -37,6 +43,13 @@ router.get("/channels", authMiddleware, async (req: RequestWithUser, res) => {
       where: {
         id: {
           in: channel_memberships.map((m) => m.channel_id)
+        },
+        members: {
+          every: {
+            user_id: {
+              notIn: blocked_users.map((u) => u.target_id)
+            }
+          }
         }
       },
       include: {
@@ -475,14 +488,15 @@ router.post("/message", authMiddleware, async (req: RequestWithUser, res) => {
       return;
     }
 
+    const blocked_users = await prisma.userBlocked.findMany({
+      where: {
+        target_id: BigInt(req.user.id)
+      }
+    });
+
     const channel = await prisma.messageChannel.findUnique({
       where: {
-        id: channel_id,
-        members: {
-          some: {
-            user_id: user.id
-          }
-        }
+        id: channel_id
       }
     });
 
@@ -545,6 +559,10 @@ router.post("/message", authMiddleware, async (req: RequestWithUser, res) => {
 
     try {
       for await (const member of other_members) {
+        if (blocked_users.map((u) => u.user_id).includes(member.user_id)) {
+          continue;
+        }
+
         if (
           !(
             new Date(member.last_read_at).getTime() >
@@ -725,10 +743,20 @@ router.get(
         });
         return;
       }
+      const blocked_users = await prisma.userBlocked.findMany({
+        where: {
+          user_id: BigInt(req.user.id)
+        }
+      });
 
       const channels = await prisma.messageChannel.findMany({
         where: {
           members: {
+            every: {
+              user_id: {
+                notIn: blocked_users.map((u) => u.target_id)
+              }
+            },
             some: {
               user_id: user.id
             }

@@ -2,9 +2,17 @@ import dayjs from "dayjs";
 
 import { parsePostBody } from "@/lib/post-utils";
 
-export const current_release = "0.9.7";
+export const current_release = "0.9.8";
 
 const releases = [
+  {
+    version: "0.9.8",
+    date: "2025-05-26",
+    changes: [
+      "Added block user functionality.",
+      "Improved timeline image gallery."
+    ]
+  },
   {
     version: "0.9.7",
     date: "2025-05-23",

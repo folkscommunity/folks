@@ -126,8 +126,27 @@ router.get("/", async (req, res) => {
       }
     }
 
+    let blocked_users = [];
+
+    if (user_id) {
+      blocked_users = await prisma.userBlocked.findMany({
+        where: {
+          user_id: BigInt(user_id)
+        }
+      });
+
+      blocked_users = blocked_users.map(
+        (blocked_user) => blocked_user.target_id
+      );
+    }
+
     const feed = await prisma.post.findMany({
-      where: where,
+      where: {
+        ...where,
+        author_id: {
+          notIn: blocked_users
+        }
+      },
       cursor: cursorId ? { id: cursorId } : undefined,
       skip: cursorId ? 1 : 0,
       take: limit ? Number(limit) : 20,

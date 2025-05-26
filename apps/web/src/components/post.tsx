@@ -14,6 +14,13 @@ import { cn, dateRelativeTiny } from "@/lib/utils";
 
 import { ReplyComposeFloating } from "./composer";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
+} from "./dialog";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -212,10 +219,10 @@ export function Post({
 
   return (
     <div
-      className="group mx-auto mb-4 flex w-full max-w-3xl gap-4 pb-4 max-sm:max-w-[100vw]"
+      className="group mx-auto mb-4 flex w-full max-w-3xl gap-4 overflow-x-clip pb-4 max-sm:mx-[-16px] max-sm:w-[100dvw] max-sm:max-w-[100vw]"
       id={`post-${lPost.id}`}
     >
-      <div>
+      <div className="max-sm:pl-4">
         <Link href={`/${lPost.author.username}`} className="hover:no-underline">
           <FolksAvatar
             src={lPost.author.avatar_url}
@@ -223,7 +230,7 @@ export function Post({
           />
         </Link>
       </div>
-      <div className="flex max-w-full flex-1 flex-col gap-1">
+      <div className="flex max-w-full flex-1 flex-col gap-1 max-sm:pr-4">
         <div className="flex items-center justify-between gap-[2px]">
           <div>
             <Link className="font-bold" href={`/${lPost.author.username}`}>
@@ -391,19 +398,76 @@ export function Post({
 
         {lPost.attachments && lPost.attachments.length > 0 && (
           <>
-            <div className="flex gap-2 pt-2">
-              {lPost.attachments.map((attachment: any, i: number) => (
-                <TimelinePhoto
-                  key={i}
-                  src={attachment.url}
-                  width={attachment.width}
-                  height={attachment.height}
-                  alt={
-                    attachment.alt_text || `${lPost.author.username}'s Photo`
-                  }
-                  onClick={() => setIndex(i)}
-                />
-              ))}
+            <div className="w-[calc(100%+72px] relative -ml-[72px] mt-2 overflow-hidden max-sm:!w-[calc(100%+144px)] sm:ml-0 sm:w-full">
+              <div className="hiddenscrollbar flex max-w-[100dvw] snap-x snap-mandatory gap-2 overflow-x-auto pr-16 max-sm:pl-[72px] max-sm:pr-8">
+                {(() => {
+                  // Calculate base height from first image
+                  const firstImage = lPost.attachments[0];
+                  const baseHeight = Math.min(
+                    400,
+                    (firstImage.height * 300) / firstImage.width
+                  );
+
+                  return lPost.attachments.map((attachment: any, i: number) => {
+                    const aspectRatio = attachment.width / attachment.height;
+                    const width = Math.min(
+                      baseHeight * aspectRatio,
+                      window.innerWidth * 0.85
+                    );
+
+                    return (
+                      <div
+                        key={i}
+                        className="relative flex-none snap-center"
+                        style={{
+                          height: `${baseHeight}px`,
+                          width: `${width}px`
+                        }}
+                      >
+                        <div
+                          className="absolute inset-0 cursor-pointer overflow-hidden rounded-lg border dark:border-slate-800"
+                          onClick={() => setIndex(i)}
+                        >
+                          <img
+                            src={attachment.url}
+                            alt={
+                              attachment.alt_text ||
+                              `${lPost.author.username}'s Photo`
+                            }
+                            className="h-full w-full object-cover"
+                          />
+
+                          {attachment.alt_text &&
+                            !attachment.alt_text.endsWith("'s Photo") && (
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <button
+                                    className="bg-black-900 dark:bg-black-800 text-black-100 absolute bottom-2 right-2 h-[32px] w-[32px] rounded-full border border-neutral-300/0 p-1 text-xs font-medium opacity-50 hover:opacity-100 dark:border-slate-800 dark:text-slate-400"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                    }}
+                                  >
+                                    alt
+                                  </button>
+                                </DialogTrigger>
+                                <DialogContent className="sm:max-w-md">
+                                  <DialogHeader>
+                                    <DialogTitle>Image Description</DialogTitle>
+                                  </DialogHeader>
+                                  <div className="py-4">
+                                    <p className="text-sm text-slate-600 dark:text-slate-400">
+                                      {attachment.alt_text}
+                                    </p>
+                                  </div>
+                                </DialogContent>
+                              </Dialog>
+                            )}
+                        </div>
+                      </div>
+                    );
+                  });
+                })()}
+              </div>
             </div>
 
             {index !== -1 && (
@@ -479,22 +543,6 @@ export function Post({
                 : " "}
             </span>
           </div>
-
-          {isClient &&
-            stickers_teaser_feature_flag &&
-            (stickers_teaser_feature_flag as string[]).includes(
-              lPost.id.toString()
-            ) && (
-              <div className="flex min-w-12 items-center gap-2">
-                <SmileIcon
-                  className={cn(
-                    "rotate size-5 rotate-0 cursor-pointer text-slate-700 transition-transform hover:rotate-[-30deg] hover:text-blue-500"
-                  )}
-                  strokeWidth={1.5}
-                  onClick={stickers}
-                />
-              </div>
-            )}
         </div>
       </div>
 

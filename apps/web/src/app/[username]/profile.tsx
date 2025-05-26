@@ -1,13 +1,24 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Cube, Gear } from "@phosphor-icons/react";
+import { Cube, DotsThree, Gear } from "@phosphor-icons/react";
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { ExternalLinkIcon } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { toast } from "sonner";
 
+import { BlockUserDialog } from "@/components/block-user-dialog";
+import { Button } from "@/components/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from "@/components/dropdown-menu";
 import { FeedUser } from "@/components/feeds";
 import { FolksAvatar } from "@/components/folks-avatar";
 import { ProfileMedia } from "@/components/profile-media";
@@ -29,6 +40,7 @@ export interface Profile {
   website?: string;
   super_admin?: boolean;
   suspended?: boolean;
+  blocked_by_user?: boolean;
   created_at: Date;
   updated_at: Date;
   count: {
@@ -175,6 +187,9 @@ export default function Profile({
 }) {
   const [followingModal, setFollowingModal] = useState(false);
   const [followersModal, setFollowersModal] = useState(false);
+  const [blockUserModal, setBlockUserModal] = useState(false);
+  const [dropdownShown, setDropdownShown] = useState(false);
+
   const searchParams = useSearchParams();
 
   const [tab, setTab] = useState<Tabs>(
@@ -209,6 +224,28 @@ export default function Profile({
     };
   }, [tab, queryTab]);
 
+  async function unblockUser() {
+    const unblock = await fetch("/api/user/unblock", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        target_id: profile.id.toString()
+      })
+    });
+
+    if (!unblock.ok) {
+      toast.error("Failed to unblock user.");
+      setDropdownShown(false);
+      return;
+    }
+
+    setDropdownShown(false);
+    toast.success(`@${profile.username} unblocked.`);
+    window.location.reload();
+  }
+
   return (
     <>
       <div className="mx-auto w-full max-w-3xl flex-1 overflow-x-hidden max-sm:max-w-[100vw]">
@@ -226,33 +263,6 @@ export default function Profile({
               )}
             </div>
 
-            {!isUser && (
-              <div className="flex flex-row items-end gap-2 pb-3">
-                {!isUser && user && (
-                  <Link
-                    href={`/api/messages/channel/${profile.username}`}
-                    prefetch={false}
-                  >
-                    <button className="h-[34px] w-[120px] border border-gray-400 px-3 py-1 hover:bg-gray-500/20">
-                      Message
-                    </button>
-                  </Link>
-                )}
-
-                {!isUser && user && (
-                  <FollowButton target_id={profile.id.toString()} />
-                )}
-
-                {!user && (
-                  <Link href="/register">
-                    <button className="h-[34px] w-[120px] border border-gray-400 px-3 py-1 hover:bg-gray-500/20">
-                      Follow
-                    </button>
-                  </Link>
-                )}
-              </div>
-            )}
-
             {isUser && (
               <Link
                 href="/settings"
@@ -266,6 +276,51 @@ export default function Profile({
                 />
               </Link>
             )}
+
+            {!isUser && user && (
+              <DropdownMenu
+                open={dropdownShown}
+                onOpenChange={(open) => setDropdownShown(open)}
+              >
+                <DropdownMenuTrigger asChild>
+                  <button className="group mr-1 mt-3 h-fit w-fit rounded-full">
+                    <DotsThree
+                      size="28px"
+                      className="opacity-50 transition-all group-hover:opacity-80"
+                    />
+                  </button>
+                </DropdownMenuTrigger>
+
+                <DropdownMenuContent
+                  className="bg-background border-black-200 min-w-[200px] rounded-none dark:border-slate-900"
+                  side="bottom"
+                  align="end"
+                >
+                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {profile.blocked_by_user ? (
+                    <DropdownMenuItem
+                      onClick={() => {
+                        unblockUser();
+                      }}
+                      className="hover:bg-black-50 hover:text-black-700 dark:hover:bg-black-700 cursor-pointer rounded-none dark:hover:text-white"
+                    >
+                      Unblock @{profile.username}
+                    </DropdownMenuItem>
+                  ) : (
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setDropdownShown(false);
+                        setBlockUserModal(true);
+                      }}
+                      className="cursor-pointer rounded-none hover:bg-red-500 hover:text-white dark:hover:bg-red-600"
+                    >
+                      Block @{profile.username}
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
 
           <div className="flex flex-row justify-between gap-4">
@@ -276,13 +331,15 @@ export default function Profile({
             @{profile.username} (#{profile.id})
           </p>
 
-          <p className="mb-0">
-            {[profile.occupation, profile.location, profile.pronouns]
-              .filter((d) => d)
-              .join(", ")}
-          </p>
+          {!profile.blocked_by_user && (
+            <p className="mb-0">
+              {[profile.occupation, profile.location, profile.pronouns]
+                .filter((d) => d)
+                .join(", ")}
+            </p>
+          )}
 
-          {profile.website && (
+          {!profile.blocked_by_user && profile.website && (
             <a
               href={profile.website}
               target="_blank"
@@ -301,15 +358,42 @@ export default function Profile({
                 onClick={() => setFollowingModal(true)}
                 className="dark:border-black-300 dark:text-black-300 border-black-700 text-black-700 rounded-2xl border px-5 py-1"
               >
-                {profile.count.following} following
+                {profile.count.following || "0"} following
               </button>
 
               <button
                 onClick={() => setFollowersModal(true)}
                 className="dark:border-black-300 dark:text-black-300 border-black-700 text-black-700 rounded-2xl border px-5 py-1"
               >
-                {profile.count.followers} followers
+                {profile.count.followers || "0"} followers
               </button>
+            </div>
+          )}
+
+          {!isUser && (
+            <div className="flex flex-row items-end gap-2 pb-3">
+              {!isUser && user && !profile.blocked_by_user && (
+                <Link
+                  href={`/api/messages/channel/${profile.username}`}
+                  prefetch={false}
+                >
+                  <button className="h-[34px] w-[120px] border border-gray-400 px-3 py-1 hover:bg-gray-500/20">
+                    Message
+                  </button>
+                </Link>
+              )}
+
+              {!isUser && user && !profile.blocked_by_user && (
+                <FollowButton target_id={profile.id.toString()} />
+              )}
+
+              {!user && (
+                <Link href="/register">
+                  <button className="h-[34px] w-[120px] border border-gray-400 px-3 py-1 hover:bg-gray-500/20">
+                    Follow
+                  </button>
+                </Link>
+              )}
             </div>
           )}
         </div>
@@ -317,84 +401,101 @@ export default function Profile({
         <div className="pb-2">
           <Separator />
         </div>
+        {!profile.blocked_by_user && (
+          <>
+            <div className="flex w-full justify-center pb-4">
+              <div className="text-black-400 hiddenscrollbar flex flex-row space-x-[1px] overflow-x-auto text-sm font-bold">
+                <span
+                  className={cn(
+                    "hover:text-foreground cursor-pointer px-4 py-0.5",
+                    tab === Tabs.POSTS &&
+                      "hover:bg-black-800 text-foreground hover:text-background rounded-3xl bg-black text-white dark:bg-white dark:text-black dark:hover:bg-slate-200"
+                  )}
+                  onClick={() => setTab(Tabs.POSTS)}
+                >
+                  Posts
+                </span>
 
-        <div className="flex w-full justify-center pb-4">
-          <div className="text-black-400 hiddenscrollbar flex flex-row space-x-[1px] overflow-x-auto text-sm font-bold">
-            <span
-              className={cn(
-                "hover:text-foreground cursor-pointer px-4 py-0.5",
-                tab === Tabs.POSTS &&
-                  "hover:bg-black-800 text-foreground hover:text-background rounded-3xl bg-black text-white dark:bg-white dark:text-black dark:hover:bg-slate-200"
-              )}
-              onClick={() => setTab(Tabs.POSTS)}
-            >
-              Posts
-            </span>
-
-            {profile.count.articles > 0 && (
-              <span
-                className={cn(
-                  "hover:text-foreground cursor-pointer px-4 py-0.5",
-                  tab === Tabs.ARTICLES &&
-                    "hover:bg-black-800 text-foreground hover:text-background rounded-3xl bg-black text-white dark:bg-white dark:text-black dark:hover:bg-slate-200"
+                {profile.count.articles > 0 && (
+                  <span
+                    className={cn(
+                      "hover:text-foreground cursor-pointer px-4 py-0.5",
+                      tab === Tabs.ARTICLES &&
+                        "hover:bg-black-800 text-foreground hover:text-background rounded-3xl bg-black text-white dark:bg-white dark:text-black dark:hover:bg-slate-200"
+                    )}
+                    onClick={() => setTab(Tabs.ARTICLES)}
+                  >
+                    Articles
+                  </span>
                 )}
-                onClick={() => setTab(Tabs.ARTICLES)}
-              >
-                Articles
-              </span>
+
+                {profile.count.boards > 0 && (
+                  <span
+                    className={cn(
+                      "hover:text-foreground cursor-pointer px-4 py-0.5",
+                      tab === Tabs.BOARDS &&
+                        "hover:bg-black-800 text-foreground hover:text-background rounded-3xl bg-black text-white dark:bg-white dark:text-black dark:hover:bg-slate-200"
+                    )}
+                    onClick={() => setTab(Tabs.BOARDS)}
+                  >
+                    Boards
+                  </span>
+                )}
+
+                <span
+                  className={cn(
+                    "hover:text-foreground cursor-pointer px-4 py-0.5",
+                    tab === Tabs.REPLIES &&
+                      "hover:bg-black-800 text-foreground hover:text-background rounded-3xl bg-black text-white dark:bg-white dark:text-black dark:hover:bg-slate-200"
+                  )}
+                  onClick={() => setTab(Tabs.REPLIES)}
+                >
+                  Replies
+                </span>
+
+                <span
+                  className={cn(
+                    "hover:text-foreground cursor-pointer px-4 py-0.5",
+                    tab === Tabs.MEDIA &&
+                      "hover:bg-black-800 text-foreground hover:text-background rounded-3xl bg-black text-white dark:bg-white dark:text-black dark:hover:bg-slate-200"
+                  )}
+                  onClick={() => setTab(Tabs.MEDIA)}
+                >
+                  Media
+                </span>
+              </div>
+            </div>
+            {tab === Tabs.POSTS && (
+              <FeedUser author_id={profile.id.toString()} user={user} />
             )}
 
-            {profile.count.boards > 0 && (
-              <span
-                className={cn(
-                  "hover:text-foreground cursor-pointer px-4 py-0.5",
-                  tab === Tabs.BOARDS &&
-                    "hover:bg-black-800 text-foreground hover:text-background rounded-3xl bg-black text-white dark:bg-white dark:text-black dark:hover:bg-slate-200"
-                )}
-                onClick={() => setTab(Tabs.BOARDS)}
-              >
-                Boards
-              </span>
+            {tab === Tabs.REPLIES && (
+              <FeedUser
+                author_id={profile.id.toString()}
+                user={user}
+                replies={true}
+              />
             )}
 
-            <span
-              className={cn(
-                "hover:text-foreground cursor-pointer px-4 py-0.5",
-                tab === Tabs.REPLIES &&
-                  "hover:bg-black-800 text-foreground hover:text-background rounded-3xl bg-black text-white dark:bg-white dark:text-black dark:hover:bg-slate-200"
-              )}
-              onClick={() => setTab(Tabs.REPLIES)}
-            >
-              Replies
-            </span>
+            {tab === Tabs.MEDIA && (
+              <ProfileMedia profile={profile} user={user} />
+            )}
+            {tab === Tabs.ARTICLES && <Articles profile={profile} />}
+            {tab === Tabs.BOARDS && <Boards profile={profile} />}
+          </>
+        )}
 
-            <span
-              className={cn(
-                "hover:text-foreground cursor-pointer px-4 py-0.5",
-                tab === Tabs.MEDIA &&
-                  "hover:bg-black-800 text-foreground hover:text-background rounded-3xl bg-black text-white dark:bg-white dark:text-black dark:hover:bg-slate-200"
-              )}
-              onClick={() => setTab(Tabs.MEDIA)}
-            >
-              Media
-            </span>
+        {profile.blocked_by_user && (
+          <div className="mx-auto mt-20 flex w-fit flex-col items-center justify-center gap-1 pb-4">
+            <p>
+              You have blocked <strong>@{profile.username}</strong>.
+            </p>
+
+            <Button onClick={unblockUser} className="w-[200px]">
+              Unblock
+            </Button>
           </div>
-        </div>
-        {tab === Tabs.POSTS && (
-          <FeedUser author_id={profile.id.toString()} user={user} />
         )}
-
-        {tab === Tabs.REPLIES && (
-          <FeedUser
-            author_id={profile.id.toString()}
-            user={user}
-            replies={true}
-          />
-        )}
-
-        {tab === Tabs.MEDIA && <ProfileMedia profile={profile} user={user} />}
-        {tab === Tabs.ARTICLES && <Articles profile={profile} />}
-        {tab === Tabs.BOARDS && <Boards profile={profile} />}
 
         <FollowersModal
           open={followersModal}
@@ -409,6 +510,13 @@ export default function Profile({
             setFollowersModal(false);
             setFollowingModal(false);
           }}
+        />
+
+        <BlockUserDialog
+          open={blockUserModal}
+          onClose={() => setBlockUserModal(false)}
+          user_id={profile.id.toString()}
+          user_name={profile.username}
         />
       </div>
     </>

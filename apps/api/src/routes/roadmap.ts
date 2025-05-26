@@ -4,6 +4,7 @@ import { prisma, RoadmapItemStatus } from "@folks/db";
 import { JSONtoString } from "@folks/utils";
 
 import { authMiddleware, RequestWithUser } from "@/lib/auth_middleware";
+import { posthog } from "@/lib/posthog";
 
 const app = Router();
 
@@ -79,6 +80,15 @@ app.post("/suggest", authMiddleware, async (req: RequestWithUser, res) => {
         description: description,
         status: "SUGGESTED",
         created_by_id: BigInt(req.user.id)
+      }
+    });
+
+    await posthog.capture({
+      event: "roadmap_item_suggested",
+      distinctId: req.user.id.toString(),
+      properties: {
+        title: title,
+        description: description
       }
     });
 

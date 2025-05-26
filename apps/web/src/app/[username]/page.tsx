@@ -101,6 +101,23 @@ export default async function Page({
     isUser = selectedUser.id === user?.id;
   }
 
+  let blockedByUser = false;
+
+  if (user) {
+    const isBlockedByUser = await prisma.userBlocked.findUnique({
+      where: {
+        user_blocked_unique: {
+          user_id: BigInt(user.id),
+          target_id: BigInt(selectedUser.id)
+        }
+      }
+    });
+
+    if (isBlockedByUser) {
+      blockedByUser = true;
+    }
+  }
+
   return (
     <MainContainer hideAbout={true}>
       <Profile
@@ -118,6 +135,7 @@ export default async function Page({
           suspended: selectedUser.suspended,
           created_at: selectedUser.created_at,
           updated_at: selectedUser.updated_at,
+          ...(user && { blocked_by_user: blockedByUser }),
           count: {
             following: selectedUser._count.following || undefined,
             followers: selectedUser._count.followers || undefined,
