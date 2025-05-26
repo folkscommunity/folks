@@ -110,14 +110,9 @@ router.get("/", async (req, res) => {
 
       where = {
         author_id: {
-          AND: [
-            {
-              in: following.map((following) => following.target_id)
-            },
-            {
-              notIn: blocked_users
-            }
-          ]
+          in: following
+            .map((following) => following.target_id)
+            .filter((id) => !blocked_users.includes(id))
         },
         imported: false,
         deleted_at: null
