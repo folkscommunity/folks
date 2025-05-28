@@ -96,6 +96,8 @@ export default function RootLayout({
 
         <meta name="theme-color" content="#00050c" />
 
+        <meta name="apple-itunes-app" content="app-id=6745430553" />
+
         <link
           rel="apple-touch-startup-image"
           media="screen and (device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape)"

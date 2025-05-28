@@ -81,6 +81,8 @@ jobs:
           APN_KEY_ID: ${{ secrets.APN_KEY_ID }}
           APN_TEAM_ID: ${{ secrets.APN_TEAM_ID }}
           APN_TOPIC: ${{ secrets.APN_TOPIC }}
+          GHOST_URL: ${{ secrets.GHOST_URL }}
+          GHOST_KEY: ${{ secrets.GHOST_KEY }}
 
       - name: Discord notification (success)
         if: success()

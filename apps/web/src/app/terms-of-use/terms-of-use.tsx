@@ -1,4 +1,4 @@
-export async function Guidelines({
+export async function TermsOfUse({
   content,
   title
 }: {

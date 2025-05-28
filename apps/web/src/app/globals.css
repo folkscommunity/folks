@@ -998,3 +998,30 @@ p {
     background-clip: content-box;
   }
 }
+
+.ghost {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply py-1;
+  }
+
+  ol {
+    @apply list-decimal space-y-1 py-2 pl-6;
+  }
+
+  ul {
+    @apply list-disc space-y-1 py-2 pl-6;
+  }
+
+  p {
+    @apply my-4 min-h-2;
+  }
+
+  a {
+    @apply font-bold hover:underline;
+  }
+}

@@ -48,3 +48,5 @@ env:
     - APN_KEY_ID
     - APN_TEAM_ID
     - APN_TOPIC
+    - GHOST_URL
+    - GHOST_KEY

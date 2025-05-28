@@ -4,14 +4,14 @@ import { notFound } from "next/navigation";
 import { MainContainer } from "@/components/main-container";
 import { ghost } from "@/lib/ghost_cms";
 
-import { PrivacyPolicy } from "./privacy-policy";
+import { TermsOfUse } from "./terms-of-use";
 
 export const metadata: Metadata = {
-  title: "Folks – Privacy Policy"
+  title: "Folks – Terms of Use"
 };
 
 export default async function Page() {
-  const guidelines_page = await ghost.pages.read({ slug: "privacy-policy" });
+  const guidelines_page = await ghost.pages.read({ slug: "terms-of-use" });
 
   if (!guidelines_page) {
     return notFound();
@@ -19,7 +19,7 @@ export default async function Page() {
 
   return (
     <MainContainer hideAbout={true}>
-      <PrivacyPolicy
+      <TermsOfUse
         content={guidelines_page.html}
         title={guidelines_page.title}
       />
