@@ -639,6 +639,7 @@ router.get(
           deleted_at: null,
           suspended: false,
           email_verified: true,
+          search_hidden: false,
           NOT: {
             id: user.id
           },
@@ -729,7 +730,7 @@ router.get(
         JSON.stringify({
           error: true,
           path: "/api/user/search/recommended",
-          stack: e
+          stack: JSON.stringify(e)
         })
       );
 
