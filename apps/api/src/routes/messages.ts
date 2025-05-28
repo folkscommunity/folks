@@ -606,7 +606,12 @@ router.post("/message", authMiddleware, async (req: RequestWithUser, res) => {
             title: `${user.display_name}`,
             body: message.toString(),
             url: `/messages/${channel_id}`,
-            thread_id: "messages-" + channel_id
+            thread_id: "messages-" + channel_id,
+            sender_id: "folks-" + user.username.toString(),
+            sender_name: user.display_name,
+            sender_avatar_url: user.avatar_url,
+            channel_id: "messages-" + channel_id,
+            image_url: null
           });
         }
       }

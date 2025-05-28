@@ -927,6 +927,158 @@ router.get("/blocked", authMiddleware, async (req: RequestWithUser, res) => {
   }
 });
 
+router.get("/get-id/:username", async (req, res) => {
+  try {
+    const { username } = req.params;
+
+    const user = await prisma.user.findUnique({
+      where: {
+        username: username
+      },
+      select: {
+        id: true
+      }
+    });
+
+    if (!user) {
+      res.status(404).json({
+        error: "not_found"
+      });
+      return;
+    }
+
+    res.setHeader("Content-Type", "application/json");
+    res.send(JSONtoString({ ok: true, data: user.id }));
+  } catch (e) {
+    console.error(e);
+  }
+});
+
+router.get("/username/:username", async (req, res) => {
+  try {
+    const { username } = req.params;
+
+    const folks_sid =
+      req.cookies.folks_sid ||
+      req.headers.authorization ||
+      req.headers.Authorization;
+
+    let user_id = null;
+    let user;
+
+    if (folks_sid) {
+      const jwt_object: any = jwt.decode(folks_sid);
+
+      const session = await redis.get(`session:${jwt_object.id}:${folks_sid}`);
+
+      if (session) {
+        user_id = jwt_object.id;
+
+        user = await prisma.user.findUnique({
+          where: {
+            id: BigInt(user_id)
+          },
+          select: {
+            id: true,
+            username: true
+          }
+        });
+      }
+    }
+
+    const selectedUser = await prisma.user.findUnique({
+      where: {
+        username: username,
+        deleted_at: null
+      },
+      select: {
+        id: true,
+        username: true,
+        display_name: true,
+        avatar_url: true,
+        occupation: true,
+        location: true,
+        pronouns: true,
+        website: true,
+        super_admin: true,
+        suspended: true,
+        created_at: true,
+        updated_at: true,
+        _count: {
+          select: {
+            following: user && user.username === username ? true : false,
+            followers: user && user.username === username ? true : false,
+            articles: true,
+            boards: {
+              where: {
+                public: true
+              }
+            },
+            posts: true
+          }
+        }
+      }
+    });
+
+    if (!selectedUser) {
+      res.status(404).json({
+        error: "not_found"
+      });
+      return;
+    }
+
+    let blockedByUser = false;
+
+    if (user_id) {
+      const isBlockedByUser = await prisma.userBlocked.findUnique({
+        where: {
+          user_blocked_unique: {
+            user_id: BigInt(user_id),
+            target_id: BigInt(selectedUser.id)
+          }
+        }
+      });
+
+      if (isBlockedByUser) {
+        blockedByUser = true;
+      }
+    }
+
+    res.setHeader("Content-Type", "application/json");
+    res.send(
+      JSONtoString({
+        ok: true,
+        data: {
+          id: selectedUser.id,
+          username: selectedUser.username,
+          display_name: selectedUser.display_name,
+          occupation: selectedUser.occupation || undefined,
+          avatar_url: selectedUser.avatar_url || undefined,
+          location: selectedUser.location || undefined,
+          pronouns: selectedUser.pronouns || undefined,
+          website: selectedUser.website || undefined,
+          ...(selectedUser.super_admin && { super_admin: true }),
+          ...(selectedUser.suspended && { suspended: true }),
+          ...(user_id && { blocked_by_user: blockedByUser }),
+          created_at: selectedUser.created_at,
+          updated_at: selectedUser.updated_at,
+          count: {
+            following: selectedUser._count.following || undefined,
+            followers: selectedUser._count.followers || undefined,
+            articles: selectedUser._count.articles ?? 0,
+            boards: selectedUser._count.boards ?? 0,
+            posts: selectedUser._count.posts ?? 0
+          }
+        }
+      })
+    );
+  } catch (e) {
+    res.status(500).json({
+      error: "server_error"
+    });
+  }
+});
+
 router.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;

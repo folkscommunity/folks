@@ -39,7 +39,7 @@ const apnProvider = new apn.Provider({
     keyId: process.env.APN_KEY_ID!,
     teamId: process.env.APN_TEAM_ID!
   },
-  production: true
+  production: false
 });
 
 export async function sendWebPushNotification(
@@ -85,6 +85,12 @@ export async function sendWebPushNotification(
     } catch (e) {}
     console.error(e);
   }
+}
+
+export function optimizeImageForNotification(url: string) {
+  const url_as_base64 = Buffer.from(url).toString("base64");
+
+  return `https://imgproxy.folkscommunity.com/plain/${url_as_base64}.jpg`;
 }
 
 export function workerThread(id: number) {
@@ -162,6 +168,15 @@ export function workerThread(id: number) {
       const subtitle = job.data.subtitle;
       const body = job.data.body;
       const url = job.data.url;
+      const sender_id = job.data.sender_id;
+      const sender_name = job.data.sender_name;
+      const sender_avatar_url = job.data.sender_avatar_url
+        ? optimizeImageForNotification(job.data.sender_avatar_url)
+        : undefined;
+      const channel_id = job.data.channel_id;
+      const image_url = job.data.image_url
+        ? optimizeImageForNotification(job.data.image_url)
+        : undefined;
       const thread_id = job.data.thread_id;
 
       if (!user_id || !body) {
@@ -199,9 +214,18 @@ export function workerThread(id: number) {
 
         note.pushType = "alert";
 
+        note.mutableContent = true;
+
         note.payload = {
-          url: url || undefined
+          url: url || undefined,
+          "sender-id": sender_id || undefined,
+          "sender-name": sender_name || undefined,
+          "avatar-url": sender_avatar_url || undefined,
+          "channel-id": channel_id || sender_id || undefined,
+          "image-url": image_url || undefined
         };
+
+        console.log(note.payload);
 
         if (thread_id) {
           note.threadId = thread_id;

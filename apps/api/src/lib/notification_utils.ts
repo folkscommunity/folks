@@ -34,7 +34,12 @@ export async function sendMobileNotification({
   subtitle,
   body,
   url,
-  thread_id
+  thread_id,
+  sender_id,
+  sender_name,
+  sender_avatar_url,
+  channel_id,
+  image_url
 }: {
   user_id: bigint;
   title: string;
@@ -42,6 +47,11 @@ export async function sendMobileNotification({
   body: string;
   url?: string;
   thread_id?: string;
+  sender_id?: string;
+  sender_name?: string;
+  sender_avatar_url?: string;
+  channel_id?: string;
+  image_url?: string;
 }) {
   try {
     const queue_send_mobile_notification = new Queue(
@@ -55,7 +65,12 @@ export async function sendMobileNotification({
       subtitle: subtitle,
       body: body,
       url: url,
-      thread_id: thread_id
+      thread_id: thread_id,
+      sender_id: sender_id,
+      sender_name: sender_name,
+      sender_avatar_url: sender_avatar_url,
+      channel_id: channel_id,
+      image_url: image_url
     });
   } catch (e) {
     console.error(e);
