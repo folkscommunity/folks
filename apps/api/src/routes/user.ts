@@ -690,7 +690,11 @@ router.get(
       const sortedUsers = [...recommendedUsers].sort((a, b) => {
         const aDate = mostRecentPosts.get(a.id.toString());
         const bDate = mostRecentPosts.get(b.id.toString());
-        return bDate.getTime() - aDate.getTime();
+        // Handle cases where dates might be undefined
+        if (!aDate && !bDate) return 0;
+        if (!aDate) return 1; // Users with no posts go to the end
+        if (!bDate) return -1; // Users with posts come before those without
+        return new Date(bDate).getTime() - new Date(aDate).getTime();
       });
 
       // Get follow states for all recommended users
