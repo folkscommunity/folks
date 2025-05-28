@@ -29,6 +29,12 @@ ENV SENTRY_AUTH_TOKEN=$SENTRY_AUTH_TOKEN
 ARG VERCEL_URL
 ENV VERCEL_URL=$VERCEL_URL
 
+ARG GHOST_URL
+ENV GHOST_URL=$GHOST_URL
+
+ARG GHOST_KEY
+ENV GHOST_KEY=$GHOST_KEY
+
 # Copy API to Build Stage
 COPY ./apps/api/src /app/apps/api/src
 COPY ./apps/api/tsconfig.json /app/apps/api/tsconfig.json
