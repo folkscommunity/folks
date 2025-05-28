@@ -726,6 +726,8 @@ router.get(
         })
       );
     } catch (e) {
+      console.log(e);
+
       console.error(
         JSON.stringify({
           error: true,
