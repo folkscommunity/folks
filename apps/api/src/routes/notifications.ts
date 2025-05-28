@@ -358,7 +358,7 @@ router.post(
 
       const existing = await prisma.notificationEndpoint.findFirst({
         where: {
-          id: btoa(token),
+          id: btoa(token + user.id.toString()),
           user_id: user.id
         }
       });
@@ -371,7 +371,7 @@ router.post(
 
       await prisma.notificationEndpoint.create({
         data: {
-          id: btoa(token),
+          id: btoa(token + user.id.toString()),
           user_id: user.id,
           type: NotificationEndpointType.IOS,
           user_agent: user_agent,

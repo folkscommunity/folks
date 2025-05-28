@@ -161,6 +161,19 @@ router.post("/register", async (req, res) => {
       });
     }
 
+    const existing_email = await prisma.user.findUnique({
+      where: {
+        email: email
+      }
+    });
+
+    if (existing_email) {
+      return res.status(400).json({
+        error: "email_already_exists",
+        msg: "An account using this email already exists."
+      });
+    }
+
     try {
       await schemas.emailSchema.parseAsync(email);
       await schemas.usernameSchema.parseAsync(username);
@@ -169,7 +182,7 @@ router.post("/register", async (req, res) => {
     } catch (err) {
       return res.status(400).json({
         error: "invalid_request",
-        message: JSON.parse(err.message)[0].message
+        msg: JSON.parse(err.message)[0].message
       });
     }
 
