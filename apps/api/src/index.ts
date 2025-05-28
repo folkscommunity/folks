@@ -142,7 +142,8 @@ async function mainThread() {
       try {
         const user = await prisma.user.findUnique({
           where: {
-            id: BigInt(user_id)
+            id: BigInt(user_id),
+            deleted_at: null
           },
           include: {
             message_channel_membership: true

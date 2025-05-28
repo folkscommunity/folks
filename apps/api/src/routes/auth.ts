@@ -24,7 +24,8 @@ router.get("/", authMiddleware, async (req: RequestWithUser, res) => {
   try {
     const user = await prisma.user.findUnique({
       where: {
-        id: BigInt(req.user.id)
+        id: BigInt(req.user.id),
+        deleted_at: null
       }
     });
 
@@ -299,6 +300,13 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({
         error: "invalid_credentials",
         msg: "The email or password you entered is incorrect."
+      });
+    }
+
+    if (user.deleted_at) {
+      return res.status(400).json({
+        error: "account_deleted",
+        msg: "This account has been deleted, contact support."
       });
     }
 
@@ -600,7 +608,8 @@ router.post("/reset/request", async (req, res) => {
 
     const user = await prisma.user.findUnique({
       where: {
-        email: email
+        email: email,
+        deleted_at: null
       }
     });
 
@@ -687,7 +696,8 @@ router.post("/reset", async (req, res) => {
 
     const user = await prisma.user.findFirst({
       where: {
-        reset_password_token: token
+        reset_password_token: token,
+        deleted_at: null
       }
     });
 

@@ -16,7 +16,8 @@ router.get("/channels", authMiddleware, async (req: RequestWithUser, res) => {
   try {
     const user = await prisma.user.findUnique({
       where: {
-        id: BigInt(req.user.id)
+        id: BigInt(req.user.id),
+        deleted_at: null
       }
     });
 
@@ -54,6 +55,11 @@ router.get("/channels", authMiddleware, async (req: RequestWithUser, res) => {
       },
       include: {
         members: {
+          where: {
+            user: {
+              deleted_at: null
+            }
+          },
           select: {
             user: {
               select: {
@@ -109,7 +115,8 @@ router.post("/channel", authMiddleware, async (req: RequestWithUser, res) => {
 
     const user = await prisma.user.findUnique({
       where: {
-        id: BigInt(req.user.id)
+        id: BigInt(req.user.id),
+        deleted_at: null
       }
     });
 
@@ -136,7 +143,8 @@ router.post("/channel", authMiddleware, async (req: RequestWithUser, res) => {
 
     const target_user = await prisma.user.findUnique({
       where: {
-        id: BigInt(target_id)
+        id: BigInt(target_id),
+        deleted_at: null
       }
     });
 
@@ -218,7 +226,8 @@ router.get(
 
       const user = await prisma.user.findUnique({
         where: {
-          id: BigInt(req.user.id)
+          id: BigInt(req.user.id),
+          deleted_at: null
         }
       });
 
@@ -239,7 +248,8 @@ router.get(
 
       const target_user = await prisma.user.findUnique({
         where: {
-          username: username.toString()
+          username: username.toString(),
+          deleted_at: null
         }
       });
 
@@ -303,7 +313,8 @@ router.get(
     try {
       const user = await prisma.user.findUnique({
         where: {
-          id: BigInt(req.user.id)
+          id: BigInt(req.user.id),
+          deleted_at: null
         }
       });
 
@@ -334,6 +345,11 @@ router.get(
         },
         include: {
           members: {
+            where: {
+              user: {
+                deleted_at: null
+              }
+            },
             select: {
               user: {
                 select: {
@@ -394,7 +410,8 @@ router.get(
 
       const user = await prisma.user.findUnique({
         where: {
-          id: BigInt(req.user.id)
+          id: BigInt(req.user.id),
+          deleted_at: null
         }
       });
 
@@ -408,7 +425,10 @@ router.get(
       const membership = await prisma.messageChannelMember.findFirst({
         where: {
           channel_id: channel_id,
-          user_id: BigInt(req.user.id)
+          user_id: BigInt(req.user.id),
+          user: {
+            deleted_at: null
+          }
         }
       });
 
@@ -421,7 +441,10 @@ router.get(
 
       const messages = await prisma.message.findMany({
         where: {
-          channel_id: channel_id
+          channel_id: channel_id,
+          user: {
+            deleted_at: null
+          }
         },
         skip: cursor ? 1 : 0,
         cursor: cursor ? { id: cursor } : undefined,
@@ -470,7 +493,8 @@ router.post("/message", authMiddleware, async (req: RequestWithUser, res) => {
 
     const user = await prisma.user.findUnique({
       where: {
-        id: BigInt(req.user.id)
+        id: BigInt(req.user.id),
+        deleted_at: null
       }
     });
 

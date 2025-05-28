@@ -371,7 +371,10 @@ router.get("/media/:user_id", async (req, res) => {
       where: {
         post: {
           author_id: BigInt(user_id),
-          deleted_at: null
+          deleted_at: null,
+          author: {
+            deleted_at: null
+          }
         }
       },
       orderBy: {

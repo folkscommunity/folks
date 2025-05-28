@@ -2,9 +2,14 @@ import dayjs from "dayjs";
 
 import { parsePostBody } from "@/lib/post-utils";
 
-export const current_release = "0.9.8";
+export const current_release = "0.9.9";
 
 const releases = [
+  {
+    version: "0.9.9",
+    date: "2025-05-28",
+    changes: ["Added the ability to delete your account."]
+  },
   {
     version: "0.9.8",
     date: "2025-05-26",

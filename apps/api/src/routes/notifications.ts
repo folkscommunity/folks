@@ -13,7 +13,8 @@ router.get("/", authMiddleware, async (req: RequestWithUser, res) => {
   try {
     const user = await prisma.user.findUnique({
       where: {
-        id: BigInt(req.user.id)
+        id: BigInt(req.user.id),
+        deleted_at: null
       }
     });
 

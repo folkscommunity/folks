@@ -67,7 +67,8 @@ async function generatePostMentions(post_id: string, body: string) {
 
     const matched_user = await prisma.user.findFirst({
       where: {
-        username: match_lower
+        username: match_lower,
+        deleted_at: null
       }
     });
 
@@ -152,7 +153,8 @@ router.post(
       // Get user from db
       const user = await prisma.user.findUnique({
         where: {
-          id: BigInt(req.user.id)
+          id: BigInt(req.user.id),
+          deleted_at: null
         }
       });
 
@@ -966,7 +968,8 @@ router.post("/like", authMiddleware, async (req: RequestWithUser, res) => {
 
     const user = await prisma.user.findUnique({
       where: {
-        id: BigInt(req.user.id)
+        id: BigInt(req.user.id),
+        deleted_at: null
       }
     });
 
@@ -1079,7 +1082,8 @@ router.delete("/like", authMiddleware, async (req: RequestWithUser, res) => {
 
     const user = await prisma.user.findUnique({
       where: {
-        id: BigInt(req.user.id)
+        id: BigInt(req.user.id),
+        deleted_at: null
       }
     });
 
@@ -1147,7 +1151,8 @@ router.delete("/:id", authMiddleware, async (req: RequestWithUser, res) => {
 
     const user = await prisma.user.findUnique({
       where: {
-        id: BigInt(req.user.id)
+        id: BigInt(req.user.id),
+        deleted_at: null
       }
     });
 
@@ -1217,7 +1222,8 @@ router.post(
 
       const user = await prisma.user.findUnique({
         where: {
-          id: BigInt(req.user.id)
+          id: BigInt(req.user.id),
+          deleted_at: null
         }
       });
 

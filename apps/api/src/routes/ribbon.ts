@@ -26,6 +26,11 @@ router.get("/", async (req, res) => {
     }
 
     const ribbon_messages = await prisma.ribbon.findMany({
+      where: {
+        user: {
+          deleted_at: null
+        }
+      },
       include: {
         user: {
           select: {
@@ -38,15 +43,15 @@ router.get("/", async (req, res) => {
       }
     });
 
-    const users = await prisma.user.findMany({
-      select: {
-        id: true
+    const users = await prisma.user.count({
+      where: {
+        deleted_at: null
       }
     });
 
-    const posts = await prisma.post.findMany({
-      select: {
-        id: true
+    const posts = await prisma.post.count({
+      where: {
+        deleted_at: null
       }
     });
 
@@ -57,7 +62,7 @@ router.get("/", async (req, res) => {
         })
         .join(" · ") || "";
 
-    const ribbon_string = `${users.length} People · ${posts.length} Posts · ${ribbon_messages.length} Ribbon Messages · ${ribbon_messages_string} · `;
+    const ribbon_string = `${users} People · ${posts} Posts · ${ribbon_messages.length} Ribbon Messages · ${ribbon_messages_string} · `;
 
     await redis.set("cache:ribbon", ribbon_string, "EX", 60 * 30);
 
@@ -91,7 +96,8 @@ router.post("/", authMiddleware, async (req: RequestWithUser, res) => {
 
     const user = await prisma.user.findUnique({
       where: {
-        id: BigInt(req.user.id)
+        id: BigInt(req.user.id),
+        deleted_at: null
       }
     });
 

@@ -22,7 +22,8 @@ router.post("/", authMiddleware, async (req: RequestWithUser, res) => {
 
     const user = await prisma.user.findUnique({
       where: {
-        id: BigInt(req.user.id)
+        id: BigInt(req.user.id),
+        deleted_at: null
       }
     });
 
@@ -36,7 +37,8 @@ router.post("/", authMiddleware, async (req: RequestWithUser, res) => {
 
     const target = await prisma.user.findUnique({
       where: {
-        id: target_id
+        id: target_id,
+        deleted_at: null
       }
     });
 
@@ -116,7 +118,8 @@ router.delete("/", authMiddleware, async (req: RequestWithUser, res) => {
 
     const user = await prisma.user.findUnique({
       where: {
-        id: BigInt(req.user.id)
+        id: BigInt(req.user.id),
+        deleted_at: null
       }
     });
 
@@ -176,7 +179,8 @@ router.get("/following", authMiddleware, async (req: RequestWithUser, res) => {
   try {
     const user = await prisma.user.findUnique({
       where: {
-        id: BigInt(req.user.id)
+        id: BigInt(req.user.id),
+        deleted_at: null
       }
     });
 
@@ -231,7 +235,8 @@ router.get("/followers", authMiddleware, async (req: RequestWithUser, res) => {
   try {
     const user = await prisma.user.findUnique({
       where: {
-        id: BigInt(req.user.id)
+        id: BigInt(req.user.id),
+        deleted_at: null
       }
     });
 
@@ -298,7 +303,8 @@ router.get("/:target_id", authMiddleware, async (req: RequestWithUser, res) => {
 
     const target = await prisma.user.findUnique({
       where: {
-        id: BigInt(target_id)
+        id: BigInt(target_id),
+        deleted_at: null
       }
     });
 

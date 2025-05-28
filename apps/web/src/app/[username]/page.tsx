@@ -17,7 +17,8 @@ export async function generateMetadata({
 
   const user = await prisma.user.findUnique({
     where: {
-      username: username
+      username: username,
+      deleted_at: null
     },
     select: {
       display_name: true,
@@ -61,7 +62,8 @@ export default async function Page({
 
   const selectedUser = await prisma.user.findUnique({
     where: {
-      username: username
+      username: username,
+      deleted_at: null
     },
     select: {
       id: true,

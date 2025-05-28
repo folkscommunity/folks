@@ -36,8 +36,10 @@ model User {
 
   internal_notes String?
 
-  super_admin Boolean @default(false)
-  suspended   Boolean @default(false)
+  super_admin   Boolean   @default(false)
+  suspended     Boolean   @default(false)
+  deleted_at    DateTime?
+  search_hidden Boolean   @default(false)
 
   featured_board_id String?
 

@@ -55,7 +55,8 @@ export async function ServerSession(): Promise<User | false> {
 
   const user = await prisma.user.findUnique({
     where: {
-      id: BigInt(jwt_object.id)
+      id: BigInt(jwt_object.id),
+      deleted_at: null
     }
   });
 

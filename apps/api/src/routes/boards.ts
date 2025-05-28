@@ -37,7 +37,8 @@ router.get("/", authMiddleware, async (req: RequestWithUser, res) => {
   try {
     const user = await prisma.user.findUnique({
       where: {
-        id: BigInt(req.user.id)
+        id: BigInt(req.user.id),
+        deleted_at: null
       }
     });
 
@@ -104,7 +105,8 @@ router.post("/create", authMiddleware, async (req: RequestWithUser, res) => {
   try {
     const user = await prisma.user.findUnique({
       where: {
-        id: BigInt(req.user.id)
+        id: BigInt(req.user.id),
+        deleted_at: null
       }
     });
 
@@ -175,6 +177,9 @@ router.get("/user/:user_id", async (req, res) => {
           some: {
             type: "Image"
           }
+        },
+        user: {
+          deleted_at: null
         }
       },
       include: {
@@ -212,7 +217,8 @@ router.post(
     try {
       const user = await prisma.user.findUnique({
         where: {
-          id: BigInt(req.user.id)
+          id: BigInt(req.user.id),
+          deleted_at: null
         }
       });
 
@@ -399,6 +405,9 @@ router.get("/:board_id/items", async (req, res) => {
     const board = await prisma.board.findUnique({
       where: {
         id: board_id,
+        user: {
+          deleted_at: null
+        },
         OR: user
           ? [
               {
@@ -462,7 +471,8 @@ router.post(
     try {
       const user = await prisma.user.findUnique({
         where: {
-          id: BigInt(req.user.id)
+          id: BigInt(req.user.id),
+          deleted_at: null
         }
       });
 
@@ -555,7 +565,10 @@ router.delete(
       const board = await prisma.board.findUnique({
         where: {
           id: board_id,
-          user_id: BigInt(req.user.id)
+          user_id: BigInt(req.user.id),
+          user: {
+            deleted_at: null
+          }
         }
       });
 
@@ -613,7 +626,8 @@ router.patch(
     try {
       const user = await prisma.user.findUnique({
         where: {
-          id: BigInt(req.user.id)
+          id: BigInt(req.user.id),
+          deleted_at: null
         }
       });
 
@@ -688,7 +702,8 @@ router.delete(
     try {
       const user = await prisma.user.findUnique({
         where: {
-          id: BigInt(req.user.id)
+          id: BigInt(req.user.id),
+          deleted_at: null
         }
       });
 

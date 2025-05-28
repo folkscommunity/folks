@@ -22,7 +22,8 @@ export default async function Image({
 
   const user = await prisma.user.findUnique({
     where: {
-      username: username
+      username: username,
+      deleted_at: null
     },
     select: {
       display_name: true,

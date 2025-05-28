@@ -35,7 +35,8 @@ router.patch("/", authMiddleware, async (req: RequestWithUser, res) => {
 
     const user = await prisma.user.findUnique({
       where: {
-        id: BigInt(req.user.id)
+        id: BigInt(req.user.id),
+        deleted_at: null
       }
     });
 
@@ -145,7 +146,8 @@ router.patch("/password", authMiddleware, async (req: RequestWithUser, res) => {
 
     const user = await prisma.user.findUnique({
       where: {
-        id: BigInt(req.user.id)
+        id: BigInt(req.user.id),
+        deleted_at: null
       }
     });
 
@@ -221,7 +223,8 @@ router.post(
 
       const user = await prisma.user.findUnique({
         where: {
-          id: BigInt(req.user.id)
+          id: BigInt(req.user.id),
+          deleted_at: null
         }
       });
 
@@ -531,7 +534,8 @@ router.get("/search", authMiddleware, async (req: RequestWithUser, res) => {
 
     const user = await prisma.user.findUnique({
       where: {
-        id: BigInt(req.user.id)
+        id: BigInt(req.user.id),
+        deleted_at: null
       }
     });
 
@@ -544,6 +548,9 @@ router.get("/search", authMiddleware, async (req: RequestWithUser, res) => {
 
     const users = await prisma.user.findMany({
       where: {
+        deleted_at: null,
+        suspended: false,
+        email_verified: true,
         OR: [
           {
             display_name: {
@@ -615,7 +622,8 @@ router.get(
     try {
       const user = await prisma.user.findUnique({
         where: {
-          id: BigInt(req.user.id)
+          id: BigInt(req.user.id),
+          deleted_at: null
         }
       });
 
@@ -628,15 +636,17 @@ router.get(
 
       const recommendedUsers = await prisma.user.findMany({
         where: {
+          deleted_at: null,
+          suspended: false,
+          email_verified: true,
           NOT: {
             id: user.id
           },
           posts: {
             some: {} // Only include users who have at least one post
-          },
-          email_verified: true
+          }
         },
-        take: 20,
+        take: 40,
         select: {
           id: true,
           username: true,
@@ -653,6 +663,7 @@ router.get(
       // Get the most recent post for each user
       const userPosts = await prisma.post.findMany({
         where: {
+          deleted_at: null,
           author_id: {
             in: recommendedUsers.map((u) => u.id)
           }
@@ -939,7 +950,8 @@ router.get("/:id", async (req, res) => {
 
     const selectedUser = await prisma.user.findUnique({
       where: {
-        id: BigInt(id)
+        id: BigInt(id),
+        deleted_at: null
       },
       select: {
         id: true,
@@ -1027,6 +1039,103 @@ router.get("/:id", async (req, res) => {
   } catch (e) {
     res.status(500).json({
       error: "server_error"
+    });
+  }
+});
+
+router.post("/delete", authMiddleware, async (req: RequestWithUser, res) => {
+  try {
+    const { password } = req.body;
+
+    const user = await prisma.user.findUnique({
+      where: {
+        id: BigInt(req.user.id)
+      }
+    });
+
+    if (!user) {
+      return res.status(401).json({
+        error: "unauthorized"
+      });
+    }
+
+    const isValid = await argon2.verify(user.password_hash, password);
+
+    if (!isValid) {
+      return res.status(400).json({
+        error: "invalid_password"
+      });
+    }
+
+    // destroy session
+    const token =
+      req.cookies.folks_sid ||
+      req.headers.authorization ||
+      req.headers.Authorization;
+
+    if (token) {
+      const jwt_object = jwt.decode(token) as {
+        id: string;
+      };
+
+      await redis.del(`session:${jwt_object.id}:${token}`);
+    }
+
+    await prisma.user.update({
+      where: {
+        id: BigInt(req.user.id)
+      },
+      data: {
+        deleted_at: new Date(),
+        marketing_emails: false,
+        notifications_push_replied_to: false,
+        notifications_push_mentioned: false,
+        notifications_push_followed: false,
+        notifications_push_liked_posts: false
+      }
+    });
+
+    await prisma.following.deleteMany({
+      where: {
+        user_id: BigInt(req.user.id)
+      }
+    });
+
+    await prisma.post.updateMany({
+      where: {
+        author_id: BigInt(req.user.id)
+      },
+      data: {
+        deleted_at: new Date()
+      }
+    });
+
+    await prisma.article.updateMany({
+      where: {
+        author_id: BigInt(req.user.id)
+      },
+      data: {
+        deleted_at: new Date()
+      }
+    });
+
+    try {
+      await posthog.capture({
+        event: "user_deleted",
+        distinctId: req.user.id.toString()
+      });
+    } catch (e) {
+      console.error(e);
+    }
+
+    res.setHeader("Content-Type", "application/json");
+    res.send(JSONtoString({ ok: true }));
+  } catch (e) {
+    console.error(e);
+
+    res.status(500).json({
+      error: "server_error",
+      message: "Something went wrong."
     });
   }
 });

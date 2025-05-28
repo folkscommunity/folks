@@ -13,7 +13,8 @@ export default async function Page({
 
   const user = await prisma.user.findFirst({
     where: {
-      reset_password_token: token
+      reset_password_token: token,
+      deleted_at: null
     }
   });
 

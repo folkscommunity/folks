@@ -17,7 +17,8 @@ router.post("/create", authMiddleware, async (req: RequestWithUser, res) => {
   try {
     const user = await prisma.user.findUnique({
       where: {
-        id: BigInt(req.user.id)
+        id: BigInt(req.user.id),
+        deleted_at: null
       }
     });
 
@@ -93,7 +94,8 @@ router.post(
     try {
       const user = await prisma.user.findUnique({
         where: {
-          id: BigInt(req.user.id)
+          id: BigInt(req.user.id),
+          deleted_at: null
         }
       });
 
@@ -219,7 +221,8 @@ router.post(
     try {
       const user = await prisma.user.findUnique({
         where: {
-          id: BigInt(req.user.id)
+          id: BigInt(req.user.id),
+          deleted_at: null
         }
       });
 
@@ -422,7 +425,8 @@ router.post(
     try {
       const user = await prisma.user.findUnique({
         where: {
-          id: BigInt(req.user.id)
+          id: BigInt(req.user.id),
+          deleted_at: null
         }
       });
 
@@ -599,7 +603,8 @@ router.get("/user-feed/:user_id", async (req, res) => {
     const { user_id } = req.params;
     const user = await prisma.user.findUnique({
       where: {
-        id: BigInt(user_id)
+        id: BigInt(user_id),
+        deleted_at: null
       }
     });
 

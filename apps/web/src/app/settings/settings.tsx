@@ -6,6 +6,14 @@ import Link from "next/link";
 import { toast } from "sonner";
 
 import { Button } from "@/components/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
+} from "@/components/dialog";
 import { Label } from "@/components/label";
 import { Separator } from "@/components/separator";
 import { Slider } from "@/components/slider";
@@ -174,6 +182,10 @@ export function Settings({ user }: { user: any }) {
         <h3 className="py-4">Blocked Users</h3>
 
         {isClient && <BlockedUsers />}
+
+        <div className="mt-4">
+          <DeleteAccount />
+        </div>
       </div>
     </div>
   );
@@ -474,5 +486,123 @@ function BlockedUsers() {
 
       {!blockedUsers.length && <div>You have not blocked anyone.</div>}
     </div>
+  );
+}
+
+function DeleteAccount() {
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState(false);
+  const [error, setError] = useState("");
+
+  function deleteAccount(password: string) {
+    setError("");
+
+    fetch("/api/user/delete", {
+      method: "POST",
+      body: JSON.stringify({
+        password: password
+      }),
+      headers: {
+        "Content-Type": "application/json"
+      }
+    })
+      .then((res) => res.json())
+      .then((res) => {
+        if (res.ok) {
+          toast.success("Account has been deleted.", {
+            richColors: true,
+            position: "top-center"
+          });
+
+          setTimeout(() => {
+            window.location.href = "/";
+          }, 1000);
+        } else {
+          if (res.msg) {
+            setError(res.msg);
+          } else if (res.error === "invalid_password") {
+            setError("Invalid password.");
+          } else {
+            setError("Something went wrong. Please contact support.");
+          }
+        }
+      });
+    return;
+  }
+
+  return (
+    <Dialog
+      onOpenChange={(open) => {
+        if (!open) {
+          setError("");
+          setPassword("");
+          setConfirm(false);
+        }
+      }}
+    >
+      <DialogTrigger asChild>
+        <Button className="border-none bg-red-500 px-3 py-2 font-semibold text-white">
+          Delete Account
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="bg-black-100 dark:bg-black-800 z-[99999] flex flex-col gap-4 rounded-lg border border-neutral-300 px-6 py-4 dark:border-slate-900">
+        <DialogHeader>
+          <DialogTitle>Delete Account</DialogTitle>
+        </DialogHeader>
+        <DialogDescription className="mb-0">
+          To delete your account, please enter your password below.
+        </DialogDescription>
+
+        <div className="flex flex-col gap-4">
+          {error && <div className="font-medium text-red-500">{error}</div>}
+          <input
+            type="password"
+            placeholder="Enter your password"
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="rounded-none border border-neutral-400 bg-transparent px-2 py-1.5 placeholder:text-neutral-400 focus:border-blue-500 focus:outline-none dark:border-neutral-600 dark:placeholder:text-neutral-600"
+          />
+          <div className="flex items-start gap-2">
+            <label className="relative flex cursor-pointer items-center">
+              <input
+                type="checkbox"
+                className="peer h-5 w-5 cursor-pointer appearance-none rounded border border-neutral-400 transition-all checked:border-neutral-800 checked:bg-neutral-800"
+                id="check"
+                onChange={(e) => setConfirm(e.target.checked)}
+                checked={confirm}
+              />
+              <span className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform text-white opacity-0 peer-checked:opacity-100">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-3.5 w-3.5"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  stroke="currentColor"
+                  strokeWidth="1"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                    clipRule="evenodd"
+                  ></path>
+                </svg>
+              </span>
+            </label>
+            <label htmlFor="check" className="font-medium">
+              I understand that my account will be scheduled for deletion after
+              pressing "Delete Account".
+            </label>
+          </div>
+          <Button
+            onClick={() => deleteAccount(password)}
+            disabled={!confirm || !password}
+            className="mt-2 border-none bg-red-500 px-3 py-2 font-semibold text-white hover:bg-red-300 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-red-500"
+          >
+            Delete Account
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }

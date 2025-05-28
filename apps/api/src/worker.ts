@@ -108,7 +108,8 @@ export function workerThread(id: number) {
 
       const user = await prisma.user.findUnique({
         where: {
-          id: BigInt(user_id)
+          id: BigInt(user_id),
+          deleted_at: null
         },
         include: {
           notification_endpoints: true
@@ -169,7 +170,8 @@ export function workerThread(id: number) {
 
       const user = await prisma.user.findUnique({
         where: {
-          id: BigInt(user_id)
+          id: BigInt(user_id),
+          deleted_at: null
         },
         include: {
           notification_endpoints: true
@@ -429,7 +431,9 @@ export function workerThread(id: number) {
                   },
                   {
                     deleted_at: {
-                      lt: new Date(new Date().getTime() - 24 * 60 * 60 * 1000)
+                      lt: new Date(
+                        new Date().getTime() - 7 * 24 * 60 * 60 * 1000
+                      )
                     }
                   }
                 ]
