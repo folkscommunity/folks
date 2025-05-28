@@ -725,6 +725,14 @@ router.get(
         })
       );
     } catch (e) {
+      console.error(
+        JSON.stringify({
+          error: true,
+          path: "/api/user/search/recommended",
+          stack: e
+        })
+      );
+
       res.status(500).json({
         error: "server_error"
       });
