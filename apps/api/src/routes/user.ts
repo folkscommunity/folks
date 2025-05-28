@@ -551,6 +551,7 @@ router.get("/search", authMiddleware, async (req: RequestWithUser, res) => {
         deleted_at: null,
         suspended: false,
         email_verified: true,
+        search_hidden: false,
         OR: [
           {
             display_name: {
