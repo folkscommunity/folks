@@ -71,6 +71,7 @@ model User {
   roadmap_items              RoadmapItem[]          @relation("roadmap_items")
   user_blocked               UserBlocked[]          @relation("user_blocked")
   user_blocked_by            UserBlocked[]          @relation("user_blocked_by")
+  message_attachments        MessageAttachment[]
 
   @@index([id])
   @@index([username])
@@ -340,13 +341,43 @@ model Message {
   content   String
   edited_at DateTime?
 
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  created_at  DateTime            @default(now())
+  updated_at  DateTime            @updatedAt
+  attachments MessageAttachment[]
 
   @@index([channel_id])
   @@index([channel_member_id])
   @@index([user_id])
   @@map("messages")
+}
+
+enum MessageAttachmentType {
+  Image
+  Video
+  Voice
+  File
+}
+
+model MessageAttachment {
+  id String @id @unique @default(uuid())
+
+  message_id BigInt?
+  message    Message? @relation(fields: [message_id], references: [id], onDelete: Cascade)
+
+  user_id BigInt
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  url    String
+  height Int?
+  width  Int?
+  type   MessageAttachmentType
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([message_id])
+  @@index([user_id])
+  @@map("message_attachments")
 }
 
 model Article {

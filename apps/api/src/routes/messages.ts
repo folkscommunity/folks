@@ -1,9 +1,16 @@
+import { randomUUID } from "crypto";
+import crypto from "node:crypto";
+import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { Router } from "express";
+import multer from "multer";
+import sharp from "sharp";
 
 import { prisma } from "@folks/db";
 import { JSONtoString } from "@folks/utils";
 
+import { Sentry } from "@/instrument";
 import { authMiddleware, RequestWithUser } from "@/lib/auth_middleware";
+import { s3 } from "@/lib/aws";
 import {
   sendMobileNotification,
   sendNotification
@@ -11,6 +18,150 @@ import {
 import { sendToChannel } from "@/lib/socket";
 
 const router = Router();
+
+const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+
+const upload = multer({
+  limits: {
+    fileSize: MAX_FILE_SIZE,
+    files: 1
+  },
+  fileFilter: (req, file, cb) => {
+    // Only allow image files
+    if (!file.mimetype.startsWith("image/")) {
+      return cb(new Error("Only image files are allowed"));
+    }
+    cb(null, true);
+  }
+});
+
+// Error handling middleware for multer
+const handleMulterError = (err: any, req: any, res: any, next: any) => {
+  if (err instanceof multer.MulterError) {
+    if (err.code === "LIMIT_FILE_SIZE") {
+      return res.status(413).json({
+        error: "file_too_large",
+        message: `File size exceeds the limit of ${MAX_FILE_SIZE / (1024 * 1024)}MB`
+      });
+    }
+    if (err.code === "LIMIT_UNEXPECTED_FILE") {
+      return res.status(400).json({
+        error: "too_many_files",
+        message: "Only one file is allowed per request"
+      });
+    }
+  } else if (err) {
+    // Handle other errors
+    return res.status(400).json({
+      error: "file_upload_error",
+      message: err.message || "Error uploading file"
+    });
+  }
+  next();
+};
+
+// Upload attachment for a message
+router.post(
+  "/attachment",
+  authMiddleware,
+  upload.single("file"),
+  handleMulterError,
+  async (req: RequestWithUser, res) => {
+    try {
+      const file = req.file;
+
+      if (!file) {
+        return res.status(400).json({
+          error: "no_file_provided"
+        });
+      }
+
+      // Additional file validation (redundant but safe)
+      if (!file.mimetype.startsWith("image/")) {
+        return res.status(400).json({
+          error: "invalid_file_type",
+          message: "Only image files are allowed"
+        });
+      }
+
+      // Process image and convert to JPG
+      let processedImage: Buffer;
+      let width: number | null = null;
+      let height: number | null = null;
+
+      try {
+        const image = sharp(file.buffer);
+        const metadata = await image.metadata();
+        width = metadata.width || null;
+        height = metadata.height || null;
+
+        // Convert to JPG with quality 85%
+        processedImage = await image
+          .jpeg({ quality: 85, mozjpeg: true })
+          .toBuffer();
+      } catch (e) {
+        console.error("Error processing image:", e);
+        return res.status(400).json({
+          error: "image_processing_error",
+          message: "Failed to process the image"
+        });
+      }
+
+      // Generate a unique filename with .jpg extension
+      const filename = `${crypto.randomBytes(32).toString("hex")}.jpg`;
+      const key = `chats/${filename}`;
+
+      const s3_file = await s3.send(
+        new PutObjectCommand({
+          Bucket: process.env.AWS_BUCKET!,
+          Key: key,
+          Body: processedImage,
+          ContentType: "image/jpeg",
+          ACL: "public-read",
+          CacheControl: "max-age=2592000" // 30 days
+        })
+      );
+
+      if (s3_file.$metadata.httpStatusCode !== 200) {
+        console.error("Error uploading file to S3.", s3_file);
+
+        return res.status(400).json({
+          error: "invalid_request",
+          message: "Something went wrong."
+        });
+      }
+
+      const attachment = await prisma.messageAttachment.create({
+        data: {
+          user_id: BigInt(req.user.id),
+          url: process.env.CDN_URL
+            ? `${process.env.CDN_URL}/${key}`
+            : `https://${process.env.AWS_BUCKET}.s3.amazonaws.com/${key}`,
+          type: "Image", // Only images are allowed
+          width: width,
+          height: height
+        }
+      });
+
+      res.json({
+        ok: true,
+        data: {
+          id: attachment.id,
+          url: attachment.url,
+          type: attachment.type,
+          width: attachment.width,
+          height: attachment.height
+        }
+      });
+    } catch (e) {
+      console.error(e);
+      Sentry.captureException(e);
+      res.status(500).json({
+        error: "failed_to_upload_attachment"
+      });
+    }
+  }
+);
 
 router.get("/channels", authMiddleware, async (req: RequestWithUser, res) => {
   try {
@@ -72,9 +223,21 @@ router.get("/channels", authMiddleware, async (req: RequestWithUser, res) => {
             last_read_at: true
           }
         },
+
         messages: {
           orderBy: {
             created_at: "desc"
+          },
+          include: {
+            attachments: {
+              select: {
+                id: true,
+                url: true,
+                type: true,
+                width: true,
+                height: true
+              }
+            }
           },
           take: 1
         },
@@ -367,7 +530,19 @@ router.get(
             orderBy: {
               created_at: "desc"
             },
-            take: 1
+            take: 1,
+            include: {
+              attachments: {
+                select: {
+                  id: true,
+                  url: true,
+                  type: true,
+                  width: true,
+                  height: true,
+                  created_at: true
+                }
+              }
+            }
           },
           _count: {
             select: {
@@ -457,6 +632,16 @@ router.get(
           content: true,
           edited_at: true,
           created_at: true,
+          attachments: {
+            select: {
+              id: true,
+              url: true,
+              type: true,
+              width: true,
+              height: true,
+              created_at: true
+            }
+          },
           user: {
             select: {
               id: true,
@@ -489,7 +674,7 @@ router.get(
 
 router.post("/message", authMiddleware, async (req: RequestWithUser, res) => {
   try {
-    const { channel_id, message } = req.body;
+    const { channel_id, message, attachment_ids } = req.body;
 
     const user = await prisma.user.findUnique({
       where: {
@@ -505,9 +690,19 @@ router.post("/message", authMiddleware, async (req: RequestWithUser, res) => {
       return;
     }
 
-    if (!channel_id || !message) {
+    if (!channel_id) {
       res.status(400).json({
-        error: "missing_parameters"
+        error: "missing_parameters",
+        message: "Channel ID is required"
+      });
+      return;
+    }
+
+    // Either message or attachments must be provided
+    if (!message && (!attachment_ids || attachment_ids.length === 0)) {
+      res.status(400).json({
+        error: "missing_parameters",
+        message: "Either message text or attachments are required"
       });
       return;
     }
@@ -545,13 +740,66 @@ router.post("/message", authMiddleware, async (req: RequestWithUser, res) => {
       return;
     }
 
-    await prisma.message.create({
-      data: {
-        content: message,
-        channel_id: channel.id,
-        user_id: user.id,
-        channel_member_id: member.id
+    // Validate attachments if any
+    let attachments = [];
+
+    if (
+      attachment_ids &&
+      Array.isArray(attachment_ids) &&
+      attachment_ids.length > 0
+    ) {
+      // Validate number of attachments
+      if (attachment_ids.length > 10) {
+        return res.status(400).json({
+          error: "too_many_attachments",
+          message: "Maximum 10 attachments allowed per message"
+        });
       }
+
+      // Verify all attachments exist and belong to the user
+      const attachmentsCount = await prisma.messageAttachment.count({
+        where: {
+          id: { in: attachment_ids },
+          user_id: user.id,
+          message_id: null // Only allow unattached files
+        }
+      });
+
+      if (attachmentsCount !== attachment_ids.length) {
+        return res.status(400).json({
+          error: "invalid_attachments",
+          message: "One or more attachments are invalid or already used"
+        });
+      }
+
+      attachments = attachment_ids;
+    }
+
+    // Create the message with attachments
+    await prisma.$transaction(async (prisma) => {
+      const newMessage = await prisma.message.create({
+        data: {
+          content: message,
+          channel_id: channel.id,
+          user_id: user.id,
+          channel_member_id: member.id
+        }
+      });
+
+      // Update attachments with the message ID
+      if (attachments.length > 0) {
+        await prisma.messageAttachment.updateMany({
+          where: {
+            id: { in: attachments },
+            user_id: user.id
+          },
+          data: {
+            message_id: newMessage.id
+          }
+        });
+      }
+
+      return newMessage;
     });
 
     await sendToChannel(
@@ -601,17 +849,39 @@ router.post("/message", authMiddleware, async (req: RequestWithUser, res) => {
             url: `/messages/${channel_id}`
           });
 
+          let image_url;
+
+          if (attachments.length > 0) {
+            try {
+              const get_attachment = await prisma.messageAttachment.findFirst({
+                where: {
+                  id: attachments[0]
+                }
+              });
+
+              image_url = get_attachment?.url;
+            } catch (e) {
+              console.error(e);
+            }
+          }
+
           await sendMobileNotification({
             user_id: member.user_id,
             title: `${user.display_name}`,
-            body: message.toString(),
+            body: message
+              ? message.toString()
+              : image_url
+                ? attachment_ids.length > 1
+                  ? `sent you ${attachment_ids.length} images`
+                  : `sent you an image`
+                : null,
             url: `/messages/${channel_id}`,
             thread_id: "messages-" + channel_id,
             sender_id: "folks-" + user.username.toString(),
             sender_name: user.display_name,
             sender_avatar_url: user.avatar_url,
             channel_id: "messages-" + channel_id,
-            image_url: null
+            image_url: image_url ?? null
           });
         }
       }

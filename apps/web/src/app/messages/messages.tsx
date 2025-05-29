@@ -21,30 +21,32 @@ export function Messages({ user }: { user: any }) {
       .then((data) => {
         if (data.ok) {
           const channels = data.data.map((channel: any) => {
+            // Find the other user in the channel (not the current user)
+            const otherMember = channel.members?.find(
+              (m: any) => m?.user?.id !== user?.id?.toString()
+            );
+
+            // Find the current user's membership info
+            const currentUserMember = channel.members?.find(
+              (m: any) => m?.user?.id === user?.id?.toString()
+            );
+
             return {
               id: channel.id,
               name:
-                channel.name ??
-                channel.members.filter(
-                  (m: any) => m.user.id !== user.id.toString()
-                )[0].user.display_name,
-              avatar_url:
-                channel.members.filter(
-                  (m: any) => m.user.id !== user.id.toString()
-                )[0].user.avatar_url || "",
-              last_message_at:
-                channel.messages &&
-                channel.messages.length > 0 &&
-                dateRelativeTiny(new Date(channel.messages[0].created_at)),
-              last_message_at_date:
-                channel.messages &&
-                channel.messages.length > 0 &&
-                new Date(channel.messages[0].created_at),
-              last_read_at: channel.members.filter(
-                (m: any) => m.user.id === user.id.toString()
-              )[0].last_read_at,
-              last_message_body:
-                channel.messages && channel.messages[0]?.content
+                channel.name ||
+                otherMember?.user?.display_name ||
+                "Unknown User",
+              avatar_url: otherMember?.user?.avatar_url || "",
+              last_message_at: channel.messages?.[0]?.created_at
+                ? dateRelativeTiny(new Date(channel.messages[0].created_at))
+                : null,
+              last_message_at_date: channel.messages?.[0]?.created_at
+                ? new Date(channel.messages[0].created_at)
+                : null,
+              last_read_at: currentUserMember?.last_read_at || null,
+              last_message_body: channel.messages?.[0]?.content || "",
+              last_message_attachments: channel.messages?.[0]?.attachments || []
             };
           });
 
@@ -87,7 +89,8 @@ export function Messages({ user }: { user: any }) {
                     last_read_at: channel.last_read_at,
                     last_message_at_date: channel.last_message_at_date,
                     last_message_at: channel.last_message_at,
-                    last_message_body: channel.last_message_body
+                    last_message_body: channel.last_message_body,
+                    last_message_attachments: channel.last_message_attachments
                   }}
                 />
               ))
@@ -123,12 +126,24 @@ function Channel({
     last_message_at_date: any;
     last_read_at: string;
     last_message_body: string;
+    last_message_attachments?: any[];
   };
 }) {
   const read =
     channel.last_read_at &&
     new Date(channel.last_read_at).getTime() >
       new Date(channel.last_message_at_date).getTime();
+
+  const messagePreview =
+    channel.last_message_attachments &&
+    channel.last_message_attachments.length > 0 &&
+    !channel.last_message_body?.trim()
+      ? `Sent ${
+          channel.last_message_attachments.length > 1
+            ? `${channel.last_message_attachments.length} images`
+            : "an image"
+        }`
+      : channel.last_message_body;
 
   return (
     <Link
@@ -141,7 +156,7 @@ function Channel({
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-[0.5ch] font-bold">
             <span className="truncate">{channel.name}</span>
-            {!read && channel.last_message_body ? (
+            {!read && messagePreview ? (
               <div className="inline-block size-[7px] rounded-full bg-blue-500" />
             ) : (
               ""
@@ -155,11 +170,11 @@ function Channel({
         <div
           className="truncate"
           style={{
-            fontWeight: !read && channel.last_message_body ? "bold" : "normal",
-            opacity: !read && channel.last_message_body ? "0.8" : "0.5"
+            fontWeight: !read && messagePreview ? "bold" : "normal",
+            opacity: !read && messagePreview ? "0.8" : "0.5"
           }}
         >
-          {channel.last_message_body || ""}
+          {messagePreview || ""}
         </div>
       </div>
     </Link>

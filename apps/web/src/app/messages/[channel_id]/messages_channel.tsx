@@ -1,21 +1,16 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import {
-  Bell,
-  BellSimple,
-  BellSimpleSlash,
-  DotsThree
-} from "@phosphor-icons/react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { BellSimple, BellSimpleSlash, Image, X } from "@phosphor-icons/react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useInView } from "react-intersection-observer";
 import { toast } from "sonner";
+import { v4 as uuidv4 } from "uuid";
 
 import { FolksAvatar } from "@/components/folks-avatar";
-import { Separator } from "@/components/separator";
 import { useSocket } from "@/components/socket-provider";
 import { parsePostBody } from "@/lib/post-utils";
-import { cn, dateRelativeTiny } from "@/lib/utils";
+import { dateRelativeTiny } from "@/lib/utils";
 
 export function MessagesChannel({
   channel,
@@ -328,6 +323,27 @@ function Message({
   user: any;
   small: boolean;
 }) {
+  const renderAttachments = () => {
+    if (!message.attachments || message.attachments.length === 0) return null;
+
+    return (
+      <div className="mt-2 space-y-2">
+        {message.attachments.map((attachment: any) => (
+          <div
+            key={attachment.id}
+            className="max-w-[300px] overflow-hidden rounded-md"
+          >
+            <img
+              src={attachment.url}
+              alt=""
+              className="max-h-[300px] w-auto rounded-md object-cover"
+              loading="lazy"
+            />
+          </div>
+        ))}
+      </div>
+    );
+  };
   const isUser = user.username === message.user.username;
 
   return (
@@ -367,16 +383,19 @@ function Message({
               wordBreak: "break-word"
             }}
           />
+          {renderAttachments()}
         </div>
-
-        {small && (
-          <div className="dategradientbg pointer-events-none absolute right-0 top-0 hidden pb-1 pl-3 pr-[12px] text-black/50 group-hover:block dark:text-white/50">
-            {dateRelativeTiny(new Date(message.created_at))}
-          </div>
-        )}
       </div>
     </div>
   );
+}
+
+interface UploadingFile {
+  id: string;
+  file: File;
+  progress: number;
+  preview: string;
+  error?: string;
 }
 
 function MessageComposer({
@@ -388,42 +407,222 @@ function MessageComposer({
 }) {
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
+  const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const textBoxRef = useRef<HTMLTextAreaElement>(null);
 
-  function sendMessage(message: string) {
-    if (textBoxRef.current) {
-      textBoxRef.current.focus();
-      textBoxRef.current.style.height = "auto";
+  const MAX_FILES = 5;
+  const MAX_FILE_SIZE_MB = 50;
+  const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
+
+  const uploadFile = useCallback(
+    async (
+      file: File,
+      onProgress: (progress: number) => void
+    ): Promise<string> => {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+
+        xhr.upload.addEventListener("progress", (event) => {
+          if (event.lengthComputable) {
+            const progress = Math.round((event.loaded / event.total) * 100);
+            onProgress(progress);
+          }
+        });
+
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try {
+              const response = JSON.parse(xhr.responseText);
+              if (response.ok && response.data && response.data.id) {
+                resolve(response.data.id);
+              } else {
+                reject(
+                  new Error(response.message || "Invalid response format")
+                );
+              }
+            } catch (e) {
+              console.error("Error parsing response:", e);
+              reject(new Error("Invalid response from server"));
+            }
+          } else {
+            let errorMessage = "Upload failed";
+            try {
+              const errorResponse = JSON.parse(xhr.responseText);
+              errorMessage =
+                errorResponse.message || errorResponse.error || errorMessage;
+            } catch (e) {
+              console.error("Error parsing error response:", e);
+            }
+            reject(new Error(errorMessage));
+          }
+        };
+
+        xhr.onerror = () => {
+          reject(new Error("Network error during upload"));
+        };
+
+        xhr.open("POST", "/api/messages/attachment", true);
+        xhr.send(formData);
+      });
+    },
+    []
+  );
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const validFiles: File[] = [];
+    const oversizedFiles: string[] = [];
+
+    // Check each file
+    files.forEach((file) => {
+      if (file.size > MAX_FILE_SIZE_BYTES) {
+        oversizedFiles.push(file.name);
+      } else if (validFiles.length + uploadingFiles.length < MAX_FILES) {
+        validFiles.push(file);
+      }
+    });
+
+    // Show error for oversized files
+    if (oversizedFiles.length > 0) {
+      const fileList = oversizedFiles.join(", ");
+      const message = `The following files exceed ${MAX_FILE_SIZE_MB}MB and were not added: ${fileList}`;
+      toast.error(message);
     }
 
-    setSending(true);
+    // Check if we've reached max files
+    const remainingSlots = MAX_FILES - uploadingFiles.length;
+    if (remainingSlots <= 0) {
+      toast.error(`Maximum of ${MAX_FILES} files allowed`);
+      return;
+    }
 
-    fetch("/api/messages/message", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        channel_id: channel.id,
-        message: message
-      })
-    })
-      .then((res) => res.json())
-      .then((res) => {
-        if (res.ok) {
+    // Add valid files to upload queue
+    validFiles.slice(0, remainingSlots).forEach((file) => {
+      const id = uuidv4();
+      const preview = URL.createObjectURL(file);
+      setUploadingFiles((prev) => [
+        ...prev,
+        { id, file, preview, progress: 0 }
+      ]);
+    });
+
+    // Reset file input to allow selecting the same file again
+    if (e.target) {
+      e.target.value = "";
+    }
+  };
+
+  const removeFile = (id: string) => {
+    setUploadingFiles((prev) => {
+      const fileToRemove = prev.find((f) => f.id === id);
+      if (fileToRemove) {
+        URL.revokeObjectURL(fileToRemove.preview);
+      }
+      return prev.filter((f) => f.id !== id);
+    });
+  };
+
+  const uploadFiles = useCallback(async (): Promise<string[]> => {
+    const results: string[] = [];
+
+    for (const file of uploadingFiles) {
+      try {
+        const attachmentId = await uploadFile(file.file, (progress) => {
+          setUploadingFiles((prev) =>
+            prev.map((f) => (f.id === file.id ? { ...f, progress } : f))
+          );
+        });
+
+        results.push(attachmentId);
+
+        // Update the file to show it's been uploaded successfully
+        setUploadingFiles((prev) =>
+          prev.map((f) =>
+            f.id === file.id ? { ...f, progress: 100, error: undefined } : f
+          )
+        );
+      } catch (error) {
+        setUploadingFiles((prev) =>
+          prev.map((f) =>
+            f.id === file.id
+              ? {
+                  ...f,
+                  error:
+                    error instanceof Error ? error.message : "Upload failed",
+                  progress: 0
+                }
+              : f
+          )
+        );
+        throw error;
+      }
+    }
+
+    return results;
+  }, [uploadingFiles, uploadFile]);
+
+  const sendMessage = useCallback(
+    async (message: string) => {
+      if (textBoxRef.current) {
+        textBoxRef.current.focus();
+        textBoxRef.current.style.height = "auto";
+      }
+
+      if (!message.trim() && uploadingFiles.length === 0) return;
+
+      setSending(true);
+
+      try {
+        let attachmentIds: string[] = [];
+
+        // Upload files if any
+        if (uploadingFiles.length > 0) {
+          try {
+            attachmentIds = await uploadFiles();
+          } catch (error) {
+            // If any upload fails, don't send the message
+            console.error("Error uploading files:", error);
+            throw error;
+          }
+        }
+
+        // Send message with text and attachments
+        const response = await fetch("/api/messages/message", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            channel_id: channel.id,
+            message: message,
+            attachment_ids: attachmentIds
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.ok) {
           setText("");
+          setUploadingFiles([]);
           onSend();
         } else {
-          toast.error(res.message || "Something went wrong.");
+          throw new Error(data.message || "Failed to send message");
         }
-      })
-      .catch((err) => {
-        toast.error("Something went wrong.");
-      })
-      .finally(() => {
+      } catch (error) {
+        console.error("Error sending message:", error);
+        toast.error(
+          error instanceof Error ? error.message : "Something went wrong"
+        );
+      } finally {
         setSending(false);
-      });
-  }
+      }
+    },
+    [channel.id, onSend, uploadFiles, uploadingFiles]
+  );
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -437,42 +636,118 @@ function MessageComposer({
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="dark:border-black-700 flex border border-t-0"
-    >
-      <textarea
-        className="text-md placeholder:text-black-500 max-h-[200px] min-h-[40px] w-full flex-1 resize-none bg-transparent p-2 pl-3 focus:outline-none"
-        rows={1}
-        onKeyDownCapture={(e) => {
-          if (e.key === "Enter" && !e.shiftKey) {
-            e.preventDefault();
-            sendMessage(text);
-          }
-        }}
-        onChange={(e) => {
-          setText(e.target.value);
-          e.target.style.height = "auto";
-          e.target.style.height =
-            e.target.scrollHeight < 200
-              ? `${e.target.scrollHeight}px`
-              : "200px";
-        }}
-        ref={textBoxRef}
-        maxLength={2000}
-        value={text}
-        placeholder="Send a message..."
-        name="body"
-      />
+    <div className="dark:border-black-700 border border-t-0">
+      {uploadingFiles.length > 0 && (
+        <div className="flex gap-2 overflow-x-auto bg-gray-50 px-2 pb-2 pt-3 dark:bg-gray-900">
+          {uploadingFiles.map((file) => (
+            <div key={file.id} className="relative mb-2">
+              <div className="group relative h-16 w-16 overflow-visible">
+                <div className="relative h-full w-full overflow-hidden rounded-md bg-gray-200 dark:bg-gray-700">
+                  <img
+                    src={file.preview}
+                    alt="Preview"
+                    className="h-full w-full object-cover transition-opacity group-hover:opacity-80"
+                  />
+                  {file.error && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-red-500/50 p-1 text-center text-xs text-white">
+                      Error
+                    </div>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeFile(file.id);
+                  }}
+                  className="absolute -right-1.5 -top-1.5 z-10 rounded-full bg-neutral-800 p-1 text-white opacity-0 shadow-md transition-all hover:bg-neutral-800 group-hover:opacity-100 dark:bg-neutral-200 dark:hover:bg-neutral-400"
+                >
+                  <X
+                    size={12}
+                    weight="bold"
+                    className="dark:text-neutral-800"
+                  />
+                </button>
+              </div>
+              {file.progress > 0 && file.progress < 100 && (
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-200">
+                  <div
+                    className="h-full bg-blue-500 transition-all duration-300"
+                    style={{ width: `${file.progress}%` }}
+                  />
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
 
-      <button
-        className="dark:border-black-700 text-md disabled:text-black-500 min-h-full max-w-[80px] border-l px-3 py-1"
-        type="submit"
-        disabled={!text || sending}
-      >
-        Send
-      </button>
-    </form>
+      <form onSubmit={handleSubmit} className="flex">
+        <div className="flex items-center px-2">
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="rounded-full p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
+            disabled={uploadingFiles.length >= MAX_FILES}
+            title="Add image"
+          >
+            <Image size={20} />
+          </button>
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            accept="image/*"
+            multiple
+            className="hidden"
+            disabled={uploadingFiles.length >= MAX_FILES}
+          />
+        </div>
+
+        <div className="flex flex-1 flex-col">
+          <textarea
+            className="text-md placeholder:text-black-500 max-h-[200px] min-h-[40px] w-full resize-none bg-transparent p-2 pl-1 focus:outline-none"
+            rows={1}
+            onKeyDownCapture={(e) => {
+              if (
+                e.key === "Enter" &&
+                !e.shiftKey &&
+                !e.ctrlKey &&
+                !e.metaKey
+              ) {
+                e.preventDefault();
+                if (text.trim() || uploadingFiles.length > 0) {
+                  sendMessage(text);
+                }
+              }
+            }}
+            onChange={(e) => {
+              setText(e.target.value);
+              e.target.style.height = "auto";
+              e.target.style.height =
+                e.target.scrollHeight < 200
+                  ? `${e.target.scrollHeight}px`
+                  : "200px";
+            }}
+            ref={textBoxRef}
+            maxLength={2000}
+            value={text}
+            placeholder="Send a message..."
+            name="body"
+          />
+        </div>
+
+        <button
+          className="dark:border-black-700 text-md disabled:text-black-500 min-h-full max-w-[80px] border-l px-3 py-1"
+          type="submit"
+          disabled={
+            sending || (text.trim() === "" && uploadingFiles.length === 0)
+          }
+        >
+          {sending ? "Sending..." : "Send"}
+        </button>
+      </form>
+    </div>
   );
 }
 
