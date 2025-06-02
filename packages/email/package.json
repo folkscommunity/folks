@@ -8,14 +8,14 @@
     "dev": "email dev --port 3008"
   },
   "devDependencies": {
-    "@types/node": "^20.14.10",
-    "react-email": "^3.0.6",
+    "@types/node": "^20.17.57",
+    "react-email": "^3.0.7",
     "tslib": "^2.6.3"
   },
   "dependencies": {
     "@react-email/components": "^0.0.32",
-    "@react-email/render": "^1.0.4",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "@react-email/render": "^1.1.2",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
   }
 }
