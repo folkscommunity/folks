@@ -57,12 +57,14 @@ export function ReplyCompose({
       })
     ],
     onFilesSelected: ({ plainFiles, filesContent: newFiles }) => {
-      if (plainFiles.length > 5) {
+      if (!newFiles) return;
+
+      if (plainFiles && plainFiles.length > 5) {
         setError("You can only upload up to 5 images.");
         return;
       }
 
-      setFilesContent(newFiles);
+      setFilesContent(newFiles as any);
       setAltTexts(new Array(newFiles.length).fill(""));
     },
     onFilesRejected: (rejectedFiles: any) => {
@@ -326,12 +328,14 @@ export function ReplyComposeFloating({
       })
     ],
     onFilesSelected: ({ plainFiles, filesContent: newFiles }) => {
-      if (plainFiles.length > 5) {
+      if (!newFiles) return;
+
+      if (plainFiles && plainFiles.length > 5) {
         setError("You can only upload up to 5 images.");
         return;
       }
 
-      setFilesContent(newFiles);
+      setFilesContent(newFiles as any);
       setAltTexts(new Array(newFiles.length).fill(""));
     },
     onFilesRejected: (rejectedFiles: any) => {
@@ -586,12 +590,14 @@ export function InlineComposer({ onPost }: { onPost?: () => void }) {
     multiple: true,
     maxFileSize: 50,
     onFilesSelected: ({ plainFiles, filesContent: newFiles }) => {
-      if (plainFiles.length > 5) {
+      if (!newFiles) return;
+
+      if (plainFiles && plainFiles.length > 5) {
         setError("You can only upload up to 5 images.");
         return;
       }
 
-      setFilesContent(newFiles);
+      setFilesContent(newFiles as any);
       setAltTexts(new Array(newFiles.length).fill(""));
     }
   });

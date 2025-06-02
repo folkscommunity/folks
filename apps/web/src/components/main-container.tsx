@@ -42,7 +42,6 @@ export async function MainContainer({
   const ribbon = await ServerRibbon();
 
   const announcement = await redis.get("announcement");
-  const easter_feature_flag = await redis.get("feature_flags:easter");
 
   return (
     <div className={cn("mx-auto flex flex-col", !hideTopRibbon && "pt-[32px]")}>
@@ -72,9 +71,7 @@ export async function MainContainer({
           )}
         >
           <div className="flex w-full flex-row items-center justify-center gap-2 max-sm:flex-col">
-            <div className="max-sm:flex max-sm:w-full max-sm:items-center max-sm:justify-between">
-              <div className="hidden max-sm:flex max-sm:w-[32px]"></div>
-
+            <div className="max-sm:flex max-sm:w-full max-sm:items-center max-sm:justify-center">
               <Link href="/">
                 <Image
                   src="/images/logo.svg"
@@ -84,26 +81,10 @@ export async function MainContainer({
                   className="dark:invert"
                 />
               </Link>
-
-              {user && (
-                <div className="z-[99999] hidden max-sm:flex">
-                  {easter_feature_flag === "true" && (
-                    <>
-                      <EasterEgg mobile={true} />
-                    </>
-                  )}
-                </div>
-              )}
             </div>
 
             {user && (
               <div className="text-md flex flex-1 flex-row justify-end gap-2 pt-2 max-sm:hidden">
-                {easter_feature_flag === "true" && (
-                  <>
-                    <EasterEgg />
-                    <span>·</span>
-                  </>
-                )}
                 <Link href="/">Posts</Link>
                 <span>·</span>
                 <Link href="/boards">Boards</Link>

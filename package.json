@@ -13,14 +13,14 @@
     "prepare": "husky"
   },
   "devDependencies": {
-    "@ianvs/prettier-plugin-sort-imports": "^4.4.1",
-    "@types/node": "^22.10.1",
-    "dotenv": "^16.4.5",
+    "@ianvs/prettier-plugin-sort-imports": "^4.4.2",
+    "@types/node": "^22.15.29",
+    "dotenv": "^16.5.0",
     "dotenv-cli": "^7.4.2",
     "husky": "^9.1.7",
-    "prettier": "^3.5.1",
-    "prettier-plugin-packagejson": "^2.5.8",
-    "prettier-plugin-tailwindcss": "^0.6.11"
+    "prettier": "^3.5.3",
+    "prettier-plugin-packagejson": "^2.5.15",
+    "prettier-plugin-tailwindcss": "^0.6.12"
   },
   "packageManager": "pnpm@9.15.2",
   "engines": {

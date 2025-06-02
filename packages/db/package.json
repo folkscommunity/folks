@@ -14,7 +14,7 @@
     "db:push": "prisma db push --skip-generate"
   },
   "devDependencies": {
-    "@types/node": "^20.14.10",
+    "@types/node": "^20.17.57",
     "prisma": "6.3.1",
     "tslib": "^2.6.3"
   }
