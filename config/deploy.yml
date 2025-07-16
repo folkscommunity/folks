@@ -4,7 +4,7 @@ image: folks/folks
 
 servers:
   web:
-    - folks-web1-ny
+    - folkscommunity
 
 proxy:
   ssl: true
