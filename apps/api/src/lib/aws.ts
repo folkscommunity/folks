@@ -10,6 +10,16 @@ if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
   );
 }
 
+if (!process.env.R2_ACCESS_KEY_ID || !process.env.R2_SECRET_ACCESS_KEY) {
+  console.warn(
+    "R2_ACCESS_KEY_ID and R2_SECRET_ACCESS_KEY are not set, some features will not work."
+  );
+}
+
+if (!process.env.R2_ACCOUNT_ID) {
+  console.warn("R2_ACCOUNT_ID is not set, some features will not work.");
+}
+
 export const ses = new SES({
   region: "eu-central-1",
   credentials: {
@@ -19,10 +29,12 @@ export const ses = new SES({
 });
 
 export const s3 = new S3Client({
-  region: region,
+  region: "auto",
+  endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  forcePathStyle: true,
   credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+    accessKeyId: process.env.R2_ACCESS_KEY_ID,
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY
   }
 });
 

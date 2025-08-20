@@ -168,7 +168,9 @@ export function ReplyCompose({
             >
               <img
                 alt={altTexts[index] || file.name}
-                src={URL.createObjectURL(new Blob([file.content]))}
+                src={URL.createObjectURL(
+                  new Blob([new Uint8Array(file.content)])
+                )}
                 className="max-h-40 max-w-80 rounded-md border border-slate-300/0 dark:border-slate-800"
               />
 
@@ -460,10 +462,11 @@ export function ReplyComposeFloating({
                   >
                     <img
                       alt={altTexts[index] || file.name}
-                      src={URL.createObjectURL(new Blob([file.content]))}
+                      src={URL.createObjectURL(
+                        new Blob([new Uint8Array(file.content)])
+                      )}
                       className="max-h-40 max-w-80 rounded-md border border-slate-300/0 dark:border-slate-800"
-                    />
-
+                    />{" "}
                     <button
                       className="bg-black-900 dark:bg-black-800 text-black-100 absolute ml-1 mt-1 rounded-full border border-neutral-300/0 p-1 dark:border-slate-800 dark:text-slate-400"
                       onClick={() => {
@@ -478,7 +481,6 @@ export function ReplyComposeFloating({
                     >
                       <X className="size-4" />
                     </button>
-
                     <Dialog>
                       <DialogTrigger asChild>
                         <button className="bg-black-900 dark:bg-black-800 text-black-100 absolute bottom-1 right-1 rounded-full border border-neutral-300/0 p-1 text-xs font-medium dark:border-slate-800 dark:text-slate-400">
@@ -612,7 +614,7 @@ export function InlineComposer({ onPost }: { onPost?: () => void }) {
       formData.append("alt_texts", JSON.stringify(altTexts));
 
       filesContent.forEach((file) => {
-        const blob = new Blob([file.content]);
+        const blob = new Blob([new Uint8Array(file.content)]);
         formData.append("files", blob, file.name);
       });
 
@@ -676,7 +678,9 @@ export function InlineComposer({ onPost }: { onPost?: () => void }) {
           <div key={index} className="group relative flex flex-col items-start">
             <img
               alt={altTexts[index] || file.name}
-              src={URL.createObjectURL(new Blob([file.content]))}
+              src={URL.createObjectURL(
+                new Blob([new Uint8Array(file.content)])
+              )}
               className="max-h-40 max-w-80 rounded-md border border-slate-300/0 dark:border-slate-800"
             />
 

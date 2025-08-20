@@ -40,6 +40,8 @@ env:
     - JWT_SECRET
     - AWS_ACCESS_KEY_ID
     - AWS_SECRET_ACCESS_KEY
+    - R2_ACCESS_KEY_ID
+    - R2_SECRET_ACCESS_KEY
     - AWS_BUCKET
     - AWS_REGION
     - CDN_URL
@@ -52,3 +54,4 @@ env:
     - APN_TOPIC
     - GHOST_URL
     - GHOST_KEY
+    - R2_ACCOUNT_ID
