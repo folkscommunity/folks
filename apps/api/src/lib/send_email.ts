@@ -8,7 +8,7 @@ import {
   renderVerifyEmail
 } from "@folks/email";
 
-import { ses } from "./aws";
+import { resend } from "./resend";
 
 const url_base =
   process.env.NODE_ENV === "production"
@@ -43,33 +43,14 @@ export async function sendVerifyEmail(id: string) {
 
   const url = `${url_base}/verify/${token}`;
 
-  const emailHtml = await renderVerifyEmail(url, user.display_name);
-
-  const params = {
-    Source: "Folks <folks@folkscommunity.com>",
-    Destination: {
-      ToAddresses: [user.email]
-    },
-    Message: {
-      Body: {
-        Html: {
-          Charset: "UTF-8",
-          Data: emailHtml
-        }
-      },
-      Subject: {
-        Charset: "UTF-8",
-        Data: "Folks Account Verification"
-      }
-    }
-  };
-
-  if (
-    process.env.NODE_ENV === "production" &&
-    process.env.AWS_ACCESS_KEY_ID &&
-    process.env.AWS_SECRET_ACCESS_KEY
-  ) {
-    await ses.sendEmail(params);
+  if (process.env.RESEND_API_KEY) {
+    await resend.emails.send({
+      from: "Folks <folks@hey.folkscommunity.com>",
+      to: [user.email],
+      subject: "Folks Account Verification",
+      html: await renderVerifyEmail(url, user.display_name),
+      replyTo: "support@folkscommunity.com"
+    });
   } else {
     console.log("VERIFY EMAIL: ", user.email, url);
   }
@@ -105,33 +86,14 @@ export async function sendInviteEmail(email: string) {
 
   const url = `${url_base}/register`;
 
-  const emailHtml = await renderInvite(url);
-
-  const params = {
-    Source: "Folks <folks@folkscommunity.com>",
-    Destination: {
-      ToAddresses: [email]
-    },
-    Message: {
-      Body: {
-        Html: {
-          Charset: "UTF-8",
-          Data: emailHtml
-        }
-      },
-      Subject: {
-        Charset: "UTF-8",
-        Data: "You've been invited to join Folks"
-      }
-    }
-  };
-
-  if (
-    process.env.NODE_ENV === "production" &&
-    process.env.AWS_ACCESS_KEY_ID &&
-    process.env.AWS_SECRET_ACCESS_KEY
-  ) {
-    await ses.sendEmail(params);
+  if (process.env.RESEND_API_KEY) {
+    await resend.emails.send({
+      from: "Folks <folks@hey.folkscommunity.com>",
+      to: [email],
+      subject: "You've been invited to join Folks",
+      html: await renderInvite(url),
+      replyTo: "support@folkscommunity.com"
+    });
   } else {
     console.log("INVITE: ", email);
   }
@@ -144,31 +106,14 @@ export async function sendPasswordResetRequest(
   name: string,
   url: string
 ) {
-  const params = {
-    Source: "Folks <folks@folkscommunity.com>",
-    Destination: {
-      ToAddresses: [email]
-    },
-    Message: {
-      Body: {
-        Html: {
-          Charset: "UTF-8",
-          Data: await renderPasswordResetRequest(`${url_base}/${url}`, name)
-        }
-      },
-      Subject: {
-        Charset: "UTF-8",
-        Data: "Reset your password"
-      }
-    }
-  };
-
-  if (
-    process.env.NODE_ENV === "production" &&
-    process.env.AWS_ACCESS_KEY_ID &&
-    process.env.AWS_SECRET_ACCESS_KEY
-  ) {
-    await ses.sendEmail(params);
+  if (process.env.RESEND_API_KEY) {
+    await resend.emails.send({
+      from: "Folks <folks@hey.folkscommunity.com>",
+      to: [email],
+      subject: "Reset your password",
+      html: await renderPasswordResetRequest(`${url_base}/${url}`, name),
+      replyTo: "support@folkscommunity.com"
+    });
   } else {
     console.log("PASSWORD RESET: ", email, name, url);
   }
@@ -180,31 +125,14 @@ export async function sendPasswordResetConfirmation(
   email: string,
   name: string
 ) {
-  const params = {
-    Source: "Folks <folks@folkscommunity.com>",
-    Destination: {
-      ToAddresses: [email]
-    },
-    Message: {
-      Body: {
-        Html: {
-          Charset: "UTF-8",
-          Data: await renderPasswordResetConfirmation(name)
-        }
-      },
-      Subject: {
-        Charset: "UTF-8",
-        Data: "Reset your password"
-      }
-    }
-  };
-
-  if (
-    process.env.NODE_ENV === "production" &&
-    process.env.AWS_ACCESS_KEY_ID &&
-    process.env.AWS_SECRET_ACCESS_KEY
-  ) {
-    await ses.sendEmail(params);
+  if (process.env.RESEND_API_KEY) {
+    await resend.emails.send({
+      from: "Folks <folks@hey.folkscommunity.com>",
+      to: [email],
+      subject: "Your password was reset successfully",
+      html: await renderPasswordResetConfirmation(name),
+      replyTo: "support@folkscommunity.com"
+    });
   } else {
     console.log("PASSWORD RESET CONFIRM: ", name);
   }

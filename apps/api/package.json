@@ -51,6 +51,7 @@
     "ping": "^0.4.4",
     "posthog-node": "^4.4.1",
     "prettier": "^3.3.2",
+    "resend": "^6.0.1",
     "sanitize-html": "^2.14.0",
     "sharp": "^0.33.5",
     "socket.io": "^4.7.5",

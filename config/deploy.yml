@@ -55,3 +55,4 @@ env:
     - GHOST_URL
     - GHOST_KEY
     - R2_ACCOUNT_ID
+    - RESEND_API_KEY
