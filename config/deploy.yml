@@ -1,6 +1,6 @@
 service: folks
 
-image: folks/folks
+image: lumishq/folks
 
 servers:
   web:
@@ -17,7 +17,6 @@ proxy:
     timeout: 3
 
 registry:
-  server: <%= %x(echo $KAMAL_REGISTRY_SERVER).strip %>
   username: <%= %x(echo $KAMAL_REGISTRY_USERNAME).strip %>
   password:
     - KAMAL_REGISTRY_PASSWORD
@@ -27,8 +26,6 @@ builder:
   args:
     SENTRY_AUTH_TOKEN: <%= %x(echo $SENTRY_AUTH_TOKEN).strip %>
     VERCEL_URL: folkscommunity.com
-    GHOST_URL: <%= %x(echo $GHOST_URL).strip %>
-    GHOST_KEY: <%= %x(echo $GHOST_KEY).strip %>
   cache:
     type: registry
 
@@ -52,7 +49,5 @@ env:
     - APN_KEY_ID
     - APN_TEAM_ID
     - APN_TOPIC
-    - GHOST_URL
-    - GHOST_KEY
     - R2_ACCOUNT_ID
     - RESEND_API_KEY
