@@ -26,8 +26,6 @@ builder:
   args:
     SENTRY_AUTH_TOKEN: <%= %x(echo $SENTRY_AUTH_TOKEN).strip %>
     VERCEL_URL: folkscommunity.com
-  cache:
-    type: registry
 
 env:
   secret:
