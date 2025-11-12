@@ -14,6 +14,20 @@ enum StickerSide {
   Right = "right"
 }
 
+// Get current sticker size based on viewport
+function getStickerSize() {
+  if (typeof window === "undefined") return 100;
+
+  const width = window.innerWidth;
+
+  // Very small screens (< 480px): 50px
+  if (width < 480) return 50;
+  // Small screens (< 1024px): 70px
+  if (width < 1024) return 70;
+  // Desktop: 100px
+  return 100;
+}
+
 export function StickerController({
   postContainerRef,
   post,
@@ -50,7 +64,21 @@ export function StickerController({
     percentage: number
   ) {
     const availableWidth = containerX;
-    const sideOffset = (availableWidth - 110) * (percentage / 100);
+    const stickerSize = getStickerSize();
+    const maxAllowedOverflow = 20; // Max overflow in any direction
+
+    // Natural positioning
+    const naturalOffset = (availableWidth - stickerSize) * (percentage / 100);
+
+    // Clamp left edge to prevent too much left overflow
+    let sideOffset = Math.max(-maxAllowedOverflow, naturalOffset);
+
+    // Also clamp right edge to prevent too much right overflow
+    const rightEdge = sideOffset + stickerSize;
+    const maxRightEdge = availableWidth + maxAllowedOverflow;
+    if (rightEdge > maxRightEdge) {
+      sideOffset = maxRightEdge - stickerSize;
+    }
 
     if (side === StickerSide.Left) {
       return sideOffset;
@@ -114,7 +142,7 @@ export function StickerController({
 
   return (
     <div
-      className="fadein absolute left-0 top-0 z-[50] w-full select-none opacity-100 transition-opacity max-sm:opacity-0"
+      className="fadein absolute left-0 top-0 z-[50] w-full select-none opacity-100 transition-opacity max-sm:opacity-100"
       style={{
         height: availableHeight + 400,
         pointerEvents: "none"
@@ -303,7 +331,22 @@ function StickerEditor({
     percentage: number
   ) {
     const availableWidth = containerX;
-    const sideOffset = (availableWidth - 110) * (percentage / 100);
+    const stickerSize = getStickerSize();
+    const padding = 10; // Account for the 5px padding on each side
+    const allowedOverflow = 5; // Allow 5px overflow outside viewport
+    const totalStickerWidth = stickerSize + padding - allowedOverflow;
+
+    // Allow stickers to overflow slightly for better positioning
+    const effectiveWidth = Math.max(
+      totalStickerWidth,
+      availableWidth + allowedOverflow
+    );
+    const maxOffset = effectiveWidth - totalStickerWidth;
+
+    const sideOffset = Math.max(
+      -allowedOverflow,
+      Math.min(maxOffset, maxOffset * (percentage / 100))
+    );
 
     if (side === StickerSide.Left) {
       return sideOffset;
@@ -609,6 +652,16 @@ function Sticker({
 }) {
   const clampedAngle = Math.max(-20, Math.min(20, angle));
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [stickerSize, setStickerSize] = useState(getStickerSize());
+
+  useEffect(() => {
+    const handleResize = () => {
+      setStickerSize(getStickerSize());
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   return (
     <div
@@ -633,9 +686,11 @@ function Sticker({
         src={image}
         width={120}
         height={120}
-        className="size-[100px] select-none transition-all duration-[50ms] max-lg:size-[70px]"
+        className="select-none transition-all duration-[50ms]"
         style={{
-          opacity: imageLoaded ? 1 : 0
+          opacity: imageLoaded ? 1 : 0,
+          width: stickerSize,
+          height: stickerSize
         }}
         draggable={false}
         onLoad={() => setImageLoaded(true)}
