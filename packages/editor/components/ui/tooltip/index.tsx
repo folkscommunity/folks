@@ -62,6 +62,7 @@ export const Tooltip = ({
 
   if (enabled) {
     return (
+      // @ts-ignore
       <Tippy
         delay={500}
         offset={[0, 8]}

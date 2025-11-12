@@ -30,6 +30,7 @@ export const ImageUploader = ({
   if (loading) {
     return (
       <div className="flex min-h-[10rem] items-center justify-center rounded-lg bg-opacity-80 p-8 text-xl">
+        {/* @ts-ignore */}
         <Spinner className="animate-spin text-slate-500" />
       </div>
     );
@@ -48,6 +49,7 @@ export const ImageUploader = ({
       onDragLeave={onDragLeave}
       contentEditable={false}
     >
+      {/* @ts-ignore */}
       <ImageIcon
         size={48}
         className="mb-4 text-black opacity-20 dark:text-white"
@@ -58,6 +60,7 @@ export const ImageUploader = ({
         </div>
         <div>
           <Button disabled={draggedInside} onClick={handleUploadClick}>
+            {/* @ts-ignore */}
             <UploadSimple />
             Upload an image
           </Button>

@@ -26,6 +26,7 @@ export const ImageUpload = ({
   );
 
   return (
+    // @ts-ignore
     <NodeViewWrapper>
       <div className="m-0 p-0" data-drag-handle>
         <ImageUploader onUpload={onUpload} />

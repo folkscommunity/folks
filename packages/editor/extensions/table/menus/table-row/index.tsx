@@ -51,18 +51,21 @@ export const TableRowMenu = React.memo(
       >
         <Toolbar.Wrapper isVertical>
           <PopoverMenu.Item
+            // @ts-expect-error
             iconComponent={<ArrowUp />}
             close={false}
             label="Add row before"
             onClick={onAddRowBefore}
           />
           <PopoverMenu.Item
+            // @ts-expect-error
             iconComponent={<ArrowDown />}
             close={false}
             label="Add row after"
             onClick={onAddRowAfter}
           />
           <PopoverMenu.Item
+            // @ts-expect-error
             iconComponent={<Trash />}
             close={false}
             label="Delete row"

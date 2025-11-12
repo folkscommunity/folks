@@ -2,13 +2,6 @@ import { withSentryConfig } from "@sentry/nextjs";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  images: {
-    remotePatterns: [
-      {
-        hostname: "folks-static-development.s3.eu-central-1.amazonaws.com"
-      }
-    ]
-  },
   env: {
     NEXT_PUBLIC_VAPID_PUBLIC_KEY: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
   },
@@ -17,10 +10,6 @@ const nextConfig: NextConfig = {
       {
         source: "/api/:path*",
         destination: "http://localhost:3002/api/:path*"
-      },
-      {
-        source: "/js/s.js",
-        destination: "https://p.lum.is/js/script.outbound-links.js"
       },
       {
         source: "/ws/:path*",
@@ -57,7 +46,5 @@ export default withSentryConfig(nextConfig, {
 
   reactComponentAnnotation: {
     enabled: true
-  },
-  hideSourceMaps: true,
-  disableLogger: true
+  }
 });

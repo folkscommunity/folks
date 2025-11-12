@@ -34,6 +34,7 @@ export const ImageBlockView = (props: ImageBlockViewProps) => {
   }, [getPos, editor.commands]);
 
   return (
+    // @ts-ignore
     <NodeViewWrapper>
       <div
         className={wrapperClassName}

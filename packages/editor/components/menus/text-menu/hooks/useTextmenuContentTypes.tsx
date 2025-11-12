@@ -22,6 +22,7 @@ export const useTextmenuContentTypes = (editor: Editor) => {
         id: "hierarchy"
       },
       {
+        // @ts-expect-error
         iconComponent: <Paragraph />,
 
         onClick: () =>
@@ -43,6 +44,7 @@ export const useTextmenuContentTypes = (editor: Editor) => {
         type: "option"
       },
       {
+        // @ts-expect-error
         iconComponent: <TextHOne />,
         onClick: () =>
           ctx.editor
@@ -59,6 +61,7 @@ export const useTextmenuContentTypes = (editor: Editor) => {
         type: "option"
       },
       {
+        // @ts-expect-error
         iconComponent: <TextHTwo />,
         onClick: () =>
           ctx.editor
@@ -75,6 +78,7 @@ export const useTextmenuContentTypes = (editor: Editor) => {
         type: "option"
       },
       {
+        // @ts-expect-error
         iconComponent: <TextHThree />,
         onClick: () =>
           ctx.editor
@@ -96,6 +100,7 @@ export const useTextmenuContentTypes = (editor: Editor) => {
         id: "lists"
       },
       {
+        // @ts-expect-error
         iconComponent: <ListBullets />,
         onClick: () => ctx.editor.chain().focus().toggleBulletList().run(),
         id: "bulletList",
@@ -105,6 +110,7 @@ export const useTextmenuContentTypes = (editor: Editor) => {
         type: "option"
       },
       {
+        // @ts-expect-error
         iconComponent: <ListNumbers />,
         onClick: () => ctx.editor.chain().focus().toggleOrderedList().run(),
         id: "orderedList",
@@ -114,6 +120,7 @@ export const useTextmenuContentTypes = (editor: Editor) => {
         type: "option"
       },
       {
+        // @ts-expect-error
         iconComponent: <ListChecks />,
         onClick: () => ctx.editor.chain().focus().toggleTaskList().run(),
         id: "todoList",

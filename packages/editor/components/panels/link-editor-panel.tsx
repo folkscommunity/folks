@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
-import { Link } from "@phosphor-icons/react";
+import { LinkIcon } from "@phosphor-icons/react";
 
 import { Button } from "../ui/button";
 import { Surface } from "../ui/surface";
@@ -51,7 +51,7 @@ export const LinkEditorPanel = ({
     <Surface className="p-2">
       <form onSubmit={state.handleSubmit} className="flex items-center gap-2">
         <label className="flex cursor-text items-center gap-2 rounded-lg bg-neutral-100 p-2 dark:bg-neutral-900">
-          <Link className="flex-none text-black dark:text-white" />
+          <LinkIcon className="flex-none text-black dark:text-white" />
           <input
             type="url"
             className="min-w-[12rem] flex-1 bg-transparent text-sm text-black outline-none dark:text-white"

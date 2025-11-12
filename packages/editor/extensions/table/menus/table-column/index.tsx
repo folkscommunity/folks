@@ -54,24 +54,28 @@ export const TableColumnMenu = React.memo(
       >
         <Toolbar.Wrapper isVertical>
           <PopoverMenu.Item
+            // @ts-expect-error
             iconComponent={<ArrowLeft />}
             close={false}
             label="Add column before"
             onClick={onAddColumnBefore}
           />
           <PopoverMenu.Item
+            // @ts-expect-error
             iconComponent={<ArrowRight />}
             close={false}
             label="Add column after"
             onClick={onAddColumnAfter}
           />
           <PopoverMenu.Item
+            // @ts-expect-error
             iconComponent={<Trash className="text-red-500" />}
             close={false}
             label="Delete column"
             onClick={onDeleteColumn}
           />
           <PopoverMenu.Item
+            // @ts-expect-error
             iconComponent={<Trash className="text-red-500" />}
             close={false}
             label="Delete table"

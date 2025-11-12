@@ -28,12 +28,6 @@ export function Manifesto({ user }: { user?: any }) {
           will be possible for someone else to take over the baton.
         </p>
 
-        <p>
-          In the future, Folks will be registered as a non-profit organization
-          to ensure that the platform remains sustainable and is not driven by
-          the pursuit of higher profit.
-        </p>
-
         <strong>Contributing Code</strong>
 
         <p>

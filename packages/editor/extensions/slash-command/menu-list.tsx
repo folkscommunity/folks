@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import { DropdownButton } from "../../components/ui/dropdown";

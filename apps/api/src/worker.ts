@@ -8,6 +8,7 @@ import webpush from "web-push";
 
 import { NotificationEndpointType, prisma } from "@folks/db";
 
+import CONFIG from "./CONFIG";
 import { Sentry } from "./instrument";
 import { rekognition, s3 } from "./lib/aws";
 import { posthog } from "./lib/posthog";
@@ -324,6 +325,10 @@ export function workerThread(id: number) {
       const data = job.data.data;
 
       if (!attachment_id || !data) {
+        return done();
+      }
+
+      if (!CONFIG.IMAGE_SCANNING_ENABLED) {
         return done();
       }
 

@@ -10,11 +10,12 @@ export function PrivacyPolicy() {
             <li>
               We use cookies for authentication and to enable certain features.
             </li>
-            <li>
-              Your attachments are stored in an AWS S3 bucket, we use Cloudfront
-              as a CDN.
-            </li>
+            <li>Your attachments are stored in an Cloudflare R2 bucket.</li>
             <li>Website is being protected by Cloudflare.</li>
+            <li>
+              We use Posthog for internal analytics and Sentry as error
+              tracking.
+            </li>
 
             <li>We will NEVER sell your data!</li>
           </ul>
@@ -93,13 +94,12 @@ export function PrivacyPolicy() {
           <p>Current third party service providers include:</p>
           <ul className="list-disc space-y-1 pl-6">
             <li>Cloudflare - reverse proxy & cdn</li>
-            <li>AWS - attachment storage, cdn and email delivery</li>
+            <li>Resend - email delivery</li>
             <li>Sentry - error reporting</li>
             <li>
               PostHog - product analytics, feature flagging, and session
               recording to improve user experience
             </li>
-            <li>Plausible (self hosted) - analytics</li>
           </ul>
 
           <h3>Analytics and Feature Management</h3>

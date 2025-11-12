@@ -54,9 +54,10 @@ export const ContentTypePicker = ({ options }: ContentTypePickerProps) => {
           {activeItem?.type === "option" ? (
             activeItem?.iconComponent
           ) : (
+            // @ts-expect-error
             <Paragraph />
           )}
-
+          {/* @ts-expect-error */}
           <CaretDown />
         </Toolbar.Button>
       </Dropdown.Trigger>

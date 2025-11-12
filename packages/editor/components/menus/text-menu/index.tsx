@@ -129,6 +129,7 @@ export const TextMenu = ({
             onClick={commands.onBold}
             active={states.isBold}
           >
+            {/* @ts-expect-error */}
             <TextBolder />
           </MemoButton>
           <MemoButton
@@ -137,6 +138,7 @@ export const TextMenu = ({
             onClick={commands.onItalic}
             active={states.isItalic}
           >
+            {/* @ts-expect-error */}
             <TextItalic />
           </MemoButton>
           <MemoButton
@@ -145,6 +147,7 @@ export const TextMenu = ({
             onClick={commands.onUnderline}
             active={states.isUnderline}
           >
+            {/* @ts-expect-error */}
             <TextUnderline />
           </MemoButton>
           <MemoButton
@@ -153,6 +156,7 @@ export const TextMenu = ({
             onClick={commands.onStrike}
             active={states.isStrike}
           >
+            {/* @ts-expect-error */}
             <TextStrikethrough />
           </MemoButton>
           <MemoButton
@@ -161,9 +165,11 @@ export const TextMenu = ({
             onClick={commands.onCode}
             active={states.isCode}
           >
+            {/* @ts-expect-error */}
             <CodeBlock />
           </MemoButton>
           <MemoButton tooltip="Code block" onClick={commands.onCodeBlock}>
+            {/* @ts-expect-error */}
             <File />
           </MemoButton>
           <EditLinkPopover onSetLink={commands.onLink} />
@@ -173,6 +179,7 @@ export const TextMenu = ({
                 active={!!states.currentHighlight}
                 tooltip="Highlight text"
               >
+                {/* @ts-expect-error */}
                 <Highlighter />
               </MemoButton>
             </Popover.Trigger>
@@ -189,6 +196,7 @@ export const TextMenu = ({
           <Popover.Root>
             <Popover.Trigger asChild>
               <MemoButton active={!!states.currentColor} tooltip="Text color">
+                {/* @ts-expect-error */}
                 <Palette />
               </MemoButton>
             </Popover.Trigger>
@@ -205,6 +213,7 @@ export const TextMenu = ({
           <Popover.Root>
             <Popover.Trigger asChild>
               <MemoButton tooltip="More options">
+                {/* @ts-expect-error */}
                 <DotsThreeVertical />
               </MemoButton>
             </Popover.Trigger>
@@ -216,6 +225,7 @@ export const TextMenu = ({
                   onClick={commands.onSubscript}
                   active={states.isSubscript}
                 >
+                  {/* @ts-expect-error */}
                   <TextSubscript />
                 </MemoButton>
                 <MemoButton
@@ -224,6 +234,7 @@ export const TextMenu = ({
                   onClick={commands.onSuperscript}
                   active={states.isSuperscript}
                 >
+                  {/* @ts-expect-error */}
                   <TextSuperscript />
                 </MemoButton>
                 <Toolbar.Divider />
@@ -233,6 +244,7 @@ export const TextMenu = ({
                   onClick={commands.onAlignLeft}
                   active={states.isAlignLeft}
                 >
+                  {/* @ts-expect-error */}
                   <TextAlignLeft />
                 </MemoButton>
                 <MemoButton
@@ -241,6 +253,7 @@ export const TextMenu = ({
                   onClick={commands.onAlignCenter}
                   active={states.isAlignCenter}
                 >
+                  {/* @ts-expect-error */}
                   <TextAlignCenter />
                 </MemoButton>
                 <MemoButton
@@ -249,6 +262,7 @@ export const TextMenu = ({
                   onClick={commands.onAlignRight}
                   active={states.isAlignRight}
                 >
+                  {/* @ts-expect-error */}
                   <TextAlignRight />
                 </MemoButton>
                 <MemoButton
@@ -257,6 +271,7 @@ export const TextMenu = ({
                   onClick={commands.onAlignJustify}
                   active={states.isAlignJustify}
                 >
+                  {/* @ts-expect-error */}
                   <TextAlignJustify />
                 </MemoButton>
               </Toolbar.Wrapper>

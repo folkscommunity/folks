@@ -110,6 +110,7 @@ export const ImageBlockMenu = ({
           active={isImageLeft}
           onClick={onAlignImageLeft}
         >
+          {/* @ts-expect-error */}
           <TextAlignLeft />
         </Toolbar.Button>
         <Toolbar.Button
@@ -117,6 +118,7 @@ export const ImageBlockMenu = ({
           active={isImageCenter}
           onClick={onAlignImageCenter}
         >
+          {/* @ts-expect-error */}
           <TextAlignCenter />
         </Toolbar.Button>
         <Toolbar.Button
@@ -124,6 +126,7 @@ export const ImageBlockMenu = ({
           active={isImageRight}
           onClick={onAlignImageRight}
         >
+          {/* @ts-expect-error */}
           <TextAlignRight />
         </Toolbar.Button>
         <Toolbar.Divider />

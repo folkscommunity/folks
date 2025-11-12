@@ -85,6 +85,7 @@ export const ColumnsMenu = ({ editor, appendTo }: MenuProps) => {
           active={isColumnLeft}
           onClick={onColumnLeft}
         >
+          {/* @ts-expect-error */}
           <ColumnsPlusLeft />
         </Toolbar.Button>
         <Toolbar.Button
@@ -92,6 +93,7 @@ export const ColumnsMenu = ({ editor, appendTo }: MenuProps) => {
           active={isColumnTwo}
           onClick={onColumnTwo}
         >
+          {/* @ts-expect-error */}
           <ColumnsIcon />
         </Toolbar.Button>
         <Toolbar.Button
@@ -99,10 +101,12 @@ export const ColumnsMenu = ({ editor, appendTo }: MenuProps) => {
           active={isColumnRight}
           onClick={onColumnRight}
         >
+          {/* @ts-expect-error */}
           <ColumnsPlusRight />
         </Toolbar.Button>
         <Toolbar.Divider />
         <Toolbar.Button tooltip="Delete" onClick={onDelete}>
+          {/* @ts-expect-error */}
           <Trash className="text-red-500" />
         </Toolbar.Button>
       </Toolbar.Wrapper>

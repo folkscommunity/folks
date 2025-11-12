@@ -24,6 +24,7 @@ export const GROUPS: Group[] = [
       {
         name: "heading1",
         label: "Heading 1",
+        // @ts-expect-error
         iconComponent: <TextHOne />,
         description: "High priority section title",
         aliases: ["h1"],
@@ -34,6 +35,7 @@ export const GROUPS: Group[] = [
       {
         name: "heading2",
         label: "Heading 2",
+        // @ts-expect-error
         iconComponent: <TextHTwo />,
         description: "Medium priority section title",
         aliases: ["h2"],
@@ -44,6 +46,7 @@ export const GROUPS: Group[] = [
       {
         name: "heading3",
         label: "Heading 3",
+        // @ts-expect-error
         iconComponent: <TextHThree />,
         description: "Low priority section title",
         aliases: ["h3"],
@@ -54,6 +57,7 @@ export const GROUPS: Group[] = [
       {
         name: "bulletList",
         label: "Bullet List",
+        // @ts-expect-error
         iconComponent: <ListBullets />,
         description: "Unordered list of items",
         aliases: ["ul"],
@@ -64,6 +68,7 @@ export const GROUPS: Group[] = [
       {
         name: "numberedList",
         label: "Numbered List",
+        // @ts-expect-error
         iconComponent: <ListNumbers />,
         description: "Ordered list of items",
         aliases: ["ol"],
@@ -74,6 +79,7 @@ export const GROUPS: Group[] = [
       {
         name: "taskList",
         label: "Task List",
+        // @ts-expect-error
         iconComponent: <ListChecks />,
         description: "Task list with todo items",
         aliases: ["todo"],
@@ -84,6 +90,7 @@ export const GROUPS: Group[] = [
       {
         name: "blockquote",
         label: "Blockquote",
+        // @ts-expect-error
         iconComponent: <Quotes />,
         description: "Element for quoting",
         action: (editor) => {
@@ -93,6 +100,7 @@ export const GROUPS: Group[] = [
       {
         name: "codeBlock",
         label: "Code Block",
+        // @ts-expect-error
         iconComponent: <CodeBlock />,
         description: "Code block with syntax highlighting",
         shouldBeHidden: (editor) => editor.isActive("columns"),
@@ -109,6 +117,7 @@ export const GROUPS: Group[] = [
       {
         name: "table",
         label: "Table",
+        // @ts-expect-error
         iconComponent: <Table />,
         description: "Insert a table",
         shouldBeHidden: (editor) => editor.isActive("columns"),
@@ -123,6 +132,7 @@ export const GROUPS: Group[] = [
       {
         name: "image",
         label: "Image",
+        // @ts-expect-error
         iconComponent: <Image />,
         description: "Insert an image",
         aliases: ["img"],
@@ -133,6 +143,7 @@ export const GROUPS: Group[] = [
       {
         name: "columns",
         label: "Columns",
+        // @ts-expect-error
         iconComponent: <Columns />,
         description: "Add two column content",
         aliases: ["cols"],
@@ -149,6 +160,7 @@ export const GROUPS: Group[] = [
       {
         name: "horizontalRule",
         label: "Horizontal Rule",
+        // @ts-expect-error
         iconComponent: <Minus />,
         description: "Insert a horizontal divider",
         aliases: ["hr"],

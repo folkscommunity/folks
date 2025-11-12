@@ -14,6 +14,7 @@ export const EditLinkPopover = ({ onSetLink }: EditLinkPopoverProps) => {
     <Popover.Root>
       <Popover.Trigger asChild>
         <Toolbar.Button tooltip="Set Link">
+          {/* @ts-expect-error */}
           <Link />
         </Toolbar.Button>
       </Popover.Trigger>

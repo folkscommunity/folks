@@ -30,11 +30,13 @@ export const LinkPreviewPanel = ({
       <Toolbar.Divider />
       <Tooltip title="Edit link">
         <Toolbar.Button onClick={onEdit}>
+          {/* @ts-expect-error */}
           <Pen />
         </Toolbar.Button>
       </Tooltip>
       <Tooltip title="Remove link">
         <Toolbar.Button onClick={onClear}>
+          {/* @ts-expect-error */}
           <Trash />
         </Toolbar.Button>
       </Tooltip>

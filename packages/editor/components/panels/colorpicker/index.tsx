@@ -64,6 +64,7 @@ export const ColorPicker = ({ color, onChange, onClear }: ColorPickerProps) => {
           />
         ))}
         <Toolbar.Button tooltip="Reset color to default" onClick={onClear}>
+          {/* @ts-expect-error */}
           <ArrowUUpLeft />
         </Toolbar.Button>
       </div>

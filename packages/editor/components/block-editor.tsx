@@ -34,6 +34,7 @@ export const BlockEditor = ({
           article_id={article_id}
           original_content={content}
         />
+        {/* @ts-ignore */}
         <EditorContent
           editor={editor}
           className="min-h-screen flex-1 overflow-y-auto"

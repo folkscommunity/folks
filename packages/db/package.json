@@ -1,21 +1,21 @@
 {
   "name": "@folks/db",
-  "main": "./index.ts",
-  "types": "./index.ts",
   "version": "1.0.0",
   "private": true,
-  "dependencies": {
-    "@prisma/client": "6.3.1"
-  },
+  "main": "./index.ts",
+  "types": "./index.ts",
   "scripts": {
-    "dev": "pnpm run db:generate",
     "build": "pnpm run db:generate",
     "db:generate": "prisma generate --no-hints",
-    "db:push": "prisma db push --skip-generate"
+    "db:push": "prisma db push --skip-generate",
+    "dev": "pnpm run db:generate"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.19.0"
   },
   "devDependencies": {
     "@types/node": "^20.17.57",
-    "prisma": "6.3.1",
+    "prisma": "^6.19.0",
     "tslib": "^2.6.3"
   }
 }

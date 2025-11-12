@@ -308,13 +308,6 @@ export default function RootLayout({
           media="screen and (device-width: 744px) and (device-height: 1133px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"
           href="/images/splash/8.3__iPad_Mini_portrait.png"
         />
-
-        <script
-          defer
-          data-domain="folkscommunity.com"
-          data-api="https://p.lum.is/api/event"
-          src="/js/s.js"
-        ></script>
       </head>
       <body
         className={`${inter.variable} ${mono.variable} ${plex_serif.variable} antialiased`}
