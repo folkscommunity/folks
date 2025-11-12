@@ -96,12 +96,15 @@ export function StickerController({
     handleResize();
     fetchStickers();
 
-    window.addEventListener("resize", handleResize);
-    window.addEventListener("stickers.open_editor", handleEvent);
+    const resizeHandler = () => handleResize();
+    const eventHandler = (e: Event) => handleEvent(e);
+
+    window.addEventListener("resize", resizeHandler);
+    window.addEventListener("stickers.open_editor", eventHandler);
 
     return () => {
-      window.removeEventListener("resize", handleResize);
-      window.removeEventListener("stickers.open_editor", handleEvent);
+      window.removeEventListener("resize", resizeHandler);
+      window.removeEventListener("stickers.open_editor", eventHandler);
     };
   }, []);
 
@@ -130,12 +133,12 @@ export function StickerController({
           replies={replies}
           containerWidth={containerWidth}
           postContainerLeftOffset={postContainerLeftOffset}
-          user_sticker={
+          user_stickers={
             stickers &&
             stickers.filter(
               (sticker: any) =>
                 sticker.posted_by_id.toString() === user.id.toString()
-            )[0]
+            )
           }
         />
       )}
@@ -168,7 +171,7 @@ function StickerEditor({
   replies,
   postContainerRef,
   stickers,
-  user_sticker,
+  user_stickers,
   onClose
 }: {
   availableHeight: number;
@@ -178,25 +181,21 @@ function StickerEditor({
   replies: any[];
   postContainerRef: RefObject<HTMLDivElement | null>;
   stickers: any[];
-  user_sticker?: any;
+  user_stickers?: any[];
   onClose: any;
 }) {
-  const [topOffset, setTopOffset] = useState(user_sticker ? user_sticker.y : 0);
-  const [sideOffset, setSideOffset] = useState(
-    user_sticker ? user_sticker.x : 0
-  );
-  const [angle, setAngle] = useState(user_sticker ? user_sticker.angle : 0);
-  const [side, setSide] = useState(
-    user_sticker ? user_sticker.side : undefined
-  );
-  const [selectedSticker, setSelectedSticker] = useState(
-    user_sticker?.available_sticker
+  const [topOffset, setTopOffset] = useState(0);
+  const [sideOffset, setSideOffset] = useState(0);
+  const [angle, setAngle] = useState(0);
+  const [side, setSide] = useState<StickerSide | undefined>(undefined);
+  const [selectedSticker, setSelectedSticker] = useState<any | undefined>(
+    undefined
   );
 
   const [mouseY, setMouseY] = useState(0);
   const [mouseX, setMouseX] = useState(0);
 
-  const [mouseSide, setMouseSide] = useState<StickerSide | false>();
+  const [mouseSide, setMouseSide] = useState<StickerSide | false>(false);
 
   const [mousePercentX, setMousePercentX] = useState(0);
 
@@ -207,7 +206,7 @@ function StickerEditor({
 
   const [availableStickers, setAvailableStickers] = useState<any[]>([]);
 
-  const [stickerPlaced, setStickerPlaced] = useState(Boolean(user_sticker));
+  const [stickerPlaced, setStickerPlaced] = useState(false);
 
   function handleMouseMove(e: any) {
     setMouseHasMoved(true);
@@ -262,18 +261,30 @@ function StickerEditor({
   }
 
   useEffect(() => {
-    window.addEventListener("mousedown", handleMouseDown);
+    const mouseDownHandler = (e: MouseEvent) => handleMouseDown(e);
+
+    window.addEventListener("mousedown", mouseDownHandler);
 
     return () => {
-      window.removeEventListener("mousedown", handleMouseDown);
+      window.removeEventListener("mousedown", mouseDownHandler);
     };
-  }, [mouseX, mouseY, mouseSide, mousePercentX, showBoundry, selectedSticker]);
+  }, [
+    mouseX,
+    mouseY,
+    mouseSide,
+    mousePercentX,
+    showBoundry,
+    selectedSticker,
+    angle
+  ]);
 
   useEffect(() => {
-    window.addEventListener("mousemove", handleMouseMove);
+    const mouseMoveHandler = (e: MouseEvent) => handleMouseMove(e);
+
+    window.addEventListener("mousemove", mouseMoveHandler);
 
     return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mousemove", mouseMoveHandler);
     };
   }, [
     postContainerLeftOffset,
@@ -331,12 +342,19 @@ function StickerEditor({
       .then((res) => res.json())
       .then((res) => {
         if (res.ok) {
-          toast.success("Sticker has been placed!");
-
+          toast.success("Sticker placed! Reopen to place more.");
           onClose();
+        } else if (res.error === "sticker_limit_reached") {
+          toast.error(
+            res.msg || "You can only place up to 10 stickers per post."
+          );
+        } else {
+          toast.error("Failed to place sticker. Please try again.");
         }
       })
-      .catch((err) => {});
+      .catch((err) => {
+        toast.error("Failed to place sticker. Please try again.");
+      });
   }
 
   function handleKeyDown(e: any) {
@@ -349,14 +367,17 @@ function StickerEditor({
     handleScroll();
     fetchAvailableStickers();
 
-    window.addEventListener("scroll", handleScroll);
-    window.addEventListener("keydown", handleKeyDown);
+    const scrollHandler = () => handleScroll();
+    const keyDownHandler = (e: KeyboardEvent) => handleKeyDown(e);
+
+    window.addEventListener("scroll", scrollHandler);
+    window.addEventListener("keydown", keyDownHandler);
 
     return () => {
-      window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("scroll", scrollHandler);
+      window.removeEventListener("keydown", keyDownHandler);
     };
-  }, []);
+  }, [onClose]);
 
   function fetchAvailableStickers() {
     fetch(`/api/stickers/list`)
@@ -447,12 +468,11 @@ function StickerEditor({
         >
           <div className="flex items-center justify-between">
             <div className="flex-1" />
-            <div className="flex min-w-fit flex-1 justify-center">
-              {user_sticker ? (
-                <h2>Edit your sticker!</h2>
-              ) : (
-                <h2>Place a sticker!</h2>
-              )}
+            <div className="flex min-w-fit flex-1 flex-col items-center justify-center">
+              <h2>Place stickers!</h2>
+              <p className="m-0 text-sm text-neutral-600 dark:text-neutral-400">
+                {user_stickers?.length || 0}/10 stickers placed
+              </p>
             </div>
             <div className="flex flex-1 justify-end">
               <button onClick={() => onClose()}>[x]</button>
@@ -495,8 +515,8 @@ function StickerEditor({
             </div>
           </div>
 
-          <div className="flex justify-between">
-            <div className="flex flex-1 gap-4 pb-1">
+          <div className="flex flex-col gap-3">
+            <div className="flex gap-4 pb-1">
               <div>
                 <Label htmlFor="sticker-angle"> Angle</Label>
               </div>
@@ -510,23 +530,44 @@ function StickerEditor({
                 onValueChange={(value) => setAngle(value[0])}
               />
             </div>
-            <div>
-              {user_sticker && (
-                <button
-                  onClick={() => {
-                    deleteSticker(user_sticker.id);
-                  }}
-                  className="text-red-500 hover:underline"
-                >
-                  Delete Sticker
-                </button>
-              )}
-            </div>
+
+            {user_stickers && user_stickers.length > 0 && (
+              <div className="border-t border-neutral-300 pt-3 dark:border-slate-900/80">
+                <div className="pb-2 font-bold">Your Stickers:</div>
+                <div className="flex max-h-[120px] flex-wrap gap-2 overflow-y-auto">
+                  {user_stickers.map((sticker: any) => (
+                    <div
+                      key={sticker.id}
+                      className="group relative flex items-center gap-2 rounded border border-neutral-300 bg-neutral-100 px-3 py-2 dark:border-slate-800 dark:bg-slate-900"
+                    >
+                      <OImage
+                        src={sticker.available_sticker.url}
+                        className="size-8"
+                        height={32}
+                        width={32}
+                      />
+                      <span className="text-sm">
+                        {sticker.available_sticker.name}
+                      </span>
+                      <button
+                        onClick={() => {
+                          deleteSticker(sticker.id);
+                        }}
+                        className="ml-2 text-red-500 hover:underline"
+                        title="Delete this sticker"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      {stickerPlaced && (
+      {stickerPlaced && selectedSticker && side && (
         <Sticker
           className="z-[999999]"
           image={selectedSticker.url}

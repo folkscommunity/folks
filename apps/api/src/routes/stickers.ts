@@ -95,39 +95,31 @@ router.post("/", authMiddleware, async (req: RequestWithUser, res) => {
       return res.status(400).json({ error: "invalid_sticker" });
     }
 
-    const existing_sticker = await prisma.sticker.findFirst({
+    const user_stickers_count = await prisma.sticker.count({
       where: {
         post_id: BigInt(post_id),
         posted_by_id: user.id
       }
     });
 
-    if (existing_sticker) {
-      await prisma.sticker.update({
-        where: {
-          id: existing_sticker?.id || null
-        },
-        data: {
-          available_sticker_id: available_sticker.id,
-          x: parseFloat(parseFloat(x).toPrecision(4)),
-          y: Number(y),
-          angle: Number(angle),
-          side: side
-        }
-      });
-    } else {
-      await prisma.sticker.create({
-        data: {
-          post_id: BigInt(post_id),
-          available_sticker_id: available_sticker.id,
-          side: side,
-          x: parseFloat(parseFloat(x).toPrecision(4)),
-          y: Number(y),
-          angle: Number(angle),
-          posted_by_id: user.id
-        }
+    if (user_stickers_count >= 10) {
+      return res.status(400).json({
+        error: "sticker_limit_reached",
+        msg: "You can only place up to 10 stickers per post."
       });
     }
+
+    await prisma.sticker.create({
+      data: {
+        post_id: BigInt(post_id),
+        available_sticker_id: available_sticker.id,
+        side: side,
+        x: parseFloat(parseFloat(x).toPrecision(4)),
+        y: Number(y),
+        angle: Number(angle),
+        posted_by_id: user.id
+      }
+    });
 
     await posthog.capture({
       distinctId: user.id.toString(),
