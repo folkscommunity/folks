@@ -8,7 +8,7 @@ import webpush from "web-push";
 
 import { NotificationEndpointType, prisma } from "@folks/db";
 
-import CONFIG from "./CONFIG";
+import CONFIG from "./config";
 import { Sentry } from "./instrument";
 import { rekognition, s3 } from "./lib/aws";
 import { posthog } from "./lib/posthog";
