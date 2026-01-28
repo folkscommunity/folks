@@ -18,7 +18,7 @@ COPY ./packages /app/packages
 
 WORKDIR /app
 
-RUN --mount=type=cache,id=folks-pnpm,target=/pnpm/store pnpm install --no-frozen-lockfile
+RUN pnpm install --no-frozen-lockfile
 
 # Build Stage
 FROM base AS build
