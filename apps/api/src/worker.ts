@@ -260,6 +260,12 @@ export function workerThread(id: number) {
         }
       }
 
+      Sentry.logger.info(`Sent mobile notification to ${user.username}`, {
+        job: "send_notification",
+        user_id: user.id,
+        job_id: job.id
+      });
+
       return done();
     } catch (e) {
       Sentry.captureException(e, {
@@ -290,6 +296,12 @@ export function workerThread(id: number) {
       }
 
       const metadata = await getURLMetadata(url);
+
+      Sentry.logger.info(`Fetched URL metadata: ${url}`, {
+        job: "fetch_url_metadata",
+        job_id: job.id,
+        data: job.data
+      });
 
       return done();
     } catch (e) {
@@ -379,9 +391,12 @@ export function workerThread(id: number) {
         });
       }
 
-      Sentry.captureMessage(
-        `Purged ${deleted_posts.length} deleted posts.`,
-        "info"
+      Sentry.logger.info(
+        `[WORKER] Purged ${deleted_posts.length} deleted posts.`,
+        {
+          job: "purge_deleted_posts",
+          job_id: job.id
+        }
       );
 
       done();
@@ -420,6 +435,12 @@ export function workerThread(id: number) {
       });
 
       await s3.send(command);
+
+      Sentry.logger.info(`Deleted S3 object: ${key}`, {
+        job: "delete_s3_object",
+        job_id: job.id,
+        data: job.data
+      });
 
       return done();
     } catch (e) {
