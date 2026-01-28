@@ -1,13 +1,4 @@
-import { RekognitionClient } from "@aws-sdk/client-rekognition";
 import { S3Client } from "@aws-sdk/client-s3";
-
-const region = process.env.AWS_REGION || "us-east-2";
-
-if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
-  console.warn(
-    "AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY are not set, some features will not work."
-  );
-}
 
 if (!process.env.R2_ACCESS_KEY_ID || !process.env.R2_SECRET_ACCESS_KEY) {
   console.warn(
@@ -26,13 +17,5 @@ export const s3 = new S3Client({
   credentials: {
     accessKeyId: process.env.R2_ACCESS_KEY_ID,
     secretAccessKey: process.env.R2_SECRET_ACCESS_KEY
-  }
-});
-
-export const rekognition = new RekognitionClient({
-  region: region,
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
   }
 });

@@ -1,18 +1,13 @@
 /* eslint-disable prefer-const */
-import { DetectModerationLabelsCommand } from "@aws-sdk/client-rekognition";
 import { DeleteObjectCommand } from "@aws-sdk/client-s3";
 import apn from "@parse/node-apn";
 import Queue from "bull";
-import sharp from "sharp";
 import webpush from "web-push";
 
 import { NotificationEndpointType, prisma } from "@folks/db";
 
-import CONFIG from "./config";
 import { Sentry } from "./instrument";
-import { rekognition, s3 } from "./lib/aws";
-import { posthog } from "./lib/posthog";
-import { sendDiscordNotification } from "./lib/send_discord_notification";
+import { s3 } from "./lib/aws";
 import { getURLMetadata } from "./lib/url_metadata";
 
 const vapid_public_key = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!;
@@ -23,8 +18,6 @@ webpush.setVapidDetails(
   vapid_public_key,
   vapid_private_key
 );
-
-const forbidden_labels = ["Explicit Nudity", "Visually Disturbing"];
 
 function fixAPNSp8Key(key: string) {
   let key_replaced = key.replace(/ /g, "");
@@ -40,7 +33,7 @@ const apnProvider = new apn.Provider({
     keyId: process.env.APN_KEY_ID!,
     teamId: process.env.APN_TEAM_ID!
   },
-  production: true
+  production: process.env.NODE_ENV !== "development"
 });
 
 export async function sendWebPushNotification(
@@ -314,126 +307,6 @@ export function workerThread(id: number) {
     done();
   });
 
-  const queue_scan_images = new Queue(
-    "queue_scan_images",
-    process.env.REDIS_URL!
-  );
-
-  queue_scan_images.process(1, async (job, done) => {
-    try {
-      const attachment_id = job.data.attachment_id;
-      const data = job.data.data;
-
-      if (!attachment_id || !data) {
-        return done();
-      }
-
-      if (!CONFIG.IMAGE_SCANNING_ENABLED) {
-        return done();
-      }
-
-      if (
-        !process.env.AWS_ACCESS_KEY_ID ||
-        !process.env.AWS_SECRET_ACCESS_KEY
-      ) {
-        return done();
-      }
-
-      const attachment = await prisma.attachment.findUnique({
-        where: {
-          id: attachment_id
-        },
-        include: {
-          post: {
-            select: {
-              id: true,
-              author: true
-            }
-          }
-        }
-      });
-
-      const image = await sharp(Buffer.from(data), {
-        animated: false
-      })
-        .resize({
-          withoutEnlargement: true,
-          width: 1000
-        })
-        .jpeg()
-        .toBuffer();
-
-      const command = new DetectModerationLabelsCommand({
-        Image: { Bytes: image }
-      });
-
-      const response = await rekognition.send(command);
-
-      const moderation_labels = response.ModerationLabels || [];
-
-      let rejected = false;
-      let rejected_reasons = [];
-
-      for await (const label of moderation_labels) {
-        if (forbidden_labels.includes(label.Name!)) {
-          rejected = true;
-          rejected_reasons.push(label.Name);
-        }
-      }
-
-      if (!rejected) {
-        return done();
-      }
-
-      await sendDiscordNotification(
-        `Image (${attachment_id}) posted (${attachment.post.id}) by @${attachment.post.author.username} was rejected because it contains ${rejected_reasons.join(", ").toLowerCase()}.\n\n\n${attachment.url}`
-      );
-
-      await posthog.capture({
-        event: "image_rejected",
-        distinctId: attachment.post.author.id.toString(),
-        properties: {
-          attachment_id: attachment.id.toString(),
-          post_id: attachment.post.id.toString(),
-          rejected_reasons: rejected_reasons.join(", ").toLowerCase(),
-          url: attachment.url,
-          moderation_labels: moderation_labels
-        }
-      });
-
-      await prisma.attachment.update({
-        where: {
-          id: attachment.id
-        },
-        data: {
-          scan_status: JSON.stringify(moderation_labels)
-        }
-      });
-
-      await prisma.post.update({
-        where: {
-          id: attachment.post_id
-        },
-        data: {
-          deleted_at: new Date(),
-          scan_status: JSON.stringify(moderation_labels)
-        }
-      });
-
-      return done();
-    } catch (e) {
-      Sentry.captureException(e, {
-        tags: {
-          job: "scan_images",
-          job_id: job.id
-        }
-      });
-      console.error(e);
-    }
-
-    done();
-  });
-
   const purge_deleted_posts = new Queue(
     "queue_purge_deleted_posts",
     process.env.REDIS_URL!
@@ -481,9 +354,15 @@ export function workerThread(id: number) {
       for await (const post of deleted_posts) {
         if (post.attachments) {
           for await (const attachment of post.attachments) {
-            await delete_s3_object.add({
-              key: attachment.url
-            });
+            await delete_s3_object.add(
+              {
+                key: attachment.url
+              },
+              {
+                removeOnComplete: true,
+                removeOnFail: true
+              }
+            );
 
             await prisma.attachment.delete({
               where: {
@@ -499,6 +378,11 @@ export function workerThread(id: number) {
           }
         });
       }
+
+      Sentry.captureMessage(
+        `Purged ${deleted_posts.length} deleted posts.`,
+        "info"
+      );
 
       done();
     } catch (e) {
@@ -526,21 +410,12 @@ export function workerThread(id: number) {
         return done();
       }
 
-      if (
-        !process.env.AWS_ACCESS_KEY_ID ||
-        !process.env.AWS_SECRET_ACCESS_KEY
-      ) {
-        return done();
-      }
-
-      const CDN = process.env.CDN_URL
-        ? `${process.env.CDN_URL}/`
-        : `https://${process.env.AWS_BUCKET}.s3.amazonaws.com/`;
+      const CDN = `${process.env.CDN_URL}/`;
 
       key = key.replace(CDN, "");
 
       const command = new DeleteObjectCommand({
-        Bucket: process.env.AWS_BUCKET!,
+        Bucket: process.env.R2_BUCKET!,
         Key: key
       });
 

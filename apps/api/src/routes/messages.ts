@@ -113,7 +113,7 @@ router.post(
 
       const s3_file = await s3.send(
         new PutObjectCommand({
-          Bucket: process.env.AWS_BUCKET!,
+          Bucket: process.env.R2_BUCKET!,
           Key: key,
           Body: processedImage,
           ContentType: "image/jpeg",
@@ -134,9 +134,7 @@ router.post(
       const attachment = await prisma.messageAttachment.create({
         data: {
           user_id: BigInt(req.user.id),
-          url: process.env.CDN_URL
-            ? `${process.env.CDN_URL}/${key}`
-            : `https://${process.env.AWS_BUCKET}.s3.amazonaws.com/${key}`,
+          url: `${process.env.CDN_URL}/${key}`,
           type: "Image", // Only images are allowed
           width: width,
           height: height

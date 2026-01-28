@@ -35,8 +35,7 @@ touch .env
 echo "DATABASE_URL=\"postgresql://postgres@localhost:5432/folks?schema=public\"" >> .env
 echo "REDIS_URL=\"redis://localhost:6379\"" >> .env
 echo "JWT_SECRET=\"$JWT_KEY\"" >> .env
-echo "AWS_BUCKET=\"folks-static-development\"" >> .env
-echo "AWS_REGION=\"us-east-2\"" >> .env
+echo "R2_BUCKET=\"folks-static-development\"" >> .env
 echo "NEXT_PUBLIC_VAPID_PUBLIC_KEY=\"$VAPID_PUBLIC\"" >> .env
 echo "VAPID_PRIVATE_KEY=\"$VAPID_PRIVATE\"" >> .env
 echo "DEV_URL=\"http://localhost:3000\"" >> .env

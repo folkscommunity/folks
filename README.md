@@ -23,9 +23,8 @@ Here's a guide on how to get started with a local development environment for Fo
 - pnpm 9.15+
 - PostgreSQL 17 (if you're using mac i recommend using [DBNgin](https://dbngin.com/))
 - Redis 7 (same as above, use [DBNgin](https://dbngin.com/))
-- AWS S3 bucket for static assets. (Not required for development.)
-- AWS SES for sending emails. (Not required for development.)
-- AWS Rekognition for image scanning. (Not required for development.)
+- Cloudflare R2 bucket for static assets.
+- Resend for sending emails.
 
 ## Basic Setup
 
@@ -41,7 +40,7 @@ Here's a guide on how to get started with a local development environment for Fo
 
 # Contributing
 
-If you're interested in helping with the community effort to make Folks, let me know in the [Discord server](https://discord.gg/BmWznBhHzk), or shoot me an email [j@folkscommunity.com](mailto:j@folkscommunity.com).
+If you're interested in helping with the community effort to make Folks, let me know in the [Discord server](https://discord.gg/BmWznBhHzk), or shoot me an email [johny@rokita.org](mailto:johny@rokita.org).
 
 ---
 

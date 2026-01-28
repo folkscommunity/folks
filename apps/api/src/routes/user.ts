@@ -211,13 +211,10 @@ router.post(
         });
       }
 
-      if (
-        !process.env.AWS_ACCESS_KEY_ID ||
-        !process.env.AWS_SECRET_ACCESS_KEY
-      ) {
+      if (!process.env.R2_ACCESS_KEY_ID || !process.env.R2_SECRET_ACCESS_KEY) {
         return res.status(400).json({
           error: "invalid_request",
-          message: "AWS credentials not set. Avatar uploads are disabled."
+          message: "R2 credentials not set. Avatar uploads are disabled."
         });
       }
 
@@ -270,7 +267,7 @@ router.post(
 
       const s3_file = await s3.send(
         new PutObjectCommand({
-          Bucket: process.env.AWS_BUCKET!,
+          Bucket: process.env.R2_BUCKET!,
           Key: file_key,
           Body: transformed_image_buffer,
           Metadata: {
@@ -307,16 +304,14 @@ router.post(
           id: BigInt(req.user.id)
         },
         data: {
-          avatar_url: process.env.CDN_URL
-            ? `${process.env.CDN_URL}/${file_key}`
-            : `https://${process.env.AWS_BUCKET}.s3.amazonaws.com/${file_key}`
+          avatar_url: `${process.env.CDN_URL}/${file_key}`
         }
       });
 
       if (original_avatar_url) {
         await s3.send(
           new DeleteObjectCommand({
-            Bucket: process.env.AWS_BUCKET!,
+            Bucket: process.env.R2_BUCKET!,
             Key: original_file_key[1] + "/" + original_file_key[2]
           })
         );

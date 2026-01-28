@@ -495,13 +495,10 @@ router.post(
         });
       }
 
-      if (
-        !process.env.AWS_ACCESS_KEY_ID ||
-        !process.env.AWS_SECRET_ACCESS_KEY
-      ) {
+      if (!process.env.R2_ACCESS_KEY_ID || !process.env.R2_SECRET_ACCESS_KEY) {
         return res.status(400).json({
           error: "invalid_request",
-          message: "AWS credentials not set. Image uploads are disabled."
+          message: "R2 credentials not set. Image uploads are disabled."
         });
       }
 
@@ -532,7 +529,7 @@ router.post(
 
       const s3_file = await s3.send(
         new PutObjectCommand({
-          Bucket: process.env.AWS_BUCKET!,
+          Bucket: process.env.R2_BUCKET!,
           Key: file_key,
           Body: transformed_image_buffer,
           Metadata: {
@@ -563,9 +560,7 @@ router.post(
       const attachment = await prisma.articleAttachment.create({
         data: {
           article_id: BigInt(article_id),
-          url: process.env.CDN_URL
-            ? `${process.env.CDN_URL}/${file_key}`
-            : `https://${process.env.AWS_BUCKET}.s3.amazonaws.com/${file_key}`,
+          url: `${process.env.CDN_URL}/${file_key}`,
           type: "Image"
         }
       });

@@ -218,7 +218,13 @@ async function mainThread() {
   );
 
   cron.schedule("0 * * * *", () => {
-    purge_deleted_posts.add({});
+    purge_deleted_posts.add(
+      {},
+      {
+        removeOnComplete: true,
+        removeOnFail: true
+      }
+    );
   });
 
   Sentry.setupExpressErrorHandler(app);

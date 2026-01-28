@@ -49,7 +49,13 @@ export async function getURLMetadataFromCache(
     process.env.REDIS_URL!
   );
 
-  await queue_fetch_url_metadata.add({ url: url });
+  await queue_fetch_url_metadata.add(
+    { url: url },
+    {
+      removeOnComplete: true,
+      removeOnFail: true
+    }
+  );
 
   return {
     url: url,

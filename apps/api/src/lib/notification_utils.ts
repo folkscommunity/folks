@@ -17,12 +17,18 @@ export async function sendNotification({
       process.env.REDIS_URL!
     );
 
-    await queue_send_notification.add({
-      user_id: user_id.toString(),
-      title: title,
-      body: body,
-      url: url
-    });
+    await queue_send_notification.add(
+      {
+        user_id: user_id.toString(),
+        title: title,
+        body: body,
+        url: url
+      },
+      {
+        removeOnComplete: true,
+        removeOnFail: true
+      }
+    );
   } catch (e) {
     console.error(e);
   }
@@ -59,19 +65,25 @@ export async function sendMobileNotification({
       process.env.REDIS_URL!
     );
 
-    await queue_send_mobile_notification.add({
-      user_id: user_id.toString(),
-      title: title,
-      subtitle: subtitle,
-      body: body,
-      url: url,
-      thread_id: thread_id,
-      sender_id: sender_id,
-      sender_name: sender_name,
-      sender_avatar_url: sender_avatar_url,
-      channel_id: channel_id,
-      image_url: image_url
-    });
+    await queue_send_mobile_notification.add(
+      {
+        user_id: user_id.toString(),
+        title: title,
+        subtitle: subtitle,
+        body: body,
+        url: url,
+        thread_id: thread_id,
+        sender_id: sender_id,
+        sender_name: sender_name,
+        sender_avatar_url: sender_avatar_url,
+        channel_id: channel_id,
+        image_url: image_url
+      },
+      {
+        removeOnComplete: true,
+        removeOnFail: true
+      }
+    );
   } catch (e) {
     console.error(e);
   }

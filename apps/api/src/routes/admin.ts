@@ -135,7 +135,13 @@ router.post(
         return res.status(403).json({ error: "unauthorized" });
       }
 
-      await purge_deleted_posts.add({});
+      await purge_deleted_posts.add(
+        {},
+        {
+          removeOnComplete: true,
+          removeOnFail: true
+        }
+      );
 
       res.json({ ok: true });
     } catch (err) {
@@ -166,9 +172,15 @@ router.post(
         return res.status(400).json({ error: "invalid_request" });
       }
 
-      await delete_s3_object.add({
-        key: key
-      });
+      await delete_s3_object.add(
+        {
+          key: key
+        },
+        {
+          removeOnComplete: true,
+          removeOnFail: true
+        }
+      );
 
       res.json({ ok: true });
     } catch (err) {
